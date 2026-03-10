@@ -111,6 +111,84 @@ let structureDefinitions = {
     }
   },
 
+  // ====== COMBAT MODIFIER STRUCTURES ======
+
+  escalatingCannon: {
+    name: "Escalating Cannon",
+    owner: "player",
+    buildCost: 2,
+    escalatingDamage: 2,
+    effectText: "Deals 2 damage to all enemies. Doubles each turn",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      if (stateObj.opponentMonster.length > 0) {
+        let dmg = structures[index].escalatingDamage || 2;
+        // Deal damage to all enemies directly (not through dealOpponentDamage to avoid combat modifiers)
+        stateObj = immer.produce(stateObj, (newState) => {
+          newState.opponentMonster.forEach(function(monsterObj) {
+            if (monsterObj.encounterBlock > 0) {
+              if (monsterObj.encounterBlock >= dmg) {
+                monsterObj.encounterBlock -= dmg;
+              } else {
+                let remainder = dmg - monsterObj.encounterBlock;
+                monsterObj.encounterBlock = 0;
+                monsterObj.currentHP -= remainder;
+              }
+            } else {
+              monsterObj.currentHP -= dmg;
+            }
+          });
+          // Double the damage for next turn
+          newState.playerStructures[index].escalatingDamage = dmg * 2;
+        });
+      }
+      return stateObj;
+    }
+  },
+
+  fortressWall: {
+    name: "Fortress Wall",
+    owner: "player",
+    buildCost: 3,
+    effectText: "Doubles your fortification at end of turn",
+    avatar: "img/structures/barricade.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      stateObj = immer.produce(stateObj, (newState) => {
+        newState.doubleBlock = true;
+        newState.playerMonster.encounterBlock = newState.playerMonster.encounterBlock * 2;
+      });
+      return stateObj;
+    }
+  },
+
+  warDrums: {
+    name: "War Drums",
+    owner: "player",
+    buildCost: 3,
+    effectText: "Your attacks hit an extra time",
+    avatar: "img/structures/traininggrounds.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      stateObj = immer.produce(stateObj, (newState) => {
+        newState.extraAttackHit = true;
+      });
+      return stateObj;
+    }
+  },
+
+  siegeWorkshop: {
+    name: "Siege Workshop",
+    owner: "player",
+    buildCost: 4,
+    effectText: "Your attacks deal double damage",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      stateObj = immer.produce(stateObj, (newState) => {
+        newState.doubleAttackDamage = true;
+      });
+      return stateObj;
+    }
+  },
+
   // ====== OPPONENT STRUCTURES ======
   // Enemy structures have HP and block. Can be targeted by demolish-type cards.
 

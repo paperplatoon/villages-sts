@@ -124,6 +124,9 @@ let gameStartState = {
   diplomacy: 0,
   diplomacyThreshold: 3,
   tributeDiscount: 0,
+  doubleBlock: false,
+  extraAttackHit: false,
+  doubleAttackDamage: false,
   townMonsterArray: [],
   townBossEncounter: false,
   townBossArray: false,
@@ -318,16 +321,7 @@ function fillMapWithArray(stateObj) {
     newState.playerHere = 1;
     newState.status = Status.OverworldMap
     
-    //added new test monsters
-    random1 = createRandomMonster()
-    random2 = createRandomMonster()
-    townMonsterEncounters = [random1, random2]
-    newState.townMonsterArray = [
-      [createRandomMonster(), createRandomMonster()],
-      [createRandomMonster(), createRandomMonster()],
-      [createRandomMonster(), createRandomMonster()],
-      [createRandomMonster(), createRandomMonster()]
-    ];
+    newState.townMonsterArray = townMonsterEncounters;
     
 
     if (stateObj.townBossArray === false) {
@@ -619,6 +613,13 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
     all = true
   } else if (targetType === "specific") {
     targetIndex = stateObj.targetedMonster
+  }
+  // Structure combat modifiers
+  if (stateObj.doubleAttackDamage) {
+    damageNumber = damageNumber * 2;
+  }
+  if (stateObj.extraAttackHit) {
+    attackNumber = attackNumber + 1;
   }
   let calculatedDamage = (damageNumber + stateObj.playerMonster.strength) * attackNumber;
 
@@ -2061,6 +2062,9 @@ function resetAfterFight(stateObj) {
     newState.targetedStructure = null;
     newState.selectedPlayerStructure = 0;
     newState.diplomacy = 0;
+    newState.doubleBlock = false;
+    newState.extraAttackHit = false;
+    newState.doubleAttackDamage = false;
 
     newState.townMapSquares[newState.playerHere] = "completed";
 
@@ -2174,6 +2178,9 @@ function setUpEncounter(stateObj, isBoss=false) {
     newState.targetedStructure = null;
     newState.selectedPlayerStructure = 0;
     newState.diplomacy = 0;
+    newState.doubleBlock = false;
+    newState.extraAttackHit = false;
+    newState.doubleAttackDamage = false;
 
     newState.cardsPerTurn = 0;
     if (!stateObj.playerDeck) {
@@ -4314,6 +4321,10 @@ async function endTurnIncrement(stateObj) {
       }
     })
     newState.turnDouble = false;
+    // Reset structure-granted combat flags (structures will re-set them when they fire)
+    newState.doubleBlock = false;
+    newState.extraAttackHit = false;
+    newState.doubleAttackDamage = false;
   })
   return stateObj;
 }

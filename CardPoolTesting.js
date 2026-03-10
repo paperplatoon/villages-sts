@@ -119,6 +119,90 @@ let testCardPool = {
     }
   },
 
+  // ====== ESCALATING STRUCTURE ======
+  // Deals damage that doubles each turn. Damage tracked on the structure instance itself.
+  testCannon: {
+    cardID: 311,
+    name: "Escalating Cannon",
+    text: (state, index, array) => {
+      return `Build an Escalating Cannon. Deals 2 damage to all enemies each turn, doubling each turn. (Build cost: ${structureDefinitions.escalatingCannon.buildCost})`
+    },
+    minReq: (state, index, array) => { return 0; },
+    upgrades: 0,
+    baseCost: 0,
+    cost: (state, index, array) => { return 0; },
+    cardType: "structure",
+    elementType: "fire",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      stateObj = createStructure(stateObj, structureDefinitions.escalatingCannon, "player");
+      return stateObj;
+    }
+  },
+
+  // ====== BLOCK DOUBLING STRUCTURE ======
+  // Sets doubleBlock flag + directly doubles encounterBlock at end of turn.
+  testFortress: {
+    cardID: 312,
+    name: "Fortress Wall",
+    text: (state, index, array) => {
+      return `Build a Fortress Wall. Doubles your fortification at end of turn. (Build cost: ${structureDefinitions.fortressWall.buildCost})`
+    },
+    minReq: (state, index, array) => { return 0; },
+    upgrades: 0,
+    baseCost: 0,
+    cost: (state, index, array) => { return 0; },
+    cardType: "structure",
+    elementType: "fire",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      stateObj = createStructure(stateObj, structureDefinitions.fortressWall, "player");
+      return stateObj;
+    }
+  },
+
+  // ====== EXTRA HIT STRUCTURE ======
+  // Sets extraAttackHit flag. dealOpponentDamage adds +1 to attackNumber.
+  testDrums: {
+    cardID: 313,
+    name: "War Drums",
+    text: (state, index, array) => {
+      return `Build War Drums. Your attacks hit an extra time. (Build cost: ${structureDefinitions.warDrums.buildCost})`
+    },
+    minReq: (state, index, array) => { return 0; },
+    upgrades: 0,
+    baseCost: 0,
+    cost: (state, index, array) => { return 0; },
+    cardType: "structure",
+    elementType: "fire",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      stateObj = createStructure(stateObj, structureDefinitions.warDrums, "player");
+      return stateObj;
+    }
+  },
+
+  // ====== DOUBLE DAMAGE STRUCTURE ======
+  // Sets doubleAttackDamage flag. dealOpponentDamage doubles damageNumber.
+  testWorkshop: {
+    cardID: 314,
+    name: "Siege Workshop",
+    text: (state, index, array) => {
+      return `Build a Siege Workshop. Your attacks deal double damage. (Build cost: ${structureDefinitions.siegeWorkshop.buildCost})`
+    },
+    minReq: (state, index, array) => { return 0; },
+    upgrades: 0,
+    baseCost: 0,
+    cost: (state, index, array) => { return 0; },
+    cardType: "structure",
+    elementType: "fire",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      stateObj = createStructure(stateObj, structureDefinitions.siegeWorkshop, "player");
+      return stateObj;
+    }
+  },
+
   // ====== BUILD PROGRESS (from card effect) ======
   // buildSelectedStructure(state, amount) — adds build progress to selected structure
   // Combine with other effects for multi-purpose cards
@@ -354,5 +438,9 @@ let testPlayerMonster = {
     testCardPool.testTreason,
     testCardPool.testDiplomacy,
     testCardPool.testTribute,
+    testCardPool.testCannon,
+    testCardPool.testFortress,
+    testCardPool.testDrums,
+    testCardPool.testWorkshop,
   ]
 }
