@@ -3810,6 +3810,31 @@ function renderOpponents(stateObj) {
     monsterDiv.classList.add("monster");
     monsterDiv.id = index;
 
+    if (stateObj.targetedMonster !== index) {
+      monsterDiv.addEventListener("click", function () {
+        targetThisMonster(stateObj, index);
+      });
+    }
+
+    if (stateObj.targetedMonster == index) {
+      monsterDiv.classList.add("targeted");
+      if (monsterObj.type==="Fire") {
+        monsterDiv.classList.add("targeted-fire");
+      } else if (monsterObj.type==="Water") {
+        monsterDiv.classList.add("targeted-water");
+      } else if (monsterObj.type==="Air") {
+        monsterDiv.classList.add("targeted-air");
+      } else if (monsterObj.type==="Earth") {
+        monsterDiv.classList.add("targeted-earth");
+      }
+    } else {
+      monsterDiv.classList.add("clickable-monster")
+    }
+
+    // ====== TOP HALF: Avatar, Status Badges, HP/Block ======
+    let topHalf = document.createElement("Div");
+    topHalf.classList.add("monster-top-half");
+
     let monsterStatsDiv = document.createElement("Div");
     monsterStatsDiv.classList.add("monster-top-row");
 
@@ -3817,12 +3842,6 @@ function renderOpponents(stateObj) {
     avatar.src = monsterObj.avatar;
     avatar.classList.add("avatar")
     monsterStatsDiv.append(avatar);
-
-    if (stateObj.targetedMonster !== index) {
-      monsterDiv.addEventListener("click", function () {
-        targetThisMonster(stateObj, index);
-      });
-    }
 
     if (monsterObj.drown > 0) {
       let drownDiv = document.createElement("Div");
@@ -3873,22 +3892,31 @@ function renderOpponents(stateObj) {
       monsterStatsDiv.appendChild(monsterBlock);
     }
 
-    monsterDiv.appendChild(monsterStatsDiv);
+    // --- Powers ---
+    if (monsterObj.powers) {
+      monsterObj.powers.forEach(function(powerObj, powerIndex) {
+        let powerDiv = document.createElement("Div");
+        powerDiv.classList.add("power");
 
-    if (stateObj.targetedMonster == index) {
-      monsterDiv.classList.add("targeted");
-      if (monsterObj.type==="Fire") {
-        monsterDiv.classList.add("targeted-fire");
-      } else if (monsterObj.type==="Water") {
-        monsterDiv.classList.add("targeted-water");
-      } else if (monsterObj.type==="Air") {
-        monsterDiv.classList.add("targeted-air");
-      } else if (monsterObj.type==="Earth") {
-        monsterDiv.classList.add("targeted-earth");
-      }
-    } else {
-      monsterDiv.classList.add("clickable-monster")
+        let powerName = document.createElement("H3");
+        powerName.textContent = powerObj.name;
+        let powerText = document.createElement("P");
+        if (typeof powerObj.text === "function") {
+          powerText.textContent = powerObj.text(stateObj, index, stateObj.opponentMonster)
+        } else {
+          powerText.textContent = powerObj.text;
+        }
+        powerDiv.append(powerName, powerText);
+        topHalf.appendChild(powerDiv);
+      })
     }
+
+    topHalf.appendChild(monsterStatsDiv);
+    monsterDiv.appendChild(topHalf);
+
+    // ====== BOTTOM HALF: Development Bar + Escalation Cards ======
+    let bottomHalf = document.createElement("Div");
+    bottomHalf.classList.add("monster-bottom-half");
 
     // --- Development Progress Bar ---
     let devBarContainer = document.createElement("Div");
@@ -3925,29 +3953,7 @@ function renderOpponents(stateObj) {
 
     devBarOuter.append(devBarFill, marker4, marker7);
     devBarContainer.append(devBarOuter);
-    monsterDiv.appendChild(devBarContainer);
-
-    // --- Powers ---
-    let opponentMoveListDiv = document.createElement("Div");
-    opponentMoveListDiv.classList.add("opponent-move-list");
-
-    if (monsterObj.powers) {
-      monsterObj.powers.forEach(function(powerObj, powerIndex) {
-        let powerDiv = document.createElement("Div");
-        powerDiv.classList.add("power");
-
-        let powerName = document.createElement("H3");
-        powerName.textContent = powerObj.name;
-        let powerText = document.createElement("P");
-        if (typeof powerObj.text === "function") {
-          powerText.textContent = powerObj.text(stateObj, index, stateObj.opponentMonster)
-        } else {
-          powerText.textContent = powerObj.text;
-        }
-        powerDiv.append(powerName, powerText);
-        opponentMoveListDiv.appendChild(powerDiv);
-      })
-    }
+    bottomHalf.appendChild(devBarContainer);
 
     // --- All 3 Moves as Escalation Cards ---
     const chosenIndex = monsterObj.opponentMoveIndex;
@@ -4018,8 +4024,8 @@ function renderOpponents(stateObj) {
       movesRowDiv.appendChild(moveDiv);
     });
 
-    opponentMoveListDiv.appendChild(movesRowDiv);
-    monsterDiv.appendChild(opponentMoveListDiv);
+    bottomHalf.appendChild(movesRowDiv);
+    monsterDiv.appendChild(bottomHalf);
     document.getElementById("opponents").append(monsterDiv);
   });
 }
