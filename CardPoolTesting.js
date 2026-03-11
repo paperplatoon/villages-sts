@@ -85,7 +85,7 @@ let testCardPool = {
     cardID: 302,
     name: "Guard Tower",
     text: (state, index, array) => {
-      return `Build a Guard Tower. Deals 4 damage to targeted enemy each turn. (Build cost: ${structureDefinitions.testTower.buildCost})`
+      return `Deals 4 damage to targeted enemy each turn. (Build cost: ${structureDefinitions.testTower.buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -104,7 +104,7 @@ let testCardPool = {
     cardID: 303,
     name: "Great Wall",
     text: (state, index, array) => {
-      return `Build a Great Wall. Grants 6 fortification each turn. (Build cost: ${structureDefinitions.testWall.buildCost})`
+      return `Grants 6 fortification each turn. (Build cost: ${structureDefinitions.testWall.buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -125,7 +125,7 @@ let testCardPool = {
     cardID: 311,
     name: "Escalating Cannon",
     text: (state, index, array) => {
-      return `Build an Escalating Cannon. Deals 2 damage to all enemies each turn, doubling each turn. (Build cost: ${structureDefinitions.escalatingCannon.buildCost})`
+      return `Deals 2 damage to all enemies each turn, doubling each turn. (Build cost: ${structureDefinitions.escalatingCannon.buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -146,7 +146,7 @@ let testCardPool = {
     cardID: 312,
     name: "Fortress Wall",
     text: (state, index, array) => {
-      return `Build a Fortress Wall. Doubles your fortification at end of turn. (Build cost: ${structureDefinitions.fortressWall.buildCost})`
+      return `Doubles your fortification at end of turn. (Build cost: ${structureDefinitions.fortressWall.buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -167,7 +167,7 @@ let testCardPool = {
     cardID: 313,
     name: "War Drums",
     text: (state, index, array) => {
-      return `Build War Drums. Your attacks hit an extra time. (Build cost: ${structureDefinitions.warDrums.buildCost})`
+      return `Your attacks hit an extra time. (Build cost: ${structureDefinitions.warDrums.buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -188,7 +188,7 @@ let testCardPool = {
     cardID: 314,
     name: "Siege Workshop",
     text: (state, index, array) => {
-      return `Build a Siege Workshop. Your attacks deal double damage. (Build cost: ${structureDefinitions.siegeWorkshop.buildCost})`
+      return `Your attacks deal double damage. (Build cost: ${structureDefinitions.siegeWorkshop.buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,

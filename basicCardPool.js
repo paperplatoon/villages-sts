@@ -3900,7 +3900,7 @@ let specialCardPool = {
       cardID: 200,
       name: "Build Watchtower",
       text: (state, index, array) => {
-        return `Build a Watchtower. Deals 4 damage to front enemy each turn. (Build cost: ${structureDefinitions.watchtower.buildCost})`
+        return `Deals 4 damage to front enemy each turn. (Build cost: ${structureDefinitions.watchtower.buildCost})`
       },
       minReq: (state, index, array) => {
         return 0;
@@ -3923,7 +3923,7 @@ let specialCardPool = {
       cardID: 201,
       name: "Build Barricade",
       text: (state, index, array) => {
-        return `Build a Barricade. Grants 5 fortification each turn. (Build cost: ${structureDefinitions.barricade.buildCost})`
+        return `Grants 5 fortification each turn. (Build cost: ${structureDefinitions.barricade.buildCost})`
       },
       minReq: (state, index, array) => {
         return 0;
@@ -3946,7 +3946,7 @@ let specialCardPool = {
       cardID: 202,
       name: "Build Training Grounds",
       text: (state, index, array) => {
-        return `Build Training Grounds. Grants 1 militia each turn. (Build cost: ${structureDefinitions.trainingGrounds.buildCost})`
+        return `Grants 1 militia each turn. (Build cost: ${structureDefinitions.trainingGrounds.buildCost})`
       },
       minReq: (state, index, array) => {
         return 0;
@@ -3969,7 +3969,7 @@ let specialCardPool = {
       cardID: 203,
       name: "Build Healing Well",
       text: (state, index, array) => {
-        return `Build a Healing Well. Restores 3 HP each turn. (Build cost: ${structureDefinitions.healingWell.buildCost})`
+        return `Restores 3 HP each turn. (Build cost: ${structureDefinitions.healingWell.buildCost})`
       },
       minReq: (state, index, array) => {
         return 0;
@@ -3992,7 +3992,7 @@ let specialCardPool = {
       cardID: 204,
       name: "Build Poison Trap",
       text: (state, index, array) => {
-        return `Build a Poison Trap. Applies 2 poison to front enemy each turn. (Build cost: ${structureDefinitions.poisonTrap.buildCost})`
+        return `Applies 2 poison to front enemy each turn. (Build cost: ${structureDefinitions.poisonTrap.buildCost})`
       },
       minReq: (state, index, array) => {
         return 0;

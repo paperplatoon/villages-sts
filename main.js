@@ -782,13 +782,12 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
 async function opponentDeathAnimation(toDieIndexArray) {
   toDieIndexArray.forEach(function(index) {
     let opponentAvatar = document.querySelectorAll('#opponents .avatar')[index];
-    let opponentMoveDiv = document.querySelectorAll('#opponents .opponent-move-list')[index];
+    let opponentMonster = document.querySelectorAll('#opponents .monster')[index];
     let opponentHPDiv = document.querySelectorAll('#opponents .monster-hp')[index];
-    opponentAvatar.classList.add("fade-out");
-    opponentMoveDiv.classList.add("hidden");
-    opponentHPDiv.classList.add("hidden");
-    
-  } )
+    if (opponentAvatar) opponentAvatar.classList.add("fade-out");
+    if (opponentMonster) opponentMonster.classList.add("fade-out");
+    if (opponentHPDiv) opponentHPDiv.classList.add("hidden");
+  })
   await pause(500);
 }
 
@@ -1502,243 +1501,197 @@ function doubleCardAttack(stateObj, index, array) {
 //Render the player's stats
 async function renderPlayerMonster(stateObj) {
   document.getElementById("playerStats").innerHTML = "";
-  let topRowDiv = document.createElement("Div");
-  topRowDiv.classList.add("monster-top-row");
 
-  //create invisible draw divs
-  for (i=0; i < 8; i++) {
+  // 3D Village Cube
+  let cubeWrapper = document.createElement("Div");
+  cubeWrapper.classList.add("village-cube-wrapper");
+
+  let cubeDiv = document.createElement("Div");
+  cubeDiv.classList.add("village-cube", "player-cube", "avatar");
+
+  // Invisible draw animation divs (keep for animations)
+  for (let i = 0; i < 8; i++) {
     let newDiv = document.createElement("Div");
-    newDivString = "draw-div-" + i;
+    let newDivString = "draw-div-" + i;
     newDiv.classList.add("draw-animation-div");
     newDiv.classList.add(newDivString);
-    topRowDiv.append(newDiv)
-  };
+    cubeDiv.append(newDiv);
+  }
 
-  
-
-  let avatar = document.createElement('img');
-  avatar.classList.add("avatar");
-  avatar.src = stateObj.playerMonster.avatar;
-  topRowDiv.appendChild(avatar);
-
+  // Fireball divs (keep for animations)
   let fireballDiv = document.createElement("Div");
   fireballDiv.setAttribute("id", "fireball");
-  fireballDiv.classList.add("fireball-class")
-
+  fireballDiv.classList.add("fireball-class");
   let mediumFireballDiv = document.createElement("Div");
   mediumFireballDiv.setAttribute("id", "mediumfireball");
-  mediumFireballDiv.classList.add("fireball-class")
-
+  mediumFireballDiv.classList.add("fireball-class");
   let hugeFireballDiv = document.createElement("Div");
   hugeFireballDiv.setAttribute("id", "hugefireball");
-  hugeFireballDiv.classList.add("fireball-class")
-  topRowDiv.append(fireballDiv, mediumFireballDiv, hugeFireballDiv);
+  hugeFireballDiv.classList.add("fireball-class");
+  cubeDiv.append(fireballDiv, mediumFireballDiv, hugeFireballDiv);
 
+  let cubeFront = document.createElement("Div");
+  cubeFront.classList.add("cube-face", "cube-front");
+  let cubeTop = document.createElement("Div");
+  cubeTop.classList.add("cube-face", "cube-top");
+  let cubeRight = document.createElement("Div");
+  cubeRight.classList.add("cube-face", "cube-right");
+  cubeDiv.append(cubeFront, cubeTop, cubeRight);
+
+  // HP on the cube
+  let playerHP = document.createElement("H3");
+  playerHP.textContent = stateObj.playerMonster.currentHP + "/" + stateObj.playerMonster.maxHP;
+  playerHP.classList.add("village-hp");
+  cubeFront.appendChild(playerHP);
+
+  if (stateObj.playerMonster.encounterBlock > 0) {
+    let playerBlock = document.createElement("H3");
+    playerBlock.textContent = stateObj.playerMonster.encounterBlock + " fort";
+    playerBlock.classList.add("village-block");
+    if (stateObj.blockKeep === true) {
+      playerBlock.classList.add("monster-block-unwavering");
+    }
+    cubeFront.appendChild(playerBlock);
+  }
+
+  cubeWrapper.appendChild(cubeDiv);
+
+  // Status icons row (below cube)
   let playerStatusDiv = document.createElement("Div");
   playerStatusDiv.setAttribute("id", "playerstatus");
-  
+  playerStatusDiv.classList.add("village-status-row");
 
   if (stateObj.blockKeep === true) {
-      let statusDiv = document.createElement("Div");
-      statusDiv.setAttribute("id", "blockkeep");
-      statusDiv.addEventListener('mouseover', function() {
-        const statusText = document.querySelector("#blockkeeppopup");
-        statusText.style.display = 'block'
-      });
-      
-      statusDiv.addEventListener('mouseout', function() {
-        const statusText = document.querySelector("#blockkeeppopup");
-        statusText.style.display = 'none'
-      });
-
-
-      let statusTextDiv = document.createElement("Div");
-      statusTextDiv.setAttribute("id", "blockkeeppopup")
-      statusTextDiv.textContent = "You do not lose block at end of turn"
-
-      playerStatusDiv.appendChild(statusTextDiv);
-      playerStatusDiv.appendChild(statusDiv);
+    let statusDiv = document.createElement("Div");
+    statusDiv.setAttribute("id", "blockkeep");
+    statusDiv.addEventListener('mouseover', function() {
+      const statusText = document.querySelector("#blockkeeppopup");
+      statusText.style.display = 'block';
+    });
+    statusDiv.addEventListener('mouseout', function() {
+      const statusText = document.querySelector("#blockkeeppopup");
+      statusText.style.display = 'none';
+    });
+    let statusTextDiv = document.createElement("Div");
+    statusTextDiv.setAttribute("id", "blockkeeppopup");
+    statusTextDiv.textContent = "You do not lose block at end of turn";
+    playerStatusDiv.appendChild(statusTextDiv);
+    playerStatusDiv.appendChild(statusDiv);
   }
 
   if (stateObj.backstepDamage === true) {
     let backstepDamageDiv = document.createElement("Div");
     backstepDamageDiv.setAttribute("id", "backstepdamage");
-    
-    
     let backstepDamageTextDiv = document.createElement("Div");
-    backstepDamageTextDiv.setAttribute("id", "backstepdamagepopup")
-    backstepDamageTextDiv.textContent = "Deal 4 damage to all enemies whenever you play a Backstep card"
+    backstepDamageTextDiv.setAttribute("id", "backstepdamagepopup");
+    backstepDamageTextDiv.textContent = "Deal 4 damage to all enemies whenever you play a Backstep card";
     playerStatusDiv.appendChild(backstepDamageTextDiv);
-
     backstepDamageDiv.addEventListener('mouseover', function() {
       const backstepDiv = document.querySelector("#backstepdamagepopup");
-      backstepDiv.style.display = 'block'
-      console.log("mouseover")
+      backstepDiv.style.display = 'block';
     });
-    
     backstepDamageDiv.addEventListener('mouseout', function() {
       const backstepDiv = document.querySelector("#backstepdamagepopup");
-      backstepDiv.style.display = 'none'
+      backstepDiv.style.display = 'none';
     });
     playerStatusDiv.appendChild(backstepDamageDiv);
   }
 
   if (stateObj.cantSelfDamage === true) {
     let statusDiv = document.createElement("Div");
-      statusDiv.setAttribute("id", "cantselfdamage");
-      statusDiv.addEventListener('mouseover', function() {
-        const statusText = document.querySelector("#cantselfdamagepopup");
-        statusText.style.display = 'block'
-      });
-      
-      statusDiv.addEventListener('mouseout', function() {
-        const statusText = document.querySelector("#cantselfdamagepopup");
-        statusText.style.display = 'none'
-      });
-
-
-      let statusTextDiv = document.createElement("Div");
-      statusTextDiv.setAttribute("id", "cantselfdamagepopup")
-      statusTextDiv.textContent = "Your cards cannot damage you"
-
-      playerStatusDiv.appendChild(statusTextDiv);
-      playerStatusDiv.appendChild(statusDiv);
+    statusDiv.setAttribute("id", "cantselfdamage");
+    statusDiv.addEventListener('mouseover', function() {
+      const statusText = document.querySelector("#cantselfdamagepopup");
+      statusText.style.display = 'block';
+    });
+    statusDiv.addEventListener('mouseout', function() {
+      const statusText = document.querySelector("#cantselfdamagepopup");
+      statusText.style.display = 'none';
+    });
+    let statusTextDiv = document.createElement("Div");
+    statusTextDiv.setAttribute("id", "cantselfdamagepopup");
+    statusTextDiv.textContent = "Your cards cannot damage you";
+    playerStatusDiv.appendChild(statusTextDiv);
+    playerStatusDiv.appendChild(statusDiv);
   }
 
   if (stateObj.blockPerTurn > 0) {
     let statusDiv = document.createElement("Div");
     statusDiv.setAttribute("id", "reformingshield");
-    shieldNumber = document.createElement("P");
-    shieldNumber.classList.add("shieldnumber")
+    let shieldNumber = document.createElement("P");
+    shieldNumber.classList.add("shieldnumber");
     shieldNumber.textContent = stateObj.blockPerTurn;
     statusDiv.append(shieldNumber);
     statusDiv.addEventListener('mouseover', function() {
       const statusText = document.querySelector("#reformingshieldpopup");
-      statusText.style.display = 'block'
+      statusText.style.display = 'block';
     });
-    
     statusDiv.addEventListener('mouseout', function() {
       const statusText = document.querySelector("#reformingshieldpopup");
-      statusText.style.display = 'none'
+      statusText.style.display = 'none';
     });
-
-
     let statusTextDiv = document.createElement("Div");
-    statusTextDiv.setAttribute("id", "reformingshieldpopup")
-    statusTextDiv.textContent = `Gain ${stateObj.blockPerTurn} block at end of turn`
-
+    statusTextDiv.setAttribute("id", "reformingshieldpopup");
+    statusTextDiv.textContent = `Gain ${stateObj.blockPerTurn} block at end of turn`;
     playerStatusDiv.appendChild(statusTextDiv);
     playerStatusDiv.appendChild(statusDiv);
-}
+  }
 
-if (stateObj.gainStrengthDevChange > 0) {
-  let statusDiv = document.createElement("Div");
-  statusDiv.setAttribute("id", "gainstrengthenergy");
-  shieldNumber = document.createElement("P");
-  shieldNumber.classList.add("gainstrengthenergynumber")
-  shieldNumber.textContent = stateObj.gainStrengthDevChange;
-  statusDiv.append(shieldNumber);
-  statusDiv.addEventListener('mouseover', function() {
-    const statusText = document.querySelector("#gainstrengthenergypopup");
-    statusText.style.display = 'block'
-  });
-  
-  statusDiv.addEventListener('mouseout', function() {
-    const statusText = document.querySelector("#gainstrengthenergypopup");
-    statusText.style.display = 'none'
-  });
+  if (stateObj.gainStrengthDevChange > 0) {
+    let statusDiv = document.createElement("Div");
+    statusDiv.setAttribute("id", "gainstrengthenergy");
+    let shieldNumber = document.createElement("P");
+    shieldNumber.classList.add("gainstrengthenergynumber");
+    shieldNumber.textContent = stateObj.gainStrengthDevChange;
+    statusDiv.append(shieldNumber);
+    statusDiv.addEventListener('mouseover', function() {
+      const statusText = document.querySelector("#gainstrengthenergypopup");
+      statusText.style.display = 'block';
+    });
+    statusDiv.addEventListener('mouseout', function() {
+      const statusText = document.querySelector("#gainstrengthenergypopup");
+      statusText.style.display = 'none';
+    });
+    let statusTextDiv = document.createElement("Div");
+    statusTextDiv.setAttribute("id", "gainstrengthenergypopup");
+    statusTextDiv.textContent = `Gain ${stateObj.gainStrengthDevChange} militia whenever you change an opponent's development`;
+    playerStatusDiv.appendChild(statusTextDiv);
+    playerStatusDiv.appendChild(statusDiv);
+  }
 
+  document.getElementById("playerStats").append(cubeWrapper, playerStatusDiv);
 
-  let statusTextDiv = document.createElement("Div");
-  statusTextDiv.setAttribute("id", "gainstrengthenergypopup")
-  statusTextDiv.textContent = `Gain ${stateObj.gainStrengthDevChange} militia whenever you change an opponent's development`
+  // ====== HAND BAND: Villagers, End Turn ======
+  // Villagers display (in hand band left)
+  let villagersDisplay = document.getElementById("villagersDisplay");
+  if (villagersDisplay) {
+    villagersDisplay.innerHTML = "";
+    let playerEnergyText = document.createElement("H4");
+    playerEnergyText.classList.add("player-energy");
+    playerEnergyText.textContent = "Villagers: " + stateObj.playerMonster.encounterEnergy;
+    villagersDisplay.appendChild(playerEnergyText);
 
-  playerStatusDiv.appendChild(statusTextDiv);
-  playerStatusDiv.appendChild(statusDiv);
-}
-
-
-
-  topRowDiv.append(playerStatusDiv)
-
-  
-
-  let playerHP = document.createElement("H3");
-  playerHP.textContent = stateObj.playerMonster.currentHP + "/" + stateObj.playerMonster.maxHP;
-  playerHP.classList.add("monster-hp");
-
-  topRowDiv.appendChild(playerHP);
-
-  if (stateObj.playerMonster.encounterBlock > 0) {
-    let playerBlock = document.createElement("H3");
-    playerBlock.textContent = stateObj.playerMonster.encounterBlock;
-    playerBlock.classList.add("monster-block");
-    if (stateObj.blockKeep === true) {
-      playerBlock.classList.add("monster-block-unwavering");
+    if (stateObj.diplomacy > 0) {
+      let diplomacyText = document.createElement("H4");
+      diplomacyText.textContent = "Diplomacy: " + stateObj.diplomacy + "/" + stateObj.diplomacyThreshold;
+      diplomacyText.classList.add("diplomacy-text");
+      villagersDisplay.appendChild(diplomacyText);
     }
-    topRowDiv.appendChild(playerBlock);
   }
 
-  document.getElementById("playerStats").appendChild(topRowDiv);
-
-  let turnEnergyStrengthDiv = document.createElement("Div");
-  turnEnergyStrengthDiv.classList.add("flex", "row", "space-evenly");
-
-  let drawPileDiv = document.createElement("Div");
-  drawPileDiv.setAttribute("id", "drawPile");
-  drawPileDiv.classList.add("pile");
-  drawPileDiv.textContent = "Draw";
-
-  let drawDiv = document.createElement("Div");
-  drawDiv.setAttribute("id", "drawDiv");
-  drawPileDiv.append(drawDiv);
-  turnEnergyStrengthDiv.append(drawPileDiv);
-
-  let EnergyStrengthDiv = document.createElement("Div");
-
-  let playerEnergyText = document.createElement("H4");
-  playerEnergyText.classList.add("player-energy")
-  if (stateObj.playerMonster.type === "fire") {
-    playerEnergyText.classList.add("player-energy-fire")
-  } else if (stateObj.playerMonster.type === "water") {
-    playerEnergyText.classList.add("player-energy-water")
+  // End Turn button (in hand band right)
+  let endTurnContainer = document.getElementById("endTurnContainer");
+  if (endTurnContainer) {
+    endTurnContainer.innerHTML = "";
+    let endTurnButton = document.createElement("Button");
+    endTurnButton.setAttribute("id", "endTurnButton");
+    endTurnButton.classList.add("end-turn-btn");
+    endTurnButton.addEventListener("click", function() {
+      endTurn(stateObj);
+    });
+    endTurnButton.textContent = "End Turn";
+    endTurnContainer.appendChild(endTurnButton);
   }
-  playerEnergyText.textContent = "Villagers: " + stateObj.playerMonster.encounterEnergy;
-
-  if (stateObj.diplomacy > 0) {
-    let diplomacyText = document.createElement("H4");
-    diplomacyText.textContent = "Diplomacy: " + stateObj.diplomacy + "/" + stateObj.diplomacyThreshold;
-    diplomacyText.classList.add("diplomacy-text");
-    EnergyStrengthDiv.append(playerEnergyText, diplomacyText);
-  } else {
-    EnergyStrengthDiv.append(playerEnergyText);
-  }
-  turnEnergyStrengthDiv.append(EnergyStrengthDiv);
-
-  let turnButtonDiv = document.createElement("Div");
-  let endTurnButton = document.createElement("Button");
-  endTurnButton.classList.add("font5vmin")
-  endTurnButton.addEventListener("click", function() {
-    endTurn(stateObj)
-  })
-  endTurnButton.textContent = "End Turn";
-  turnButtonDiv.append(endTurnButton)
-  turnEnergyStrengthDiv.append(turnButtonDiv)
-  
-  document.getElementById("playerStats").appendChild(turnEnergyStrengthDiv);
-
-
-  
-
-  let discardPileDiv = document.createElement("Div");
-  discardPileDiv.setAttribute("id", "discardPile")
-  discardPileDiv.classList.add("pile")
-  discardPileDiv.textContent = "Discard"
-
-  let discardDiv = document.createElement("Div");
-  discardDiv.setAttribute("id", "discardDiv")
-  discardPileDiv.append(discardDiv);
-  document.getElementById('playerStats').appendChild(discardPileDiv);
 }
 
 async function renderDivs(stateObj) {
@@ -1756,49 +1709,106 @@ async function renderDivs(stateObj) {
   let topRow = topRowDiv(stateObj, "app")
   let restOfScreen = renderFightDiv();
   document.querySelector("#app").append(restOfScreen);
-  
-  
+
+
+  renderPlayerMonster(stateObj);
   renderOpponents(stateObj);
   renderStructures(stateObj, "player");
   renderStructures(stateObj, "opponent");
   renderHand(stateObj);
-  renderPlayerMonster(stateObj);
   renderCardPile(stateObj, stateObj.playerDeck, "deckDiv")
   renderCardPile(stateObj, stateObj.encounterDraw, "drawDiv");
   renderCardPile(stateObj, stateObj.encounterDiscard, "discardDiv");
 }
 
 function renderFightDiv() {
-  let fightContainer = document.createElement("Div");
-  fightContainer.classList.add("flex-container");
-  fightContainer.setAttribute("id", "stats");
+  // ====== MIDDLE BAND: Villages ======
+  let villagesBand = document.createElement("Div");
+  villagesBand.setAttribute("id", "stats");
+  villagesBand.classList.add("villages-band");
 
-  let playerMonsterDiv = document.createElement("Div");
-  playerMonsterDiv.classList.add("flex-container");
-  playerMonsterDiv.setAttribute("id", "playerMonster");
+  // --- Player Village (left side) ---
+  let playerVillageDiv = document.createElement("Div");
+  playerVillageDiv.setAttribute("id", "playerVillage");
+  playerVillageDiv.classList.add("village-side", "player-village-side");
 
   let playerStatsDiv = document.createElement("Div");
   playerStatsDiv.setAttribute("id", "playerStats");
 
   let playerStructuresDiv = document.createElement("Div");
   playerStructuresDiv.setAttribute("id", "playerStructures");
-  playerStructuresDiv.classList.add("structures-container");
+  playerStructuresDiv.classList.add("structures-grid");
 
-  let handDiv = document.createElement("Div");
-  handDiv.setAttribute("id", "handContainer2");
-  playerMonsterDiv.append(playerStatsDiv, playerStructuresDiv, handDiv);
+  playerVillageDiv.append(playerStatsDiv, playerStructuresDiv);
 
-  let opponentStructuresDiv = document.createElement("Div");
-  opponentStructuresDiv.setAttribute("id", "opponentStructures");
-  opponentStructuresDiv.classList.add("structures-container");
+  // --- Enemy Village (right side) ---
+  let enemyVillageDiv = document.createElement("Div");
+  enemyVillageDiv.setAttribute("id", "enemyVillage");
+  enemyVillageDiv.classList.add("village-side", "enemy-village-side");
 
   let opponentsDiv = document.createElement("Div");
   opponentsDiv.setAttribute("id", "opponents");
-  fightContainer.append(playerMonsterDiv, opponentStructuresDiv, opponentsDiv);
+
+  let opponentStructuresDiv = document.createElement("Div");
+  opponentStructuresDiv.setAttribute("id", "opponentStructures");
+  opponentStructuresDiv.classList.add("structures-grid");
+
+  enemyVillageDiv.append(opponentsDiv, opponentStructuresDiv);
+
+  villagesBand.append(playerVillageDiv, enemyVillageDiv);
+
+  // ====== BOTTOM BAND: Hand ======
+  let handBand = document.createElement("Div");
+  handBand.setAttribute("id", "handBand");
+  handBand.classList.add("hand-band");
+
+  // Left column: Villagers + Draw pile
+  let handLeft = document.createElement("Div");
+  handLeft.classList.add("hand-band-left");
+
+  let villagersDiv = document.createElement("Div");
+  villagersDiv.setAttribute("id", "villagersDisplay");
+
+  let drawPileDiv = document.createElement("Div");
+  drawPileDiv.setAttribute("id", "drawPile");
+  drawPileDiv.classList.add("pile");
+  drawPileDiv.textContent = "Draw";
+  let drawDiv = document.createElement("Div");
+  drawDiv.setAttribute("id", "drawDiv");
+  drawPileDiv.append(drawDiv);
+
+  handLeft.append(villagersDiv, drawPileDiv);
+
+  // Center: Cards
+  let handCenter = document.createElement("Div");
+  handCenter.setAttribute("id", "handContainer2");
+  handCenter.classList.add("hand-cards-center");
+
+  // Right column: End Turn + Discard pile
+  let handRight = document.createElement("Div");
+  handRight.classList.add("hand-band-right");
+
+  let endTurnDiv = document.createElement("Div");
+  endTurnDiv.setAttribute("id", "endTurnContainer");
+
+  let discardPileDiv = document.createElement("Div");
+  discardPileDiv.setAttribute("id", "discardPile");
+  discardPileDiv.classList.add("pile");
+  discardPileDiv.textContent = "Discard";
+  let discardDiv = document.createElement("Div");
+  discardDiv.setAttribute("id", "discardDiv");
+  discardPileDiv.append(discardDiv);
+
+  handRight.append(endTurnDiv, discardPileDiv);
+
+  handBand.append(handLeft, handCenter, handRight);
+
+  // Wrapper
+  let fightContainer = document.createElement("Div");
+  fightContainer.setAttribute("id", "fightScreen");
+  fightContainer.append(villagesBand, handBand);
 
   return fightContainer;
-
-  
 }
 
 
@@ -3667,10 +3677,13 @@ function renderStructures(stateObj, side) {
   let structures = (side === "player") ? stateObj.playerStructures : stateObj.opponentStructures;
   if (!structures || structures.length === 0) return;
 
-  let headerDiv = document.createElement("H4");
-  headerDiv.classList.add("structures-header");
-  headerDiv.textContent = (side === "player") ? "Your Structures" : "Enemy Structures";
-  container.appendChild(headerDiv);
+  // Header label only for enemy structures (player header removed)
+  if (side === "opponent") {
+    let headerDiv = document.createElement("H4");
+    headerDiv.classList.add("structures-header");
+    headerDiv.textContent = "Enemy Structures";
+    container.appendChild(headerDiv);
+  }
 
   structures.forEach(function(structureObj, index) {
     let structDiv = document.createElement("Div");
@@ -3689,15 +3702,6 @@ function renderStructures(stateObj, side) {
           selectPlayerStructure(stateObj, index);
         });
       }
-
-      // Name
-      let nameDiv = document.createElement("H4");
-      nameDiv.classList.add("structure-name");
-      nameDiv.textContent = structureObj.name;
-      if (isComplete) {
-        nameDiv.textContent += " ✓";
-      }
-      structDiv.appendChild(nameDiv);
 
       // Effect text
       let effectDiv = document.createElement("P");
@@ -3831,33 +3835,55 @@ function renderOpponents(stateObj) {
       monsterDiv.classList.add("clickable-monster")
     }
 
-    // ====== TOP HALF: Avatar, Status Badges, HP/Block ======
-    let topHalf = document.createElement("Div");
-    topHalf.classList.add("monster-top-half");
+    // ====== Enemy Village Cube + HP ======
+    let cubeWrapper = document.createElement("Div");
+    cubeWrapper.classList.add("village-cube-wrapper");
+    cubeWrapper.classList.add("monster-top-row");
 
-    let monsterStatsDiv = document.createElement("Div");
-    monsterStatsDiv.classList.add("monster-top-row");
+    let cubeDiv = document.createElement("Div");
+    cubeDiv.classList.add("village-cube", "enemy-cube", "avatar");
 
-    let avatar = document.createElement('img');
-    avatar.src = monsterObj.avatar;
-    avatar.classList.add("avatar")
-    monsterStatsDiv.append(avatar);
+    let cubeFront = document.createElement("Div");
+    cubeFront.classList.add("cube-face", "cube-front");
+    let cubeTop = document.createElement("Div");
+    cubeTop.classList.add("cube-face", "cube-top");
+    let cubeRight = document.createElement("Div");
+    cubeRight.classList.add("cube-face", "cube-right");
+    cubeDiv.append(cubeFront, cubeTop, cubeRight);
+
+    let monsterHP = document.createElement("H3");
+    monsterHP.textContent = monsterObj.currentHP + "/" + monsterObj.maxHP;
+    monsterHP.classList.add("village-hp", "monster-hp");
+    cubeFront.appendChild(monsterHP);
+
+    if (monsterObj.encounterBlock > 0) {
+      let monsterBlock = document.createElement("H3");
+      monsterBlock.textContent = monsterObj.encounterBlock + " fort";
+      monsterBlock.classList.add("village-block");
+      cubeFront.appendChild(monsterBlock);
+    }
+
+    cubeWrapper.appendChild(cubeDiv);
+
+    // Status badges next to cube
+    let statusBadges = document.createElement("Div");
+    statusBadges.classList.add("enemy-status-badges");
 
     if (monsterObj.drown > 0) {
       let drownDiv = document.createElement("Div");
       drownDiv.textContent = monsterObj.drown;
-      drownDiv.classList.add("fishbowl")
-      monsterStatsDiv.append(drownDiv);
+      drownDiv.classList.add("fishbowl");
+      statusBadges.append(drownDiv);
     }
 
     if (monsterObj.poison > 0) {
       let poisonDiv = document.createElement("Div");
       poisonDiv.classList.add("poison");
-      poisonTextSpan = document.createElement("span");
-      poisonTextSpan.classList.add("poison-text-span")
+      let poisonTextSpan = document.createElement("span");
+      poisonTextSpan.classList.add("poison-text-span");
       poisonTextSpan.textContent = monsterObj.poison;
-      poisonDiv.append(poisonTextSpan)
-      monsterStatsDiv.append(poisonDiv);
+      poisonDiv.append(poisonTextSpan);
+      statusBadges.append(poisonDiv);
     }
 
     if (monsterObj.treason && monsterObj.treason > 0) {
@@ -3867,58 +3893,41 @@ function renderOpponents(stateObj) {
       treasonTextSpan.classList.add("treason-text-span");
       treasonTextSpan.textContent = monsterObj.treason;
       treasonDiv.append(treasonTextSpan);
-      monsterStatsDiv.append(treasonDiv);
+      statusBadges.append(treasonDiv);
     }
 
     if (monsterObj.hunted > 0) {
       let huntedDiv = document.createElement("Div");
       huntedDiv.classList.add('hunted');
-      huntedText = document.createElement("P")
+      let huntedText = document.createElement("P");
       huntedText.textContent = monsterObj.hunted;
       huntedDiv.append(huntedText);
-      monsterStatsDiv.append(huntedDiv)
+      statusBadges.append(huntedDiv);
     }
 
-    let monsterHP = document.createElement("H3");
-    monsterHP.textContent = monsterObj.currentHP + "/" + monsterObj.maxHP;
-    monsterHP.classList.add("monster-hp");
+    cubeWrapper.appendChild(statusBadges);
 
-    monsterStatsDiv.appendChild(monsterHP);
-
-    if (monsterObj.encounterBlock > 0) {
-      let monsterBlock = document.createElement("H3");
-      monsterBlock.textContent = monsterObj.encounterBlock;
-      monsterBlock.classList.add("monster-block");
-      monsterStatsDiv.appendChild(monsterBlock);
-    }
-
-    // --- Powers ---
+    // Powers
     if (monsterObj.powers) {
       monsterObj.powers.forEach(function(powerObj, powerIndex) {
         let powerDiv = document.createElement("Div");
         powerDiv.classList.add("power");
-
         let powerName = document.createElement("H3");
         powerName.textContent = powerObj.name;
         let powerText = document.createElement("P");
         if (typeof powerObj.text === "function") {
-          powerText.textContent = powerObj.text(stateObj, index, stateObj.opponentMonster)
+          powerText.textContent = powerObj.text(stateObj, index, stateObj.opponentMonster);
         } else {
           powerText.textContent = powerObj.text;
         }
         powerDiv.append(powerName, powerText);
-        topHalf.appendChild(powerDiv);
+        cubeWrapper.appendChild(powerDiv);
       })
     }
 
-    topHalf.appendChild(monsterStatsDiv);
-    monsterDiv.appendChild(topHalf);
+    monsterDiv.appendChild(cubeWrapper);
 
-    // ====== BOTTOM HALF: Development Bar + Escalation Cards ======
-    let bottomHalf = document.createElement("Div");
-    bottomHalf.classList.add("monster-bottom-half");
-
-    // --- Development Progress Bar ---
+    // ====== Development Bar ======
     let devBarContainer = document.createElement("Div");
     devBarContainer.classList.add("dev-bar-container");
 
@@ -3936,14 +3945,12 @@ function renderOpponents(stateObj) {
     let fillPercent = Math.min((currentDev / 7) * 100, 100);
     devBarFill.style.width = fillPercent + "%";
 
-    // Color based on threat level
     if (currentDev >= 7) {
       devBarFill.classList.add("dev-bar-critical");
     } else if (currentDev >= 4) {
       devBarFill.classList.add("dev-bar-warning");
     }
 
-    // Threshold markers at 4 and 7
     let marker4 = document.createElement("Div");
     marker4.classList.add("dev-marker");
     marker4.style.left = ((4/7)*100) + "%";
@@ -3953,16 +3960,16 @@ function renderOpponents(stateObj) {
 
     devBarOuter.append(devBarFill, marker4, marker7);
     devBarContainer.append(devBarOuter);
-    bottomHalf.appendChild(devBarContainer);
+    monsterDiv.appendChild(devBarContainer);
 
-    // --- All 3 Moves as Escalation Cards ---
+    // ====== Move Cards ======
     const chosenIndex = monsterObj.opponentMoveIndex;
 
     let movesRowDiv = document.createElement("Div");
     movesRowDiv.classList.add("moves-row");
 
     monsterObj.moves.forEach(function(moveObj, moveIndex) {
-      if (!moveObj.name) return; // skip empty slots
+      if (!moveObj.name) return;
 
       let moveDiv = document.createElement("Div");
       moveDiv.classList.add("move", "escalation-card");
@@ -3971,7 +3978,6 @@ function renderOpponents(stateObj) {
       let isUnlocked = currentDev >= devReq;
       let isActive = (moveIndex === chosenIndex);
 
-      // Type-based color
       if (monsterObj.type === "Fire") {
         moveDiv.classList.add("move-div-fire");
       } else if (monsterObj.type === "Water") {
@@ -3982,7 +3988,6 @@ function renderOpponents(stateObj) {
         moveDiv.classList.add("move-div-earth");
       }
 
-      // State styling
       if (isActive) {
         moveDiv.classList.add("chosen", "move-active");
       } else if (!isUnlocked) {
@@ -3991,28 +3996,22 @@ function renderOpponents(stateObj) {
         moveDiv.classList.add("move-unlocked");
       }
 
-      // Tier label
       let tierLabel = document.createElement("span");
       tierLabel.classList.add("move-tier-label");
       if (devReq === 0) {
         tierLabel.textContent = "DEFAULT";
-      } else if (devReq <= 4) {
-        tierLabel.textContent = "AT " + devReq + " DEV";
       } else {
         tierLabel.textContent = "AT " + devReq + " DEV";
       }
 
-      // Move name
       let moveName = document.createElement("H3");
       moveName.textContent = moveObj.name || "";
 
-      // Move text
       let moveText = document.createElement("P");
       moveText.textContent = (typeof moveObj.text === "function")
         ? moveObj.text(stateObj, index, stateObj.opponentMonster)
         : (moveObj.text || "");
 
-      // Lock icon for locked moves
       if (!isUnlocked) {
         let lockIcon = document.createElement("span");
         lockIcon.classList.add("lock-icon");
@@ -4024,8 +4023,7 @@ function renderOpponents(stateObj) {
       movesRowDiv.appendChild(moveDiv);
     });
 
-    bottomHalf.appendChild(movesRowDiv);
-    monsterDiv.appendChild(bottomHalf);
+    monsterDiv.appendChild(movesRowDiv);
     document.getElementById("opponents").append(monsterDiv);
   });
 }
