@@ -4011,6 +4011,29 @@ let specialCardPool = {
       }
     },
 
+    finalassault: {
+      cardID: 211,
+      name: "Final Assault",
+      text: (state, index, array) => {
+        return `Single use. Deals 35 damage when complete. (Build cost: 4)`
+      },
+      minReq: (state, index, array) => {
+        return 0;
+      },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => {
+        return 0;
+      },
+      cardType: "structure",
+      elementType: "fire",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, structureDefinitions.finalAssault, "player");
+        return stateObj;
+      }
+    },
+
     demolish: {
       cardID: 210,
       name: "Demolish",

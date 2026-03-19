@@ -294,13 +294,16 @@ function fillMapWithArray(stateObj) {
 
   let townMonsterEncounters = []
   if (stateObj.testingMode === true) {
-    townMonsterEncounters = [ [easyMultiEncounters.em3, easyMultiEncounters.em4], [easySoloEncounters.e8], [easyMultiEncounters.em3, easyMultiEncounters.em4],[easySoloEncounters.e5],[easySoloEncounters.e6], [easySoloEncounters.e7],[easySoloEncounters.e8]]  
+    townMonsterEncounters = [ [easyMultiEncounters.em3, easyMultiEncounters.em4], [easySoloEncounters.e8], [easyMultiEncounters.em3, easyMultiEncounters.em4],[easySoloEncounters.e5],[easySoloEncounters.e6], [easySoloEncounters.e7],[easySoloEncounters.e8]]
   } else {
-    let shuffledEncounterArray = fisherYatesShuffle(towns[stateObj.gymCount])
-    townMonsterEncounters[0] = shuffledEncounterArray[0];
-    townMonsterEncounters[1] = shuffledEncounterArray[1];
-    townMonsterEncounters[2] = shuffledEncounterArray[2];
-    townMonsterEncounters[3] = shuffledEncounterArray[3];
+    // First 2 fights always come from the beginner pool
+    let shuffledBeginners = fisherYatesShuffle([...beginnerEncounterPool]);
+    townMonsterEncounters[0] = shuffledBeginners[0];
+    townMonsterEncounters[1] = shuffledBeginners[1];
+    // Remaining fights pull from the full town pool (beginner + moderate mixed)
+    let shuffledRest = fisherYatesShuffle(towns[stateObj.gymCount]);
+    townMonsterEncounters[2] = shuffledRest[0];
+    townMonsterEncounters[3] = shuffledRest[1];
     console.log(townMonsterEncounters);
   }
 
@@ -731,10 +734,25 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
 async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energyChange=false, attackNumber = 1, animation=true) {
 
   if (animation === true) {
+    // Pre-compute damage for fireball size
+    let monsterObj = stateObj.opponentMonster[monsterIndex];
+    let previewDamage = (damageNumber + monsterObj.strength) * attackNumber;
+
+    // Pick fireball size
+    let fireballId = "enemy-fireball-" + monsterIndex;
+    if (previewDamage > 29) {
+      fireballId = "enemy-hugefireball-" + monsterIndex;
+    } else if (previewDamage > 19) {
+      fireballId = "enemy-mediumfireball-" + monsterIndex;
+    }
+
+    let fireballEl = document.getElementById(fireballId);
     document.querySelectorAll("#opponents .avatar")[monsterIndex].classList.add("opponent-windup");
+    if (fireballEl) fireballEl.classList.add("enemy-fireball-move");
     document.querySelectorAll("#playerStats .avatar")[0].classList.add("player-impact");
-    await pause(200);
+    await pause(350);
     document.querySelectorAll("#opponents .avatar")[monsterIndex].classList.remove("opponent-windup");
+    if (fireballEl) fireballEl.classList.remove("enemy-fireball-move");
     document.querySelectorAll("#playerStats .avatar")[0].classList.remove("player-impact");
   }
 
@@ -777,6 +795,27 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
     stateObj = await dealOpponentDamage(stateObj, reflectDamage, 1, false, false, monsterIndex)
   }
   return stateObj;
+}
+
+// Animate the existing development bar BEFORE changeState rebuilds the DOM
+async function animateDevBar(monsterIndex, newDev) {
+  let bars = document.querySelectorAll("#opponents .dev-bar-fill");
+  let bar = bars[monsterIndex];
+  if (!bar) return;
+  let newPercent = Math.min((newDev / 7) * 100, 100);
+  let glowClass = (newPercent > parseFloat(bar.style.width)) ? "dev-bar-growing" : "dev-bar-draining";
+  bar.classList.add(glowClass);
+  bar.style.width = newPercent + "%";
+  await pause(600);
+  bar.classList.remove(glowClass);
+}
+
+// Centralized stat change animation — fire-and-forget, DOM rebuild cleans up
+function animateStatChange(selector, type = "neutral") {
+  let el = document.querySelector(selector);
+  if (!el) return;
+  let className = (type === "up") ? "stat-pulse-up" : (type === "down") ? "stat-pulse-down" : "stat-pulse";
+  el.classList.add(className);
 }
 
 async function opponentDeathAnimation(toDieIndexArray) {
@@ -836,6 +875,10 @@ async function upgradeAnimation(stateObj, cardIndex, cardArray, upgradeTimes, di
 function healPlayer(stateObj, amountToHeal, energyCost=false) {
   amountToHeal += stateObj.extraHeal;
   let healthDiff = stateObj.playerMonster.maxHP - stateObj.playerMonster.currentHP
+  if (healthDiff > 0) {
+    let hpEl = document.querySelector("#playerStats .village-hp");
+    if (hpEl) hpEl.classList.add("heal-pulse");
+  }
   stateObj = immer.produce(stateObj, (newState) => {
     if (healthDiff <= amountToHeal) {
       newState.fightHealTotal += newState.playerMonster.maxHP-newState.playerMonster.currentHP;
@@ -895,6 +938,8 @@ async function loseDevelopment(stateObj, devToLose, targetIndex=0, playerTrigger
     devToLose = stateObj.opponentMonster[targetIndex].development
   }
 
+  let oldDev = stateObj.opponentMonster[targetIndex].development;
+
   if (playerTriggered === true) {
     stateObj = immer.produce(stateObj, (newState) => {
       newState.fightDevDrainCount += 1
@@ -902,6 +947,7 @@ async function loseDevelopment(stateObj, devToLose, targetIndex=0, playerTrigger
     })
     await pause(350)
   }
+  await animateDevBar(targetIndex, oldDev - devToLose);
   stateObj = immer.produce(stateObj, (newState) => {
       newState.opponentMonster[targetIndex].development -= devToLose;
   })
@@ -930,6 +976,8 @@ async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTrigger
     devToGain = maxDev - currentDev
   }
 
+  let oldDev = currentDev;
+
   if (playerTriggered === true) {
     stateObj = immer.produce(stateObj, (newState) => {
       newState.fightDevGiftCount += 1
@@ -938,6 +986,7 @@ async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTrigger
     await pause(350)
   }
 
+  await animateDevBar(targetIndex, oldDev + devToGain);
   stateObj = immer.produce(stateObj, (newState) => {
       newState.opponentMonster[targetIndex].development += devToGain;
   })
@@ -1046,6 +1095,8 @@ async function destroyEnergy(stateObj, devToDestroy, villagerCost=false, all=fal
 }
 
 function gainBlock(stateObj, blockToGain, energyCost=false, blockNumber=1) {
+  let blockEl = document.querySelector("#playerStats .village-block");
+  if (blockEl) blockEl.classList.add("block-gain-pulse");
   stateObj = immer.produce(stateObj, (newState) => {
     newState.playerMonster.encounterBlock += (blockToGain + stateObj.playerMonster.dex)*blockNumber;
     console.log("player is gaining " + blockToGain + " block")
@@ -1883,7 +1934,7 @@ function renderChoiceDiv(stateObj, classesArray, imgSrcString, divTextString, tr
 // ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ======
 
 // Create a structure on either side. Stacks if same name already exists.
-function createStructure(stateObj, structureDef, side) {
+function createStructure(stateObj, structureDef, side, buildCostOverride) {
   stateObj = immer.produce(stateObj, (newState) => {
     let arrayKey = (side === "player") ? "playerStructures" : "opponentStructures";
 
@@ -1892,7 +1943,7 @@ function createStructure(stateObj, structureDef, side) {
       let newStructure = JSON.parse(JSON.stringify(structureDef));
       newStructure.onTurnEffect = structureDef.onTurnEffect;
       newStructure.buildProgress = 0;
-      newStructure.buildCost = structureDef.buildCost || 1;
+      newStructure.buildCost = buildCostOverride || structureDef.buildCost || 1;
       newState[arrayKey].push(newStructure);
       // Auto-select the new structure if it's the only one
       if (newState.playerStructures.length === 1) {
@@ -1972,23 +2023,59 @@ function dealStructureDamage(stateObj, damage, side, structureIndex) {
   return stateObj;
 }
 
+// Deal damage from a structure effect (no militia, no hunted, no combat bonuses)
+async function dealStructureEffectDamage(stateObj, damage, targetIndex = 0) {
+  let targetAvatar = document.querySelectorAll("#opponents .avatar")[targetIndex];
+  if (targetAvatar) {
+    targetAvatar.classList.add("opponent-impact");
+    await pause(300);
+    targetAvatar.classList.remove("opponent-impact");
+  }
+
+  stateObj = immer.produce(stateObj, (newState) => {
+    let monsterObj = newState.opponentMonster[targetIndex];
+    if (!monsterObj) return;
+    if (damage <= 0) return;
+    if (monsterObj.encounterBlock >= damage) {
+      monsterObj.encounterBlock -= damage;
+    } else {
+      let remainder = damage - monsterObj.encounterBlock;
+      monsterObj.encounterBlock = 0;
+      monsterObj.currentHP -= remainder;
+    }
+  });
+  return stateObj;
+}
+
 // Fire all end-of-turn effects for one side's structures
 async function fireStructureEffects(stateObj, side) {
   let arrayKey = (side === "player") ? "playerStructures" : "opponentStructures";
+  let containerId = (side === "player") ? "playerStructures" : "opponentStructures";
   let structures = stateObj[arrayKey];
+  let toRemove = [];
   for (let i = 0; i < structures.length; i++) {
     let struct = structures[i];
-    // Player structures only fire when fully built
-    if (side === "player") {
-      if (struct.buildProgress >= struct.buildCost && struct.onTurnEffect) {
-        stateObj = await struct.onTurnEffect(stateObj, i, stateObj[arrayKey]);
-      }
-    } else {
-      // Enemy structures fire if alive
-      if (struct.currentHP > 0 && struct.onTurnEffect) {
-        stateObj = await struct.onTurnEffect(stateObj, i, stateObj[arrayKey]);
-      }
+    let shouldFire = (side === "player")
+      ? (struct.buildProgress >= struct.buildCost && struct.onTurnEffect)
+      : (struct.currentHP > 0 && struct.onTurnEffect);
+    if (shouldFire) {
+      // Activation glow
+      let structEls = document.querySelectorAll("#" + containerId + " .structure");
+      if (structEls[i]) structEls[i].classList.add("structure-activating");
+      await pause(200);
+      stateObj = await struct.onTurnEffect(stateObj, i, stateObj[arrayKey]);
+      await pause(200);
+      if (structEls[i]) structEls[i].classList.remove("structure-activating");
+      if (struct.singleUse) toRemove.push(i);
     }
+  }
+  // Remove single-use structures (reverse order to preserve indices)
+  if (toRemove.length > 0) {
+    stateObj = immer.produce(stateObj, (newState) => {
+      for (let i = toRemove.length - 1; i >= 0; i--) {
+        newState[arrayKey].splice(toRemove[i], 1);
+      }
+    });
   }
   return stateObj;
 }
@@ -2393,9 +2480,21 @@ function PlayACardImmer(stateObj, cardIndexInHand) {
 }
 
 async function playACard(stateObj, cardIndexInHand, arrayObj) {
-  console.log("you played " + stateObj.encounterHand[cardIndexInHand].name);  
+  console.log("you played " + stateObj.encounterHand[cardIndexInHand].name);
   stateObj = await stateObj.encounterHand[cardIndexInHand].action(stateObj, cardIndexInHand, arrayObj);
   stateObj = await PlayACardImmer(stateObj, cardIndexInHand);
+
+  // Heal on card play (from structures like Healer's Hut)
+  let healOnPlay = 0;
+  stateObj.playerStructures.forEach(struct => {
+    if (struct.buildProgress >= struct.buildCost && struct.healOnCardPlay) {
+      healOnPlay += struct.healOnCardPlay;
+    }
+  });
+  if (healOnPlay > 0) {
+    stateObj = healPlayer(stateObj, healOnPlay);
+  }
+
   // stateObj = await pickOpponentMove(stateObj);
   stateObj = await changeState(stateObj);
 
@@ -3843,6 +3942,18 @@ function renderOpponents(stateObj) {
     let cubeDiv = document.createElement("Div");
     cubeDiv.classList.add("village-cube", "enemy-cube", "avatar");
 
+    // Enemy fireball divs (for attack projectile animation)
+    let enemyFireball = document.createElement("Div");
+    enemyFireball.setAttribute("id", "enemy-fireball-" + index);
+    enemyFireball.classList.add("enemy-fireball-class", "enemy-fireball-small");
+    let enemyMediumFireball = document.createElement("Div");
+    enemyMediumFireball.setAttribute("id", "enemy-mediumfireball-" + index);
+    enemyMediumFireball.classList.add("enemy-fireball-class", "enemy-fireball-medium");
+    let enemyHugeFireball = document.createElement("Div");
+    enemyHugeFireball.setAttribute("id", "enemy-hugefireball-" + index);
+    enemyHugeFireball.classList.add("enemy-fireball-class", "enemy-fireball-large");
+    cubeDiv.append(enemyFireball, enemyMediumFireball, enemyHugeFireball);
+
     let cubeFront = document.createElement("Div");
     cubeFront.classList.add("cube-face", "cube-front");
     let cubeTop = document.createElement("Div");
@@ -4117,42 +4228,62 @@ async function pickOpponentMove(stateObj) {
 //   return stateObj;
 // }
 
+// Execute one enemy's move with glow + dev bar animation
+async function executeOneEnemyMove(stateObj, monsterIndex) {
+  let monster = stateObj.opponentMonster[monsterIndex];
+  let move = monster.moves[monster.opponentMoveIndex];
+  let oldDev = monster.development;
+
+  // Glow the active move card red before firing
+  let monsterDivs = document.querySelectorAll("#opponents .monster");
+  if (monsterDivs[monsterIndex]) {
+    let activeMove = monsterDivs[monsterIndex].querySelector(".move-active");
+    if (activeMove) activeMove.classList.add("move-about-to-fire");
+    await pause(600);
+    if (activeMove) activeMove.classList.remove("move-about-to-fire");
+  }
+
+  // Execute the move
+  stateObj = await move.action(stateObj, monsterIndex, stateObj.opponentMonster);
+
+  // Animate dev bar if development changed
+  let newDev = stateObj.opponentMonster[monsterIndex] ? stateObj.opponentMonster[monsterIndex].development : oldDev;
+  if (newDev !== oldDev) {
+    await animateDevBar(monsterIndex, newDev);
+  }
+
+  return stateObj;
+}
+
 async function playOpponentMove(stateObj) {
   //each opponent Monster plays its own move
   if (stateObj.opponentMonster.length === 3) {
-    const move = stateObj.opponentMonster[0].moves[stateObj.opponentMonster[0].opponentMoveIndex];
-    stateObj = await move.action(stateObj, 0, stateObj.opponentMonster);
+    stateObj = await executeOneEnemyMove(stateObj, 0);
     stateObj = await pickOpponentMove(stateObj);
     stateObj = await changeState(stateObj)
 
     if (stateObj.opponentMonster[1]) {
-      const move1 = stateObj.opponentMonster[1].moves[stateObj.opponentMonster[1].opponentMoveIndex];
-      stateObj = await move1.action(stateObj, 1, stateObj.opponentMonster);
+      stateObj = await executeOneEnemyMove(stateObj, 1);
       stateObj = await pickOpponentMove(stateObj);
       stateObj = await changeState(stateObj)
     }
 
     if (stateObj.opponentMonster[2]) {
-      const move2 = stateObj.opponentMonster[2].moves[stateObj.opponentMonster[2].opponentMoveIndex];
-      stateObj = await move.action(stateObj, 2, stateObj.opponentMonster);
+      stateObj = await executeOneEnemyMove(stateObj, 2);
       stateObj = await pickOpponentMove(stateObj);
     }
   } else if (stateObj.opponentMonster.length === 2) {
-    const move = stateObj.opponentMonster[0].moves[stateObj.opponentMonster[0].opponentMoveIndex];
-    stateObj = await move.action(stateObj, 0, stateObj.opponentMonster);
+    stateObj = await executeOneEnemyMove(stateObj, 0);
     stateObj = await pickOpponentMove(stateObj);
     stateObj = await changeState(stateObj)
-    console.log("opponent 1 targetIndex is:")
-    
+
     if (stateObj.opponentMonster[1]) {
-      const move1 = stateObj.opponentMonster[1].moves[stateObj.opponentMonster[1].opponentMoveIndex];
-      stateObj = await move1.action(stateObj, 1, stateObj.opponentMonster);
+      stateObj = await executeOneEnemyMove(stateObj, 1);
       stateObj = await pickOpponentMove(stateObj);
       stateObj = await changeState(stateObj)
     }
   } else if (stateObj.opponentMonster.length === 1) {
-    const move = stateObj.opponentMonster[0].moves[stateObj.opponentMonster[0].opponentMoveIndex];
-    stateObj = await move.action(stateObj, 0, stateObj.opponentMonster);
+    stateObj = await executeOneEnemyMove(stateObj, 0);
   }
 
   return stateObj;
@@ -4281,7 +4412,7 @@ async function endTurnIncrement(stateObj) {
     newState.cardsPerTurn = 0;
     newState.comboPerTurn = 0;
     newState.combatTurnNumber += 1;
-    newState.playerMonster.encounterBlock += newState.blockPerTurn;
+    newState.playerMonster.encounterBlock = Math.floor(newState.playerMonster.encounterBlock / 2) + newState.blockPerTurn;
     newState.playerMonster.encounterEnergy += newState.playerMonster.turnEnergy
     newState.opponentMonster.forEach(async (monsterObj, monsterIndex) => {
       if (monsterObj.hunted > 0) {

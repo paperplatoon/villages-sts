@@ -10,7 +10,7 @@
 // -----------------|----------------------|------------------------------------------|---------------------
 // Damage           | baseDamage, baseHits | dealOpponentDamage(state, dmg, hits, cost, targetType) | strength (adds to dmg)
 // Block            | baseBlock            | gainBlock(state, amount, cost)            | dex (adds to block)
-// Structures       | cardType:"structure" | createStructure(state, structDef, "player") | buildCost on struct def
+// Structures       | cardType:"structure", buildCost | createStructure(state, structDef, "player", buildCost) | buildCost on card
 // Build Progress   | buildAmount          | buildSelectedStructure(state, amount)     | selectedPlayerStructure
 // Treason          | treasonAmount        | applyTreason(state, amount)               | treason on enemy (ticks up each turn)
 // Diplomacy        | diplomacyAmount      | gainDiplomacy(state, amount)              | diplomacy, diplomacyThreshold
@@ -78,14 +78,16 @@ let testCardPool = {
   },
 
   // ====== STRUCTURE (BUILDING) ======
-  // createStructure(state, structureDefinitions.XXXX, "player")
+  // createStructure(state, structDef, "player", buildCost)
   // Structure definitions live in structures.js. cardType must be "structure".
+  // buildCost lives on the card so it can be modified per-card during a run.
   // Cards are FREE to play. Player spends villagers via Build button over time.
   testTower: {
     cardID: 302,
     name: "Guard Tower",
+    buildCost: 2,
     text: (state, index, array) => {
-      return `Deals 4 damage to targeted enemy each turn. (Build cost: ${structureDefinitions.testTower.buildCost})`
+      return `Deals 4 damage to targeted enemy each turn. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -95,7 +97,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.testTower, "player");
+      stateObj = createStructure(stateObj, structureDefinitions.testTower, "player", array[index].buildCost);
       return stateObj;
     }
   },
@@ -103,8 +105,9 @@ let testCardPool = {
   testWall: {
     cardID: 303,
     name: "Great Wall",
+    buildCost: 3,
     text: (state, index, array) => {
-      return `Grants 6 fortification each turn. (Build cost: ${structureDefinitions.testWall.buildCost})`
+      return `Grants 6 fortification each turn. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -114,7 +117,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.testWall, "player");
+      stateObj = createStructure(stateObj, structureDefinitions.testWall, "player", array[index].buildCost);
       return stateObj;
     }
   },
@@ -124,8 +127,9 @@ let testCardPool = {
   testCannon: {
     cardID: 311,
     name: "Escalating Cannon",
+    buildCost: 2,
     text: (state, index, array) => {
-      return `Deals 2 damage to all enemies each turn, doubling each turn. (Build cost: ${structureDefinitions.escalatingCannon.buildCost})`
+      return `Deals 2 damage to all enemies each turn, doubling each turn. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -135,7 +139,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.escalatingCannon, "player");
+      stateObj = createStructure(stateObj, structureDefinitions.escalatingCannon, "player", array[index].buildCost);
       return stateObj;
     }
   },
@@ -145,8 +149,9 @@ let testCardPool = {
   testFortress: {
     cardID: 312,
     name: "Fortress Wall",
+    buildCost: 3,
     text: (state, index, array) => {
-      return `Doubles your fortification at end of turn. (Build cost: ${structureDefinitions.fortressWall.buildCost})`
+      return `Doubles your fortification at end of turn. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -156,7 +161,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.fortressWall, "player");
+      stateObj = createStructure(stateObj, structureDefinitions.fortressWall, "player", array[index].buildCost);
       return stateObj;
     }
   },
@@ -166,8 +171,9 @@ let testCardPool = {
   testDrums: {
     cardID: 313,
     name: "War Drums",
+    buildCost: 3,
     text: (state, index, array) => {
-      return `Your attacks hit an extra time. (Build cost: ${structureDefinitions.warDrums.buildCost})`
+      return `Your attacks hit an extra time. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -177,7 +183,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.warDrums, "player");
+      stateObj = createStructure(stateObj, structureDefinitions.warDrums, "player", array[index].buildCost);
       return stateObj;
     }
   },
@@ -187,8 +193,9 @@ let testCardPool = {
   testWorkshop: {
     cardID: 314,
     name: "Siege Workshop",
+    buildCost: 4,
     text: (state, index, array) => {
-      return `Your attacks deal double damage. (Build cost: ${structureDefinitions.siegeWorkshop.buildCost})`
+      return `Your attacks deal double damage. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -198,7 +205,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.siegeWorkshop, "player");
+      stateObj = createStructure(stateObj, structureDefinitions.siegeWorkshop, "player", array[index].buildCost);
       return stateObj;
     }
   },
@@ -238,7 +245,7 @@ let testCardPool = {
   testAOE: {
     cardID: 304,
     name: "Firestorm",
-    baseDamage: 7,
+    baseDamage: 12,
     baseHits: 1,
     text: (state, index, array) => {
       return `Deal ${array[index].baseDamage + state.playerMonster.strength} damage to ALL enemies`
@@ -266,7 +273,7 @@ let testCardPool = {
   testSabotage: {
     cardID: 305,
     name: "Saboteurs",
-    baseDamage: 2,
+    baseDamage: 5,
     baseHits: 1,
     devDestroy: 1,
     text: (state, index, array) => {
@@ -377,8 +384,8 @@ let testCardPool = {
   testTribute: {
     cardID: 310,
     name: "Mercenary Assault",
-    tribute: 10,
-    baseDamage: 20,
+    tribute: 3,
+    baseDamage: 17,
     baseHits: 1,
     text: (state, index, array) => {
       let cost = getEffectiveTribute(state, array[index].tribute);
@@ -386,7 +393,7 @@ let testCardPool = {
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
-    baseCost: 0,
+    baseCost: 1,
     cost: (state, index, array) => { return array[index].baseCost; },
     cardType: "attack",
     elementType: "fire",
@@ -398,6 +405,84 @@ let testCardPool = {
       await finishDiscardAnimation(index);
       await removeDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
       stateObj = await dealOpponentDamage(stateObj, array[index].baseDamage, array[index].baseHits, false, "front");
+      return stateObj;
+    }
+  },
+
+  // ====== HEALER'S HUT ======
+  // Structure: heal 1 HP every time you play a card. Stacks with multiple copies.
+  testHealersHut: {
+    cardID: 315,
+    name: "Healer's Hut",
+    buildCost: 1,
+    text: (state, index, array) => {
+      return `Heal 1 HP every time you play a card. (Build cost: ${array[index].buildCost})`
+    },
+    minReq: (state, index, array) => { return 0; },
+    upgrades: 0,
+    baseCost: 0,
+    cost: (state, index, array) => { return 0; },
+    cardType: "structure",
+    elementType: "water",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      stateObj = createStructure(stateObj, structureDefinitions.healersHut, "player", array[index].buildCost);
+      return stateObj;
+    }
+  },
+
+  // ====== CATAPULT ======
+  // Structure: deal 4 damage/turn. Each replay permanently increases damage by 1.
+  testCatapult: {
+    cardID: 316,
+    name: "Catapult",
+    buildCost: 2,
+    text: (state, index, array) => {
+      let existing = state.playerStructures.find(s => s.name === "Catapult" && s.buildProgress >= s.buildCost);
+      let dmg = existing ? existing.baseDamage : 4;
+      return existing
+        ? `Upgrade Catapult to ${dmg + 1} damage per turn`
+        : `Deal 4 damage to targeted enemy each turn. (Build cost: ${array[index].buildCost})`
+    },
+    minReq: (state, index, array) => { return 0; },
+    upgrades: 0,
+    baseCost: 0,
+    cost: (state, index, array) => { return 0; },
+    cardType: "structure",
+    elementType: "fire",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      let existingIndex = stateObj.playerStructures.findIndex(s => s.name === "Catapult" && s.buildProgress >= s.buildCost);
+      if (existingIndex >= 0) {
+        stateObj = immer.produce(stateObj, (newState) => {
+          newState.playerStructures[existingIndex].baseDamage += 1;
+          newState.playerStructures[existingIndex].effectText = `Deals ${newState.playerStructures[existingIndex].baseDamage} damage to targeted enemy each turn`;
+        });
+      } else {
+        stateObj = createStructure(stateObj, structureDefinitions.catapult, "player", array[index].buildCost);
+      }
+      return stateObj;
+    }
+  },
+
+  // ====== MORE HOUSING ======
+  // Structure: once built, permanently gain 5 max HP and heal 5.
+  testMoreHousing: {
+    cardID: 317,
+    name: "More Housing",
+    buildCost: 3,
+    text: (state, index, array) => {
+      return `Gain 5 max HP and heal 5. (Build cost: ${array[index].buildCost})`
+    },
+    minReq: (state, index, array) => { return 0; },
+    upgrades: 0,
+    baseCost: 0,
+    cost: (state, index, array) => { return 0; },
+    cardType: "structure",
+    elementType: "earth",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      stateObj = createStructure(stateObj, structureDefinitions.moreHousing, "player", array[index].buildCost);
       return stateObj;
     }
   },
@@ -427,20 +512,13 @@ let testPlayerMonster = {
   startingDeck: [
     testCardPool.testStrike,
     testCardPool.testStrike,
+    testCardPool.testStrike,
     testCardPool.testBlock,
     testCardPool.testBlock,
-    testCardPool.testTower,
-    testCardPool.testWall,
-    testCardPool.testAOE,
+    testCardPool.testBlock,
     testCardPool.testSabotage,
     testCardPool.testPact,
-    testCardPool.testResearch,
-    testCardPool.testTreason,
-    testCardPool.testDiplomacy,
-    testCardPool.testTribute,
-    testCardPool.testCannon,
-    testCardPool.testFortress,
-    testCardPool.testDrums,
-    testCardPool.testWorkshop,
+    cards.finalassault
+    
   ]
 }

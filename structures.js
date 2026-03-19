@@ -81,6 +81,51 @@ let structureDefinitions = {
     }
   },
 
+  // ====== INSTANT-EFFECT STRUCTURES ======
+
+  healersHut: {
+    name: "Healer's Hut",
+    owner: "player",
+    buildCost: 1,
+    healOnCardPlay: 1,
+    effectText: "Heal 1 HP every time you play a card",
+    avatar: "img/structures/healingwell.png",
+  },
+
+  catapult: {
+    name: "Catapult",
+    owner: "player",
+    buildCost: 2,
+    baseDamage: 4,
+    effectText: "Deals 4 damage to targeted enemy each turn",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      if (stateObj.opponentMonster.length > 0) {
+        let dmg = structures[index].baseDamage || 4;
+        stateObj = await dealOpponentDamage(stateObj, dmg, 1, false, "specific");
+      }
+      return stateObj;
+    }
+  },
+
+  moreHousing: {
+    name: "More Housing",
+    owner: "player",
+    buildCost: 3,
+    effectText: "Increases max HP by 5 and heals 5",
+    avatar: "img/structures/healingwell.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      if (!structures[index].applied) {
+        stateObj = immer.produce(stateObj, (newState) => {
+          newState.playerMonster.maxHP += 5;
+          newState.playerMonster.currentHP += 5;
+          newState.playerStructures[index].applied = true;
+        });
+      }
+      return stateObj;
+    }
+  },
+
   // ====== TEST STRUCTURES (for CardPoolTesting.js) ======
 
   testTower: {
@@ -256,6 +301,19 @@ let structureDefinitions = {
       stateObj = immer.produce(stateObj, (newState) => {
         newState.playerMonster.encounterEnergy = Math.max(0, newState.playerMonster.encounterEnergy - drainAmount);
       });
+      return stateObj;
+    }
+  },
+
+  finalAssault: {
+    name: "Final Assault",
+    owner: "player",
+    buildCost: 4,
+    singleUse: true,
+    effectText: "When complete: deal 35 damage. Then removed.",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      stateObj = await dealStructureEffectDamage(stateObj, 35, 0);
       return stateObj;
     }
   },

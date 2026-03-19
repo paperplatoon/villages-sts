@@ -1,41 +1,25 @@
+// Town encounter arrays
+// First 2 fights always pull from beginnerEncounterPool (defined in EnemyTesting.js)
+// Remaining fights pull from moderateEncounterPool or harder pools
+
 let town1 = [
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
-  [testEnemies.siegeCamp],
+  ...beginnerEncounterPool,
+  ...moderateEncounterPool,
 ]
 
 let town2 = [
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
-  [testEnemies.siegeCamp],
+  ...beginnerEncounterPool,
+  ...moderateEncounterPool,
 ]
 
 let town3 = [
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
-  [testEnemies.siegeCamp],
+  ...beginnerEncounterPool,
+  ...moderateEncounterPool,
 ]
 
 let town4 = [
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
-  [testEnemies.siegeCamp],
+  ...beginnerEncounterPool,
+  ...moderateEncounterPool,
 ]
 
 let towns = [town1, town2, town3, town4]
@@ -47,9 +31,9 @@ let easyEncounters = [
 ]
 
 let mediumEncounters = [
-  [testEnemies.siegeCamp],
-  [testEnemies.outpost],
-  [testEnemies.fortifier],
+  [testEnemies.warCamp],
+  [testEnemies.armoredGarrison],
+  [testEnemies.plagueVillage],
 ]
 
 let hardEncounters = [
