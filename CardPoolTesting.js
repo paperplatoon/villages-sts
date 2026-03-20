@@ -25,7 +25,7 @@ let testCardPool = {
   // Animation sequence for attack cards:
   //   1. await addDiscardAnimation(index)
   //   2. await addDealOpponentDamageAnimation(stateObj, damage, isAll)
-  //   3. await pause(350)
+  //   3. await pause(800)
   //   4. await finishDiscardAnimation(index)
   //   5. await removeDealOpponentDamageAnimation(stateObj, damage, isAll)
   //   6. stateObj = await dealOpponentDamage(state, damage, hits, cost, targetType)
@@ -47,7 +47,7 @@ let testCardPool = {
     action: async (stateObj, index, array) => {
       await addDiscardAnimation(index);
       await addDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
-      await pause(350);
+      await pause(800);
       await finishDiscardAnimation(index);
       await removeDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
       stateObj = await dealOpponentDamage(stateObj, array[index].baseDamage, array[index].baseHits, array[index].baseCost, "front");
@@ -231,7 +231,7 @@ let testCardPool = {
     action: async (stateObj, index, array) => {
       await addDiscardAnimation(index);
       await addDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
-      await pause(350);
+      await pause(800);
       await finishDiscardAnimation(index);
       await removeDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
       stateObj = await dealOpponentDamage(stateObj, array[index].baseDamage, array[index].baseHits, array[index].baseCost, "front");
@@ -259,7 +259,7 @@ let testCardPool = {
     action: async (stateObj, index, array) => {
       await addDiscardAnimation(index);
       await addDealOpponentDamageAnimation(stateObj, array[index].baseDamage, true);
-      await pause(350);
+      await pause(800);
       await finishDiscardAnimation(index);
       await removeDealOpponentDamageAnimation(stateObj, array[index].baseDamage, true);
       stateObj = await dealOpponentDamage(stateObj, array[index].baseDamage, array[index].baseHits, array[index].baseCost, "all");
@@ -288,7 +288,7 @@ let testCardPool = {
     action: async (stateObj, index, array) => {
       await addDiscardAnimation(index);
       await addDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
-      await pause(350);
+      await pause(800);
       await finishDiscardAnimation(index);
       await removeDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
       stateObj = await dealOpponentDamage(stateObj, array[index].baseDamage, array[index].baseHits, array[index].baseCost, "front");
@@ -401,7 +401,7 @@ let testCardPool = {
       await addDiscardAnimation(index);
       stateObj = await payTribute(stateObj, array[index].tribute);
       await addDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
-      await pause(350);
+      await pause(800);
       await finishDiscardAnimation(index);
       await removeDealOpponentDamageAnimation(stateObj, array[index].baseDamage);
       stateObj = await dealOpponentDamage(stateObj, array[index].baseDamage, array[index].baseHits, false, "front");

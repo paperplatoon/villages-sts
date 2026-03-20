@@ -3,6 +3,9 @@
 ## What This Is
 A Slay the Spire-inspired card game with a village/kingdom warfare theme. Vanilla JS + Immer.js, no framework.
 
+## Ongoing Conversion: Creatures → Villages
+This game was originally built around creature-vs-creature battles with energy systems. It is being converted to village-vs-village warfare. The mechanics are similar but the aesthetics and naming are different. Many legacy names remain in the code from the creature era — variable names like `strength`, `dex`, `playerMonster`, `opponentMonster`, function names like `energyGift`, `opponentGainEnergy`, CSS classes like `.monster-block`, `.monster-hp`, and UI text. These should be updated to village-themed equivalents over time, but legacy aliases must be preserved for backward compatibility until all references are migrated.
+
 ## Core Design Philosophy: Emergent Synergies
 The most important principle: **cards interact with each other through shared properties and centralized resolution functions, creating multiplicative combos.**
 
@@ -86,3 +89,7 @@ The most important principle: **cards interact with each other through shared pr
 - `structures.js` — Structure definitions (player and enemy)
 - `EnemyTesting.js` — Test enemies with development-based move system
 - `style.css` — All styling
+
+## To-Do
+- Fully convert names, variables, CSS classes, and UI text from creature/monster/energy terminology to village/warfare terminology
+- Route remaining ~280 direct `development` modifications in encounter files (`easyEncounters.js`, `mediumEncounters.js`, `hardEncounters.js`, `bossEncounters.js`) through `gainDevelopment()`/`loseDevelopment()`

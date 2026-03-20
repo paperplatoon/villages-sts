@@ -565,22 +565,56 @@ async function addDealOpponentDamageAnimation(stateObj, calculatedDamage, isAll=
   document.querySelector("#playerStats .avatar").classList.add("player-windup");
   let fireballString = "fireball";
   if (calculatedDamage > 19) {
-    fireballString = (calculatedDamage > 29) ? "hugefireball" : "mediumfireball" 
+    fireballString = (calculatedDamage > 29) ? "hugefireball" : "mediumfireball"
   }
-   
-  let classString = "fireball-move"; 
+
+  let classString = "fireball-move";
   if (stateObj.opponentMonster.length > 1) {
     classString = (stateObj.targetedMonster === 0) ? "fireball-move-2" : "fireball-move-3"
   }
   document.getElementById(fireballString).classList.add(classString);
 
-  if (isAll===false) {
-    document.querySelector(".targeted .avatar").classList.add("opponent-impact");
-  } else {
-    stateObj.opponentMonster.forEach(function (monsterObj, index) {
-      document.querySelectorAll("#opponents .avatar")[index].classList.add("opponent-impact");
-    }) 
+  // Delay impact until fireball arrives (600ms into 750ms flight)
+  setTimeout(() => {
+    if (isAll===false) {
+      let targetEl = document.querySelector(".targeted .avatar");
+      if (targetEl) {
+        targetEl.classList.add("opponent-impact");
+        spawnImpactSparks(targetEl);
+      }
+    } else {
+      stateObj.opponentMonster.forEach(function (monsterObj, index) {
+        let el = document.querySelectorAll("#opponents .avatar")[index];
+        if (el) {
+          el.classList.add("opponent-impact");
+          spawnImpactSparks(el);
+        }
+      })
+    }
+  }, 700);
+}
+
+function spawnImpactSparks(targetEl) {
+  let sparkContainer = document.createElement("div");
+  sparkContainer.classList.add("spark-container");
+  targetEl.parentElement.appendChild(sparkContainer);
+
+  for (let i = 0; i < 8; i++) {
+    let spark = document.createElement("div");
+    spark.classList.add("impact-spark");
+    // Random angle and distance for each spark
+    let angle = (i / 8) * 360 + (Math.random() * 30 - 15);
+    let distance = 30 + Math.random() * 40;
+    spark.style.setProperty("--spark-angle", angle + "deg");
+    spark.style.setProperty("--spark-distance", distance + "px");
+    spark.style.animationDelay = (Math.random() * 0.05) + "s";
+    sparkContainer.appendChild(spark);
   }
+
+  // Clean up after animation
+  setTimeout(() => {
+    sparkContainer.remove();
+  }, 600);
 }
 
 async function removeDealOpponentDamageAnimation(stateObj, calculatedDamage, isAll=false) {
@@ -762,8 +796,15 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
     let fireballEl = document.getElementById(fireballId);
     document.querySelectorAll("#opponents .avatar")[monsterIndex].classList.add("opponent-windup");
     if (fireballEl) fireballEl.classList.add("enemy-fireball-move");
-    document.querySelectorAll("#playerStats .avatar")[0].classList.add("player-impact");
-    await pause(350);
+    // Delay player impact until enemy fireball arrives
+    setTimeout(() => {
+      let playerEl = document.querySelectorAll("#playerStats .avatar")[0];
+      if (playerEl) {
+        playerEl.classList.add("player-impact");
+        spawnImpactSparks(playerEl);
+      }
+    }, 600);
+    await pause(800);
     document.querySelectorAll("#opponents .avatar")[monsterIndex].classList.remove("opponent-windup");
     if (fireballEl) fireballEl.classList.remove("enemy-fireball-move");
     document.querySelectorAll("#playerStats .avatar")[0].classList.remove("player-impact");
@@ -1609,15 +1650,12 @@ async function renderPlayerMonster(stateObj) {
   let hugeFireballDiv = document.createElement("Div");
   hugeFireballDiv.setAttribute("id", "hugefireball");
   hugeFireballDiv.classList.add("fireball-class");
-  cubeDiv.append(fireballDiv, mediumFireballDiv, hugeFireballDiv);
+  // Append fireballs to #stats so they render above all villages
+  document.getElementById("stats").append(fireballDiv, mediumFireballDiv, hugeFireballDiv);
 
   let cubeFront = document.createElement("Div");
   cubeFront.classList.add("cube-face", "cube-front");
-  let cubeTop = document.createElement("Div");
-  cubeTop.classList.add("cube-face", "cube-top");
-  let cubeRight = document.createElement("Div");
-  cubeRight.classList.add("cube-face", "cube-right");
-  cubeDiv.append(cubeFront, cubeTop, cubeRight);
+  cubeDiv.append(cubeFront);
 
   // Village avatar on the cube
   let playerAvatar = document.createElement("img");
@@ -3970,15 +4008,12 @@ function renderOpponents(stateObj) {
     let enemyHugeFireball = document.createElement("Div");
     enemyHugeFireball.setAttribute("id", "enemy-hugefireball-" + index);
     enemyHugeFireball.classList.add("enemy-fireball-class", "enemy-fireball-large");
-    cubeDiv.append(enemyFireball, enemyMediumFireball, enemyHugeFireball);
+    // Append fireballs to #stats so they render above all villages
+    document.getElementById("stats").append(enemyFireball, enemyMediumFireball, enemyHugeFireball);
 
     let cubeFront = document.createElement("Div");
     cubeFront.classList.add("cube-face", "cube-front");
-    let cubeTop = document.createElement("Div");
-    cubeTop.classList.add("cube-face", "cube-top");
-    let cubeRight = document.createElement("Div");
-    cubeRight.classList.add("cube-face", "cube-right");
-    cubeDiv.append(cubeFront, cubeTop, cubeRight);
+    cubeDiv.append(cubeFront);
 
     // Village avatar on the cube
     let enemyAvatar = document.createElement("img");
@@ -4550,7 +4585,7 @@ function animate(animationName, element) {
 async function cardAnimationDamageDiscard(stateObj, index, calculatedDamage) {
   await addDiscardAnimation(index)
   await addDealOpponentDamageAnimation(stateObj, calculatedDamage)
-  await pause(350)
+  await pause(800)
   await finishDiscardAnimation(index)
   await removeDealOpponentDamageAnimation(stateObj, calculatedDamage)
 }

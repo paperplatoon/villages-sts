@@ -1640,7 +1640,7 @@ let cards = {
           let calculatedDamage = array[index].baseDamage + (array[index].upgrades*5)
           await addDiscardAnimation(index)
           await addDealOpponentDamageAnimation(stateObj, calculatedDamage)
-          await pause(350)
+          await pause(800)
           await finishDiscardAnimation(index)
           await removeDealOpponentDamageAnimation(stateObj, calculatedDamage)
 
@@ -1675,7 +1675,7 @@ let cards = {
           let calculatedDamage = array[index].baseDamage + (array[index].upgrades*5)
           await addDiscardAnimation(index)
           await addDealOpponentDamageAnimation(stateObj, calculatedDamage)
-          await pause(350)
+          await pause(800)
           await finishDiscardAnimation(index)
           await removeDealOpponentDamageAnimation(stateObj, calculatedDamage)
 
@@ -2367,7 +2367,7 @@ let cards = {
           let calculatedDamage = array[index].baseDamage + (array[index].upgrades*5)
           await addDiscardAnimation(index)
           await addDealOpponentDamageAnimation(stateObj, calculatedDamage)
-          await pause(350)
+          await pause(800)
           await finishDiscardAnimation(index)
           await removeDealOpponentDamageAnimation(stateObj, calculatedDamage)
 

@@ -23,17 +23,11 @@
 
 @keyframes playerWindup {
   0% { transform: translateX(0); }
-  25% { transform: translateX(-20px); }
-  50% { transform: translateX(20px); }
-  75% { transform: translateX(10px); }
   100% { transform: translateX(0); }
 }
 
 @keyframes opponentWindup {
   0% { transform: translateX(0); }
-  25% { transform: translateX(20px); }
-  50% { transform: translateX(-20px); }
-  75% { transform: translateX(-10px); }
   100% { transform: translateX(0); }
 }
 
@@ -59,26 +53,53 @@
   padding-top: 1vh;
 }
 
-@keyframes opponentImpact {
-  0% { transform: translateX(0); }
-  80% { transform: translateX(0); }
-  90% { transform: translateX(30px); }
-  100% { transform: translateX(0); }
-}
-
-@keyframes playerImpact {
-  0% { transform: translateX(0); }
-  85% { transform: translateX(0); }
-  92% { transform: translateX(-30px); }
-  100% { transform: translateX(0); }
+@keyframes villageImpact {
+  0% { filter: brightness(1); box-shadow: none; }
+  20% { filter: brightness(2); box-shadow: 0 0 15px 5px rgba(255, 200, 50, 0.8), 0 0 30px 10px rgba(255, 100, 0, 0.4); }
+  50% { filter: brightness(1.5); box-shadow: 0 0 10px 3px rgba(255, 200, 50, 0.5); }
+  100% { filter: brightness(1); box-shadow: none; }
 }
 
 .opponent-impact {
-  animation: opponentImpact 0.35s forwards ;
+  animation: villageImpact 0.4s forwards;
 }
 
 .player-impact {
-  animation: playerImpact 0.2s forwards ;
+  animation: villageImpact 0.4s forwards;
+}
+
+/* Impact spark burst */
+.spark-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  z-index: 200;
+  pointer-events: none;
+}
+
+.impact-spark {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255, 255, 180) 20%, rgb(255, 80, 20) 70%, rgba(255, 30, 0, 0));
+  animation: sparkBurst 0.45s ease-out forwards;
+}
+
+@keyframes sparkBurst {
+  0% {
+    transform: translate(0, 0) scale(1.2);
+    opacity: 1;
+  }
+  30% {
+    opacity: 1;
+  }
+  100% {
+    transform: rotate(var(--spark-angle)) translateY(calc(-1 * var(--spark-distance))) scale(0.3);
+    opacity: 0;
+  }
 }
 
 
@@ -116,8 +137,10 @@
   background: radial-gradient(circle, rgb(255, 47, 40) 30%, rgb(255, 108, 23) 75%, rgb(254, 143, 52));
   border-radius: 50%;
   position: absolute;
-  transform: translateX(-35vw);
+  left: 15%;
+  top: 35%;
   visibility: hidden;
+  z-index: 100;
 }
 
 #fireball {
@@ -136,15 +159,15 @@
 }
 
 .fireball-move {
-  animation: slide 0.3s ease-in;
+  animation: slide 0.7s ease-in;
 }
 
 .fireball-move-2 {
-  animation: slide2 0.33s ease-in;
+  animation: slide2 0.7s ease-in;
 }
 
 .fireball-move-3 {
-  animation: slide3 0.33s ease-in;
+  animation: slide3 0.75s ease-in;
 }
 
 /* ====== Enemy Fireballs ====== */
@@ -153,8 +176,10 @@
   background: radial-gradient(circle, rgb(180, 40, 180) 30%, rgb(120, 20, 80) 75%, rgb(80, 0, 60));
   border-radius: 50%;
   position: absolute;
-  transform: translateX(35vw);
+  right: 15%;
+  top: 35%;
   visibility: hidden;
+  z-index: 100;
 }
 
 .enemy-fireball-small {
@@ -174,25 +199,17 @@
 
 @keyframes enemySlide {
   0% {
-    transform: translate(20vw, 10vh);
-    visibility: hidden;
-  }
-  49% {
-    transform: translate(0vw, 10vh);
-    visibility: hidden;
-  }
-  50% {
-    transform: translate(0vw, 10vh);
+    transform: translate(0, 0);
     visibility: visible;
   }
   100% {
-    transform: translate(-40vw, 10vh);
+    transform: translate(-55vw, 0);
     visibility: visible;
   }
 }
 
 .enemy-fireball-move {
-  animation: enemySlide 0.3s ease-in;
+  animation: enemySlide 0.75s ease-in;
 }
 
 /* ====== Block Gain Pulse ====== */
@@ -284,57 +301,33 @@
 
 @keyframes slide {
   0% {
-    transform: translate(-20vw, 10vh);
-    visibility: hidden;
-  }
-  49% {
-    transform: translate(0vw, 10vh);
-    visibility: hidden;
-  }
-  50% {
-    transform: translate(0vw, 10vh);
+    transform: translate(0, 0);
     visibility: visible;
   }
   100% {
-    transform: translate(40vw, 10vh);
+    transform: translate(55vw, 0);
     visibility: visible;
   }
 }
 
 @keyframes slide2 {
   0% {
-    transform: translate(-20vw, 10vh);
-    visibility: hidden;
-  }
-  49% {
-    transform: translate(0vw, 10vh);
-    visibility: hidden;
-  }
-  50% {
-    transform: translate(0vw, 10vh);
+    transform: translate(0, 0);
     visibility: visible;
   }
   100% {
-    transform: translate(25vw, 10vh);
+    transform: translate(55vw, 0);
     visibility: visible;
   }
 }
 
 @keyframes slide3 {
   0% {
-    transform: translate(0vw, 10vh);
-    visibility: hidden;
-  }
-  49% {
-    transform: translate(0vw, 10vh);
-    visibility: hidden;
-  }
-  50% {
-    transform: translate(0vw, 10vh);
+    transform: translate(0, 0);
     visibility: visible;
   }
   100% {
-    transform: translate(55vw, 10vh);
+    transform: translate(55vw, 0);
     visibility: visible;
   }
 }
@@ -382,6 +375,7 @@
   background-image: url(img/backgrounds/newpentacle.PNG);
   background-size: cover;
   height: auto !important;
+  position: relative;
 }
 
 #town {
@@ -629,45 +623,32 @@
 }
 
 .village-cube {
-  width: 10vw;
-  height: 10vw;
+  width: 90%;
   position: relative;
-  transform-style: preserve-3d;
-  transform: rotateX(-10deg) rotateY(-20deg);
   margin: 0;
+  overflow: visible;
 }
 
-/* Override .avatar sizing for cubes */
+/* Override .avatar sizing for village */
 .village-cube.avatar {
-  width: 10vw;
-  height: 10vw;
+  width: 90%;
+  height: auto;
 }
 
 .cube-face {
-  position: absolute;
   box-sizing: border-box;
-  border: 2px solid rgba(100, 100, 100, 0.6);
 }
 
 .cube-front {
-  width: 10vw;
-  height: 10vw;
-  background: linear-gradient(135deg, #d4d4d4, #f0f0f0, #e0e0e0);
+  width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  z-index: 2;
+  justify-content: flex-end;
   position: relative;
+  border-radius: 4px;
+  border: 2px solid rgba(100, 100, 100, 0.6);
   overflow: hidden;
-}
-
-.player-cube .cube-front {
-  background: linear-gradient(135deg, #b8d4e8, #d6eaf5, #a8c8dc);
-}
-
-.enemy-cube .cube-front {
-  background: linear-gradient(135deg, #e8b8b8, #f5d6d6, #dca8a8);
 }
 
 .cube-top {
@@ -704,20 +685,20 @@
 }
 
 .village-avatar {
-  position: absolute;
-  top: 0;
-  left: 0;
   width: 100%;
-  height: 100%;
-  object-fit: cover;
-  z-index: 0;
+  display: block;
+  border-radius: 4px;
 }
 
 .village-hp {
+  position: absolute;
+  bottom: 2px;
+  left: 50%;
+  transform: translateX(-50%);
   font-size: 2.5vmin;
-  color: #cc0000;
+  color: white;
   margin: 0;
-  text-shadow: 0 0 4px white, 0 0 4px white;
+  text-shadow: 0 0 4px black, 0 0 4px black, 0 0 2px black;
   z-index: 1;
   /* Override .monster-hp heart shape inside cubes */
   border-image: none !important;
@@ -1027,17 +1008,17 @@
 }
 
 .monster-block {
+    position: absolute;
+    top: 2px;
+    right: 2px;
     display: inline-block;
     border-radius: 50% 50% 50% 50% / 12% 12% 30% 30%;
     background-color: blue;
     color: white;
     text-align: center;
-    margin: 0.05vmin;
     font-size: 2.7vmin;
     width: 3.9vmin;
     height: 3.9vmin;
-    flex-shrink: 1;
-    margin-top: 3vh;
     border: 1px dashed white;
     z-index: 1;
   }
