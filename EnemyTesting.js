@@ -116,8 +116,8 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 3, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 3;
-            newState.opponentMonster[index].development += 2;
           })
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -129,9 +129,7 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 7, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development += 1;
-          })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -143,9 +141,10 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = createStructure(stateObj, testEnemyStructures.batteringRam, "opponent");
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development = 0;
-          })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -187,9 +186,7 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 4, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development += 1;
-          })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -201,9 +198,7 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 8, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development += 1;
-          })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -215,9 +210,10 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 14, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development = 0;
-          })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -260,8 +256,8 @@ let testEnemies = {
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 5;
-            newState.opponentMonster[index].development += 2;
           })
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -273,9 +269,7 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = createStructure(stateObj, testEnemyStructures.miniTrebuchet, "opponent");
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development += 3;
-          })
+          stateObj = await gainDevelopment(stateObj, 3, index);
           return stateObj;
         }
       },
@@ -289,8 +283,11 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 15, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].currentHP -= 5;
-            newState.opponentMonster[index].development = 0;
           })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -333,9 +330,7 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 5, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development += 2;
-          })
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -348,9 +343,7 @@ let testEnemies = {
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 6, index, false, 1);
           stateObj = await dealPlayerDamage(stateObj, 6, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development += 1;
-          })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -362,9 +355,10 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 18, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development = 0;
-          })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -409,8 +403,8 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 2, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 4;
-            newState.opponentMonster[index].development += 1;
           })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -424,8 +418,8 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 5, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 6;
-            newState.opponentMonster[index].development += 2;
           })
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -439,8 +433,11 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 10, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 10;
-            newState.opponentMonster[index].development = 0;
           })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -487,8 +484,8 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 4, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].strength += 1;
-            newState.opponentMonster[index].development += 1;
           })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -502,8 +499,8 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 8, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].strength += 2;
-            newState.opponentMonster[index].development += 2;
           })
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -515,9 +512,10 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = createStructure(stateObj, testEnemyStructures.warDrums, "opponent");
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development = 0;
-          })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -561,8 +559,8 @@ let testEnemies = {
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 8;
-            newState.opponentMonster[index].development += 1;
           })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -576,8 +574,8 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 6, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 6;
-            newState.opponentMonster[index].development += 2;
           })
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -590,9 +588,10 @@ let testEnemies = {
         action: async (stateObj, index, array) => {
           stateObj = createStructure(stateObj, testEnemyStructures.spikedWall, "opponent");
           stateObj = await dealPlayerDamage(stateObj, 12, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development = 0;
-          })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -638,8 +637,8 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 3, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.playerMonster.poison += 2;
-            newState.opponentMonster[index].development += 2;
           })
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -653,8 +652,8 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 5, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.playerMonster.poison += 4;
-            newState.opponentMonster[index].development += 1;
           })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -668,8 +667,11 @@ let testEnemies = {
           stateObj = await dealPlayerDamage(stateObj, 10, index, false, 1);
           stateObj = immer.produce(stateObj, (newState) => {
             newState.playerMonster.poison += 6;
-            newState.opponentMonster[index].development = 0;
           })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -717,8 +719,8 @@ let testEnemies = {
           stateObj = immer.produce(stateObj, (newState) => {
             newState.gold = Math.max(0, newState.gold - unblockedDamage);
             newState.opponentMonster[index].baseDamage += 1;
-            newState.opponentMonster[index].development += 1;
           })
+          stateObj = await gainDevelopment(stateObj, 1, index);
           return stateObj;
         }
       },
@@ -732,8 +734,11 @@ let testEnemies = {
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].baseDamage = 6;
             newState.opponentMonster[index].encounterBlock += 6;
-            newState.opponentMonster[index].development = 0;
           })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }
@@ -776,9 +781,7 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 6, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development += 2;
-          })
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -791,8 +794,8 @@ let testEnemies = {
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 8;
-            newState.opponentMonster[index].development += 3;
           })
+          stateObj = await gainDevelopment(stateObj, 3, index);
           return stateObj;
         }
       },
@@ -804,9 +807,10 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 13, index, false, 1);
-          stateObj = immer.produce(stateObj, (newState) => {
-            newState.opponentMonster[index].development = 0;
-          })
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
           return stateObj;
         }
       }

@@ -234,6 +234,21 @@ let structureDefinitions = {
     }
   },
 
+  seismicSpire: {
+    name: "Seismic Spire",
+    owner: "player",
+    buildCost: 2,
+    damageOnDevChange: 4,
+    effectText: "Whenever enemy gains or loses development, deal 4 damage",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      stateObj = immer.produce(stateObj, (newState) => {
+        newState.damageOnDevChange = structures[index].damageOnDevChange;
+      });
+      return stateObj;
+    }
+  },
+
   // ====== OPPONENT STRUCTURES ======
   // Enemy structures have HP and block. Can be targeted by demolish-type cards.
 

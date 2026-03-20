@@ -658,6 +658,8 @@
   align-items: center;
   justify-content: center;
   z-index: 2;
+  position: relative;
+  overflow: hidden;
 }
 
 .player-cube .cube-front {
@@ -701,10 +703,22 @@
   background: linear-gradient(135deg, #cc9c9c, #e0b0b0);
 }
 
+.village-avatar {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+
 .village-hp {
   font-size: 2.5vmin;
   color: #cc0000;
   margin: 0;
+  text-shadow: 0 0 4px white, 0 0 4px white;
+  z-index: 1;
   /* Override .monster-hp heart shape inside cubes */
   border-image: none !important;
   clip-path: none !important;
@@ -1025,6 +1039,7 @@
     flex-shrink: 1;
     margin-top: 3vh;
     border: 1px dashed white;
+    z-index: 1;
   }
 
   .monster-block-unwavering {

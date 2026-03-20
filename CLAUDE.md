@@ -21,10 +21,15 @@ The most important principle: **cards interact with each other through shared pr
 - The goal is that players discover powerful combos between cards, structures, and status effects
 
 ### When Writing New Cards/Mechanics
-- Always route damage through `dealOpponentDamage()` / `dealPlayerDamage()` — never hardcode damage math in individual cards
+- **Route ALL state changes through central functions** — never modify state directly in `immer.produce` when a central function exists. This ensures reactive effects (like structures that trigger on development changes) fire automatically.
+  - Damage: `dealOpponentDamage()` / `dealPlayerDamage()` / `dealStructureEffectDamage()`
+  - Development: `gainDevelopment()` / `loseDevelopment()` (also `energyGift()` / `destroyEnergy()` for player-triggered changes)
+  - Healing: `healPlayer()` / `healOpponent()`
+  - Block: `gainBlock()`
 - Add new combat modifiers as state flags checked in the central functions
 - Use existing properties (`baseDamage`, `baseHits`, etc.) so cards automatically benefit from the modifier ecosystem
 - Card `text` functions should dynamically calculate displayed values (e.g., `baseDamage + strength`) so the UI always shows the actual damage
+- **NOTE:** The real encounter files (`easyEncounters.js`, `mediumEncounters.js`, `hardEncounters.js`, `bossEncounters.js`) still have ~280 direct `development` modifications that need to be routed through `gainDevelopment()`/`loseDevelopment()`. `EnemyTesting.js` has already been updated.
 
 ## Card Properties & Mutability
 

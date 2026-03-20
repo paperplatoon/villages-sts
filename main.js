@@ -103,9 +103,10 @@ let gameStartState = {
   cardsPerTurn: 0,
   combatTurnNumber: 0,
   comboPerTurn: 0,
-  blockKeep: true,
+  blockKeep: false,
   cantSelfDamage: false,
   gainStrengthDevChange: 0,
+  damageOnDevChange: 0,
   backstepDamage: false,
   healOpponentBlocked: false,
   gainLifePerCard: 0,
@@ -626,10 +627,12 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
   }
   let calculatedDamage = (damageNumber + stateObj.playerMonster.strength) * attackNumber;
 
+  let devChanges = [];
+
   stateObj = immer.produce(stateObj, (newState) => {
     if (calculatedDamage > 0) {
       if (all) {
-        newState.opponentMonster.forEach(function (monsterObj) {
+        newState.opponentMonster.forEach(function (monsterObj, monsterIndex) {
           if (monsterObj.hunted > 0) {
             calculatedDamage *=2;
           }
@@ -640,9 +643,9 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
             newState.fightDamageTotal += calculatedDamage;
 
             if (monsterObj.deflate && calculatedDamage >= monsterObj.deflate && monsterObj.development > 0) {
-              monsterObj.development -= 1;
+              devChanges.push({ index: monsterIndex, amount: -1 });
             } else if (monsterObj.angry && monsterObj.development < 7) {
-              monsterObj.development += 1;
+              devChanges.push({ index: monsterIndex, amount: 1 });
             } else if (monsterObj.shakedown) {
               newState.gold += monsterObj.shakedown;
             }
@@ -658,9 +661,9 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
             newState.fightDamageTotal += takenDamage
 
             if (monsterObj.deflate && takenDamage >= monsterObj.deflate && monsterObj.development > 0) {
-              monsterObj.development -= 1;
+              devChanges.push({ index: monsterIndex, amount: -1 });
             } else if (monsterObj.angry && monsterObj.development < 7) {
-              monsterObj.development += 1;
+              devChanges.push({ index: monsterIndex, amount: 1 });
             } else if (monsterObj.shakedown) {
               newState.gold += monsterObj.shakedown;
             } else if (monsterObj.enrage) {
@@ -680,9 +683,9 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
           newState.fightDamageCount += 1;
           newState.fightDamageTotal += calculatedDamage;
           if (monsterObj.deflate && calculatedDamage >= monsterObj.deflate && monsterObj.development > 0) {
-            monsterObj.development -= 1;
+            devChanges.push({ index: targetIndex, amount: -1 });
           } else if (monsterObj.angry && monsterObj.development < 7) {
-            monsterObj.development += 1;
+            devChanges.push({ index: targetIndex, amount: 1 });
           } else if (monsterObj.shakedown) {
             newState.gold += monsterObj.shakedown;
           } else if (monsterObj.enrage) {
@@ -698,9 +701,9 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
           newState.fightDamageCount += 1;
           newState.fightDamageTotal += takenDamage
           if (monsterObj.deflate && takenDamage >= monsterObj.deflate && monsterObj.development > 0) {
-            monsterObj.development -= 1;
+            devChanges.push({ index: targetIndex, amount: -1 });
           } else if (monsterObj.angry && monsterObj.development < 7) {
-            monsterObj.development += 1;
+            devChanges.push({ index: targetIndex, amount: 1 });
           } else if (monsterObj.shakedown) {
             newState.gold += monsterObj.shakedown;
           } else if (monsterObj.enrage) {
@@ -715,6 +718,16 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
       newState.playerMonster.encounterEnergy -= energyCost
     }
   });
+
+  // Process deferred development changes through central functions
+  for (let change of devChanges) {
+    if (change.amount > 0) {
+      stateObj = await gainDevelopment(stateObj, change.amount, change.index);
+    } else {
+      stateObj = await loseDevelopment(stateObj, Math.abs(change.amount), change.index);
+    }
+  }
+
   if (all === true) {
     console.log("all is true")
     for (let i = 0; i < stateObj.opponentMonster.length; i++) {
@@ -952,6 +965,11 @@ async function loseDevelopment(stateObj, devToLose, targetIndex=0, playerTrigger
       newState.opponentMonster[targetIndex].development -= devToLose;
   })
   await changeState(stateObj);
+
+  if (stateObj.damageOnDevChange > 0) {
+    stateObj = await dealStructureEffectDamage(stateObj, stateObj.damageOnDevChange, targetIndex);
+  }
+
   return stateObj
 }
 
@@ -991,6 +1009,11 @@ async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTrigger
       newState.opponentMonster[targetIndex].development += devToGain;
   })
   await changeState(stateObj);
+
+  if (stateObj.damageOnDevChange > 0) {
+    stateObj = await dealStructureEffectDamage(stateObj, stateObj.damageOnDevChange, targetIndex);
+  }
+
   return stateObj
 }
 
@@ -1042,7 +1065,7 @@ async function healOpponent(stateObj, HPToGain, index=0, energyChange=false, all
               newState.enemyFightHealTotal += monsterObj.maxHP - monsterObj.currentHP
               monsterObj.currentHP = monsterObj.maxHP;
             };
-        }) 
+        })
       } else {
         let monsterObj = newState.opponentMonster[index];
         if (monsterObj.currentHP < (monsterObj.maxHP - (HPToGain + 1))) {
@@ -1053,11 +1076,11 @@ async function healOpponent(stateObj, HPToGain, index=0, energyChange=false, all
           monsterObj.currentHP = monsterObj.maxHP;
         };
     }
+    })
 
     if (energyChange) {
-      newState.opponentMonster[index].development += energyChange
+      stateObj = await gainDevelopment(stateObj, energyChange, index);
     }
-    })
   }
   return stateObj
 }
@@ -1549,6 +1572,13 @@ function doubleCardAttack(stateObj, index, array) {
 //----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 // - - - - - -  - - - - - Rendering - - - - - -  - - - - -
 //----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+function getVillageAvatar(currentHP, maxHP) {
+  let percent = (currentHP / maxHP) * 100;
+  if (percent >= 75) return "img/villages/village_health_100.png";
+  if (percent >= 25) return "img/villages/village_health_75.png";
+  return "img/villages/village_health_25.png";
+}
+
 //Render the player's stats
 async function renderPlayerMonster(stateObj) {
   document.getElementById("playerStats").innerHTML = "";
@@ -1589,6 +1619,12 @@ async function renderPlayerMonster(stateObj) {
   cubeRight.classList.add("cube-face", "cube-right");
   cubeDiv.append(cubeFront, cubeTop, cubeRight);
 
+  // Village avatar on the cube
+  let playerAvatar = document.createElement("img");
+  playerAvatar.src = getVillageAvatar(stateObj.playerMonster.currentHP, stateObj.playerMonster.maxHP);
+  playerAvatar.classList.add("village-avatar");
+  cubeFront.appendChild(playerAvatar);
+
   // HP on the cube
   let playerHP = document.createElement("H3");
   playerHP.textContent = stateObj.playerMonster.currentHP + "/" + stateObj.playerMonster.maxHP;
@@ -1597,11 +1633,8 @@ async function renderPlayerMonster(stateObj) {
 
   if (stateObj.playerMonster.encounterBlock > 0) {
     let playerBlock = document.createElement("H3");
-    playerBlock.textContent = stateObj.playerMonster.encounterBlock + " fort";
-    playerBlock.classList.add("village-block");
-    if (stateObj.blockKeep === true) {
-      playerBlock.classList.add("monster-block-unwavering");
-    }
+    playerBlock.textContent = stateObj.playerMonster.encounterBlock;
+    playerBlock.classList.add("monster-block");
     cubeFront.appendChild(playerBlock);
   }
 
@@ -1612,23 +1645,6 @@ async function renderPlayerMonster(stateObj) {
   playerStatusDiv.setAttribute("id", "playerstatus");
   playerStatusDiv.classList.add("village-status-row");
 
-  if (stateObj.blockKeep === true) {
-    let statusDiv = document.createElement("Div");
-    statusDiv.setAttribute("id", "blockkeep");
-    statusDiv.addEventListener('mouseover', function() {
-      const statusText = document.querySelector("#blockkeeppopup");
-      statusText.style.display = 'block';
-    });
-    statusDiv.addEventListener('mouseout', function() {
-      const statusText = document.querySelector("#blockkeeppopup");
-      statusText.style.display = 'none';
-    });
-    let statusTextDiv = document.createElement("Div");
-    statusTextDiv.setAttribute("id", "blockkeeppopup");
-    statusTextDiv.textContent = "You do not lose block at end of turn";
-    playerStatusDiv.appendChild(statusTextDiv);
-    playerStatusDiv.appendChild(statusDiv);
-  }
 
   if (stateObj.backstepDamage === true) {
     let backstepDamageDiv = document.createElement("Div");
@@ -2150,6 +2166,7 @@ function resetAfterFight(stateObj) {
     newState.cantSelfDamage = false;
     newState.backstepDamage = false;
     newState.gainStrengthDevChange = 0;
+    newState.damageOnDevChange = 0;
     newState.cardsPerTurn = 0;
     newState.combatTurnNumber = 0;
     newState.comboPerTurn = 0;
@@ -2268,6 +2285,7 @@ function setUpEncounter(stateObj, isBoss=false) {
     newState.cantSelfDamage = false;
     newState.backstepDamage = false;
     newState.gainStrengthDevChange = 0;
+    newState.damageOnDevChange = 0;
     newState.comboPerTurn = 0;
     newState.combatTurnNumber = 1;
     newState.playerStructures = [];
@@ -3962,6 +3980,12 @@ function renderOpponents(stateObj) {
     cubeRight.classList.add("cube-face", "cube-right");
     cubeDiv.append(cubeFront, cubeTop, cubeRight);
 
+    // Village avatar on the cube
+    let enemyAvatar = document.createElement("img");
+    enemyAvatar.src = getVillageAvatar(monsterObj.currentHP, monsterObj.maxHP);
+    enemyAvatar.classList.add("village-avatar");
+    cubeFront.appendChild(enemyAvatar);
+
     let monsterHP = document.createElement("H3");
     monsterHP.textContent = monsterObj.currentHP + "/" + monsterObj.maxHP;
     monsterHP.classList.add("village-hp", "monster-hp");
@@ -3969,8 +3993,8 @@ function renderOpponents(stateObj) {
 
     if (monsterObj.encounterBlock > 0) {
       let monsterBlock = document.createElement("H3");
-      monsterBlock.textContent = monsterObj.encounterBlock + " fort";
-      monsterBlock.classList.add("village-block");
+      monsterBlock.textContent = monsterObj.encounterBlock;
+      monsterBlock.classList.add("monster-block");
       cubeFront.appendChild(monsterBlock);
     }
 
@@ -4467,8 +4491,9 @@ async function endTurnIncrement(stateObj) {
 //if you flip the order of this around, discard works, but not playing the move
 async function endTurn(stateObj) {
 
-  // Clear enemy block (monsters + structures)
+  // Clear block (player, enemy monsters, and structures)
   stateObj = immer.produce(stateObj, (newState) => {
+    newState.playerMonster.encounterBlock = 0;
     newState.opponentMonster.forEach(function (monsterObj, index) {
       monsterObj.encounterBlock = 0;
     })

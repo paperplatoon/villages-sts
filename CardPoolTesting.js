@@ -465,6 +465,29 @@ let testCardPool = {
     }
   },
 
+  // ====== SEISMIC SPIRE ======
+  // Structure: whenever enemy gains or loses development, deal 4 damage.
+  testSeismicSpire: {
+    cardID: 318,
+    name: "Seismic Spire",
+    buildCost: 2,
+    baseDamageOnDevChange: 4,
+    text: (state, index, array) => {
+      return `Whenever enemy gains or loses development, deal ${array[index].baseDamageOnDevChange} damage. (Build cost: ${array[index].buildCost})`
+    },
+    minReq: (state, index, array) => { return 0; },
+    upgrades: 0,
+    baseCost: 0,
+    cost: (state, index, array) => { return 0; },
+    cardType: "structure",
+    elementType: "earth",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      stateObj = createStructure(stateObj, structureDefinitions.seismicSpire, "player", array[index].buildCost);
+      return stateObj;
+    }
+  },
+
   // ====== MORE HOUSING ======
   // Structure: once built, permanently gain 5 max HP and heal 5.
   testMoreHousing: {
@@ -518,7 +541,7 @@ let testPlayerMonster = {
     testCardPool.testBlock,
     testCardPool.testSabotage,
     testCardPool.testPact,
-    cards.finalassault
+    testCardPool.testSeismicSpire
     
   ]
 }
