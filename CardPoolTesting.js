@@ -470,7 +470,7 @@ let testCardPool = {
   testSeismicSpire: {
     cardID: 318,
     name: "Seismic Spire",
-    buildCost: 2,
+    buildCost: 1,
     baseDamageOnDevChange: 4,
     text: (state, index, array) => {
       return `Whenever enemy gains or loses development, deal ${array[index].baseDamageOnDevChange} damage. (Build cost: ${array[index].buildCost})`
@@ -512,11 +512,78 @@ let testCardPool = {
 }
 
 
+// ====== Coastal Settlement Card Pool ======
+// Combined pool for testing. Add/remove cards here to change what shows up as rewards.
+// Cards from CardPoolTesting.js (testCardPool) and basicCardPool.js (cards).
+let coastalSettlementCardPool = {
+
+  // -- Test cards (from CardPoolTesting.js) --
+  testStrike:       testCardPool.testStrike,
+  testBlock:        testCardPool.testBlock,
+  testTower:        testCardPool.testTower,
+  testWall:         testCardPool.testWall,
+  testCannon:       testCardPool.testCannon,
+  testFortress:     testCardPool.testFortress,
+  testDrums:        testCardPool.testDrums,
+  testWorkshop:     testCardPool.testWorkshop,
+  testResearch:     testCardPool.testResearch,
+  testAOE:          testCardPool.testAOE,
+  testSabotage:     testCardPool.testSabotage,
+  testPact:         testCardPool.testPact,
+  testTreason:      testCardPool.testTreason,
+  testDiplomacy:    testCardPool.testDiplomacy,
+  testTribute:      testCardPool.testTribute,
+  testHealersHut:   testCardPool.testHealersHut,
+  testCatapult:     testCardPool.testCatapult,
+  testSeismicSpire: testCardPool.testSeismicSpire,
+  testMoreHousing:  testCardPool.testMoreHousing,
+
+  // -- Cards from basicCardPool.js (testingCardPoolMar20) --
+  // Block
+  icyfreeze:        cards.icyfreeze,
+  essencedrain:     cards.essencedrain,
+  shatteringshield: cards.shatteringshield,
+  sabotage:         cards.sabotage,
+  thiefshield:      cards.thiefshield,
+  sanguineshield:   cards.sanguineshield,
+  wallofichor:      cards.wallofichor,
+  mentalblock:      cards.mentalblock,
+  meditate:         cards.meditate,
+
+  // Attacks
+  energyburst:      cards.energyburst,
+  decimate:         cards.decimate,
+  pirouettespin:    cards.pirouettespin,
+  weightythoughts:  cards.weightythoughts,
+  flamedome:        cards.flamedome,
+  tackle:           cards.tackle,
+  bigtackle:        cards.bigtackle,
+  banish:           cards.banish,
+  insight:          cards.insight,
+  followupslap:     cards.followupslap,
+  ascension:        cards.ascension,
+
+  // Utility
+  wellspring:       cards.wellspring,
+  dampen:           cards.dampen,
+  rewindtime:       cards.rewindtime,
+  ignite:           cards.ignite,
+  powerup:          cards.powerup,
+  fireenergy:       cards.fireenergy,
+  recall:           cards.recall,
+
+  // Backstep
+  puffofsmoke:      cards.puffofsmoke,
+  skipaway:         cards.skipaway,
+  retreatingslash:  cards.retreatingslash,
+}
+
+
 // ====== Test Player Monster (Coastal Settlement) ======
 let testPlayerMonster = {
   name: "Coastal Settlement",
   type: "water",
-  cardPool: testCardPool,
+  cardPool: coastalSettlementCardPool,
   encounterEnergy: 0,
   startingEnergy: 0,
   encounterBlock: 0,
@@ -533,15 +600,19 @@ let testPlayerMonster = {
   turnCards: 6,
   avatar: "img/watertongue.png",
   startingDeck: [
-    testCardPool.testStrike,
-    testCardPool.testStrike,
-    testCardPool.testStrike,
-    testCardPool.testBlock,
-    testCardPool.testBlock,
-    testCardPool.testBlock,
+    // testCardPool.testStrike,
+    // testCardPool.testStrike,
+    // testCardPool.testStrike,
+    // testCardPool.testBlock,
+    // testCardPool.testBlock,
+    // testCardPool.testBlock,
     testCardPool.testSabotage,
     testCardPool.testPact,
-    testCardPool.testSeismicSpire
+    testCardPool.testSabotage,
+    testCardPool.testPact,
+    testCardPool.testSeismicSpire,
+    testCardPool.testSeismicSpire,
+    testCardPool.testSeismicSpire,
     
   ]
 }

@@ -13,6 +13,7 @@ let structureDefinitions = {
     name: "Watchtower",
     owner: "player",
     buildCost: 2,
+    projectileTarget: "opponent",
     effectText: "Deals 4 damage to targeted enemy each turn",
     avatar: "img/structures/watchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
@@ -41,6 +42,7 @@ let structureDefinitions = {
     name: "Poison Trap",
     owner: "player",
     buildCost: 2,
+    projectileTarget: "opponent",
     effectText: "Applies 2 poison to targeted enemy each turn",
     avatar: "img/structures/poisontrap.png",
     onTurnEffect: async function(stateObj, index, structures) {
@@ -97,6 +99,7 @@ let structureDefinitions = {
     owner: "player",
     buildCost: 2,
     baseDamage: 4,
+    projectileTarget: "opponent",
     effectText: "Deals 4 damage to targeted enemy each turn",
     avatar: "img/structures/watchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
@@ -132,6 +135,7 @@ let structureDefinitions = {
     name: "Guard Tower",
     owner: "player",
     buildCost: 2,
+    projectileTarget: "opponent",
     effectText: "Deals 4 damage to targeted enemy each turn",
     avatar: "img/structures/watchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
@@ -163,6 +167,7 @@ let structureDefinitions = {
     owner: "player",
     buildCost: 2,
     escalatingDamage: 2,
+    projectileTarget: "opponent-all",
     effectText: "Deals 2 damage to all enemies. Doubles each turn",
     avatar: "img/structures/watchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
@@ -241,12 +246,7 @@ let structureDefinitions = {
     damageOnDevChange: 4,
     effectText: "Whenever enemy gains or loses development, deal 4 damage",
     avatar: "img/structures/watchtower.png",
-    onTurnEffect: async function(stateObj, index, structures) {
-      stateObj = immer.produce(stateObj, (newState) => {
-        newState.damageOnDevChange = structures[index].damageOnDevChange;
-      });
-      return stateObj;
-    }
+    // Passive — damageOnDevChange flag is set when structure completes building
   },
 
   // ====== OPPONENT STRUCTURES ======
@@ -325,6 +325,7 @@ let structureDefinitions = {
     owner: "player",
     buildCost: 4,
     singleUse: true,
+    projectileTarget: "opponent",
     effectText: "When complete: deal 35 damage. Then removed.",
     avatar: "img/structures/watchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {

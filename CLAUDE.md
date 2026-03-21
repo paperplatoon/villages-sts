@@ -34,6 +34,10 @@ The most important principle: **cards interact with each other through shared pr
 - Card `text` functions should dynamically calculate displayed values (e.g., `baseDamage + strength`) so the UI always shows the actual damage
 - **NOTE:** The real encounter files (`easyEncounters.js`, `mediumEncounters.js`, `hardEncounters.js`, `bossEncounters.js`) still have ~280 direct `development` modifications that need to be routed through `gainDevelopment()`/`loseDevelopment()`. `EnemyTesting.js` has already been updated.
 
+### Passive vs. Active Structures
+- **Active structures** (watchtower, barricade, healingWell) use `onTurnEffect` — they do something each turn (deal damage, grant block, heal).
+- **Passive structures** (seismicSpire) set state flags **on build completion** (in `buildStructureByIndex`/`buildSelectedStructure`), not via `onTurnEffect`. This ensures the effect is active immediately when the structure finishes building, not delayed until the next end-of-turn cycle. Example: `damageOnDevChange` is set the moment seismicSpire completes, so cards played that same turn benefit from it.
+
 ## Card Properties & Mutability
 
 **All gameplay-relevant values belong on the card object, not on external definitions.** This includes `baseDamage`, `baseBlock`, `baseCost`, `baseHits`, `buildCost`, etc.
@@ -92,4 +96,9 @@ The most important principle: **cards interact with each other through shared pr
 
 ## To-Do
 - Fully convert names, variables, CSS classes, and UI text from creature/monster/energy terminology to village/warfare terminology
+
+- Fix player card animations so they deal right to left
+- fix player structure animations so they're actually visible.
+- Change encounter enemies to be more like villages and less like craetures.
+-come up with names for strength, dex,  etc
 - Route remaining ~280 direct `development` modifications in encounter files (`easyEncounters.js`, `mediumEncounters.js`, `hardEncounters.js`, `bossEncounters.js`) through `gainDevelopment()`/`loseDevelopment()`

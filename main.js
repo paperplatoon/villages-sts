@@ -528,11 +528,11 @@ async function changeState(newStateObj) {
     stateObj = await handleStructureDeaths(stateObj);
   }
 
-  //if (stateObj.status !== Status.InEncounter && newStateObj.playerXP >= levelXPRequirements[stateObj.playerLevel]) {
-  if (stateObj.playerXP >= levelXPRequirements[stateObj.playerLevel]) {
-    console.log("Your monster leveled up to Level " + stateObj.playerLevel+1)
-    stateObj = await monsterLevelUp(stateObj);
-  }
+  // Card level-up on kill disabled for now
+  // if (stateObj.playerXP >= levelXPRequirements[stateObj.playerLevel]) {
+  //   console.log("Your monster leveled up to Level " + stateObj.playerLevel+1)
+  //   stateObj = await monsterLevelUp(stateObj);
+  // }
   
 
   
@@ -614,7 +614,7 @@ function spawnImpactSparks(targetEl) {
   // Clean up after animation
   setTimeout(() => {
     sparkContainer.remove();
-  }, 600);
+  }, 450);
 }
 
 async function removeDealOpponentDamageAnimation(stateObj, calculatedDamage, isAll=false) {
@@ -803,7 +803,7 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
         playerEl.classList.add("player-impact");
         spawnImpactSparks(playerEl);
       }
-    }, 600);
+    }, 450);
     await pause(800);
     document.querySelectorAll("#opponents .avatar")[monsterIndex].classList.remove("opponent-windup");
     if (fireballEl) fireballEl.classList.remove("enemy-fireball-move");
@@ -1009,6 +1009,7 @@ async function loseDevelopment(stateObj, devToLose, targetIndex=0, playerTrigger
 
   if (stateObj.damageOnDevChange > 0) {
     stateObj = await dealStructureEffectDamage(stateObj, stateObj.damageOnDevChange, targetIndex);
+    await changeState(stateObj);
   }
 
   return stateObj
@@ -1053,6 +1054,7 @@ async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTrigger
 
   if (stateObj.damageOnDevChange > 0) {
     stateObj = await dealStructureEffectDamage(stateObj, stateObj.damageOnDevChange, targetIndex);
+    await changeState(stateObj);
   }
 
   return stateObj
@@ -1844,7 +1846,7 @@ function renderFightDiv() {
   playerStructuresDiv.setAttribute("id", "playerStructures");
   playerStructuresDiv.classList.add("structures-grid");
 
-  playerVillageDiv.append(playerStatsDiv, playerStructuresDiv);
+  playerVillageDiv.append(playerStatsDiv);
 
   // --- Enemy Village (right side) ---
   let enemyVillageDiv = document.createElement("Div");
@@ -1993,6 +1995,7 @@ function createStructure(stateObj, structureDef, side, buildCostOverride) {
     let arrayKey = (side === "player") ? "playerStructures" : "opponentStructures";
 
     if (side === "player") {
+      if (newState.playerStructures.length >= 6) return;
       // Player structures: each is a separate instance with build progress
       let newStructure = JSON.parse(JSON.stringify(structureDef));
       newStructure.onTurnEffect = structureDef.onTurnEffect;
@@ -2028,6 +2031,11 @@ async function buildStructureByIndex(stateObj, structureIndex) {
   stateObj = immer.produce(stateObj, (newState) => {
     newState.playerMonster.encounterEnergy -= 1;
     newState.playerStructures[structureIndex].buildProgress += 1;
+    // If this completes the structure, apply any immediate passive effects
+    let struct = newState.playerStructures[structureIndex];
+    if (struct.buildProgress >= struct.buildCost && struct.damageOnDevChange) {
+      newState.damageOnDevChange += struct.damageOnDevChange;
+    }
   });
   stateObj = await changeState(stateObj);
   return stateObj;
@@ -2043,7 +2051,12 @@ function buildSelectedStructure(stateObj, amount) {
 
   stateObj = immer.produce(stateObj, (newState) => {
     let struct = newState.playerStructures[selectedIndex];
+    let wasBuild = struct.buildProgress < struct.buildCost;
     struct.buildProgress = Math.min(struct.buildCost, struct.buildProgress + amount);
+    // If this completes the structure, apply any immediate passive effects
+    if (wasBuild && struct.buildProgress >= struct.buildCost && struct.damageOnDevChange) {
+      newState.damageOnDevChange += struct.damageOnDevChange;
+    }
   });
   return stateObj;
 }
@@ -2077,15 +2090,8 @@ function dealStructureDamage(stateObj, damage, side, structureIndex) {
   return stateObj;
 }
 
-// Deal damage from a structure effect (no militia, no hunted, no combat bonuses)
 async function dealStructureEffectDamage(stateObj, damage, targetIndex = 0) {
-  let targetAvatar = document.querySelectorAll("#opponents .avatar")[targetIndex];
-  if (targetAvatar) {
-    targetAvatar.classList.add("opponent-impact");
-    await pause(300);
-    targetAvatar.classList.remove("opponent-impact");
-  }
-
+  // Pure state change — animation is handled by fireStructureEffects before this runs
   stateObj = immer.produce(stateObj, (newState) => {
     let monsterObj = newState.opponentMonster[targetIndex];
     if (!monsterObj) return;
@@ -2102,9 +2108,9 @@ async function dealStructureEffectDamage(stateObj, damage, targetIndex = 0) {
 }
 
 // Fire all end-of-turn effects for one side's structures
+// Animation sequence: glow → projectile → impact → THEN state changes → re-render
 async function fireStructureEffects(stateObj, side) {
   let arrayKey = (side === "player") ? "playerStructures" : "opponentStructures";
-  let containerId = (side === "player") ? "playerStructures" : "opponentStructures";
   let structures = stateObj[arrayKey];
   let toRemove = [];
   for (let i = 0; i < structures.length; i++) {
@@ -2112,16 +2118,62 @@ async function fireStructureEffects(stateObj, side) {
     let shouldFire = (side === "player")
       ? (struct.buildProgress >= struct.buildCost && struct.onTurnEffect)
       : (struct.currentHP > 0 && struct.onTurnEffect);
-    if (shouldFire) {
-      // Activation glow
-      let structEls = document.querySelectorAll("#" + containerId + " .structure");
-      if (structEls[i]) structEls[i].classList.add("structure-activating");
-      await pause(200);
-      stateObj = await struct.onTurnEffect(stateObj, i, stateObj[arrayKey]);
-      await pause(200);
-      if (structEls[i]) structEls[i].classList.remove("structure-activating");
-      if (struct.singleUse) toRemove.push(i);
+    if (!shouldFire) continue;
+
+    // --- STEP 1: GLOW ---
+    let structSelector = (side === "player")
+      ? ".village-cube.player-cube .structure"
+      : "#opponentStructures .structure";
+    let structEls = document.querySelectorAll(structSelector);
+    let sourceEl = structEls[i];
+    if (sourceEl) sourceEl.classList.add("structure-activating");
+    await pause(300);
+
+    // --- STEP 2: PROJECTILE ANIMATION (if structure has a target) ---
+    if (struct.projectileTarget && side === "player") {
+      let fireballEl = document.getElementById("structure-fireball-" + i);
+      if (fireballEl) {
+        fireballEl.classList.add("structure-fireball-move");
+
+        // Delay impact until fireball arrives (match timing of regular fireballs)
+        let targetEls = [];
+        if (struct.projectileTarget === "opponent-all") {
+          for (let mi = 0; mi < stateObj.opponentMonster.length; mi++) {
+            let el = document.querySelectorAll("#opponents .avatar")[mi];
+            if (el) targetEls.push(el);
+          }
+        } else {
+          let targetIndex = stateObj.targetedMonster || 0;
+          let el = document.querySelectorAll("#opponents .avatar")[targetIndex];
+          if (el) targetEls.push(el);
+        }
+
+        // Impact on arrival
+        setTimeout(() => {
+          for (let t = 0; t < targetEls.length; t++) {
+            targetEls[t].classList.add("opponent-impact");
+            spawnImpactSparks(targetEls[t]);
+          }
+        }, 400);
+
+        await pause(600);
+
+        // Clean up impact
+        for (let t = 0; t < targetEls.length; t++) {
+          targetEls[t].classList.remove("opponent-impact");
+        }
+        fireballEl.classList.remove("structure-fireball-move");
+      }
     }
+
+    // --- STEP 3: APPLY STATE CHANGES (pure math, no animation) ---
+    stateObj = await struct.onTurnEffect(stateObj, i, stateObj[arrayKey]);
+
+    // --- STEP 4: RE-RENDER with new state ---
+    changeState(stateObj);
+    // DOM is rebuilt — glow class is gone naturally, no cleanup needed
+
+    if (struct.singleUse) toRemove.push(i);
   }
   // Remove single-use structures (reverse order to preserve indices)
   if (toRemove.length > 0) {
@@ -2506,7 +2558,7 @@ function PlayACardImmer(stateObj, cardIndexInHand) {
     let playedCard = stateObj.encounterHand[cardIndexInHand]
     newState.cardsPerTurn += 1;
     if (playedCard) {
-      if (playedCard.exhaust === true) {
+      if (playedCard.exhaust === true || playedCard.cardType === "structure") {
         console.log("you exhausted " + playedCard.name);
         newState.encounterHand.splice(cardIndexInHand, 1);
       } else {
@@ -3824,83 +3876,105 @@ function showChangedUpgradeCost(stateObj, index, array, cardObj, propertyNameStr
 
 
 function renderStructures(stateObj, side) {
-  let containerId = (side === "player") ? "playerStructures" : "opponentStructures";
+  if (side === "player") {
+    // ====== PLAYER STRUCTURES: icons overlaid on village ======
+    let cubeEl = document.querySelector(".village-cube.player-cube");
+    if (!cubeEl) return;
+    cubeEl.querySelectorAll(".structure-icon-slot").forEach(el => el.remove());
+
+    let structures = stateObj.playerStructures;
+    if (!structures || structures.length === 0) return;
+
+    // Clean up old structure fireball divs
+    for (let fi = 0; fi < 6; fi++) {
+      let old = document.getElementById("structure-fireball-" + fi);
+      if (old) old.remove();
+    }
+
+    structures.forEach(function(structureObj, index) {
+      if (index >= 6) return;
+      let isComplete = structureObj.buildProgress >= structureObj.buildCost;
+      let isSelected = stateObj.selectedPlayerStructure === index;
+
+      // Create structure fireball div (appended to #stats for animation)
+      if (isComplete && structureObj.projectileTarget) {
+        let fb = document.createElement("div");
+        fb.setAttribute("id", "structure-fireball-" + index);
+        fb.classList.add("structure-fireball", "structure-fireball-slot-" + index);
+        document.getElementById("stats").appendChild(fb);
+      }
+
+      let slot = document.createElement("div");
+      slot.classList.add("structure-icon-slot", "structure-slot-" + index, "structure");
+      if (isSelected) slot.classList.add("structure-icon-selected");
+
+      // Icon placeholder (will be replaced with real art later)
+      let iconImg = document.createElement("div");
+      iconImg.classList.add("structure-icon-img");
+      iconImg.classList.add(isComplete ? "structure-icon-built" : "structure-icon-building");
+      if (structureObj.avatar) {
+        iconImg.style.backgroundImage = "url('" + structureObj.avatar + "')";
+        iconImg.style.backgroundSize = "cover";
+        iconImg.style.backgroundPosition = "center";
+      }
+      slot.appendChild(iconImg);
+
+      // Under construction: mini progress bar
+      if (!isComplete) {
+        let progressOuter = document.createElement("div");
+        progressOuter.classList.add("structure-icon-progress");
+        let progressFill = document.createElement("div");
+        progressFill.classList.add("structure-icon-progress-fill");
+        progressFill.style.width = Math.min(100, (structureObj.buildProgress / structureObj.buildCost) * 100) + "%";
+        progressOuter.appendChild(progressFill);
+        slot.appendChild(progressOuter);
+
+        if (stateObj.playerMonster.encounterEnergy >= 1) {
+          slot.classList.add("structure-build-clickable");
+        }
+      }
+
+      // Click: build if incomplete + has energy, otherwise select
+      slot.addEventListener("click", function(e) {
+        e.stopPropagation();
+        if (!isComplete && stateObj.playerMonster.encounterEnergy >= 1) {
+          buildStructureByIndex(stateObj, index);
+        } else {
+          selectPlayerStructure(stateObj, index);
+        }
+      });
+
+      // Tooltip on hover
+      let tooltip = document.createElement("div");
+      tooltip.classList.add("structure-icon-tooltip");
+      if (index <= 2) tooltip.classList.add("structure-icon-tooltip-below");
+      let statusStr = isComplete ? "BUILT" : (structureObj.buildProgress + "/" + structureObj.buildCost);
+      tooltip.innerHTML = "<b>" + (structureObj.name || "") + "</b> (" + statusStr + ")<br>" + (structureObj.effectText || "");
+      slot.appendChild(tooltip);
+
+      cubeEl.appendChild(slot);
+    });
+    return;
+  }
+
+  // ====== ENEMY STRUCTURES: unchanged grid layout ======
+  let containerId = "opponentStructures";
   let container = document.getElementById(containerId);
   if (!container) return;
   container.innerHTML = "";
 
-  let structures = (side === "player") ? stateObj.playerStructures : stateObj.opponentStructures;
+  let structures = stateObj.opponentStructures;
   if (!structures || structures.length === 0) return;
 
-  // Header label only for enemy structures (player header removed)
-  if (side === "opponent") {
-    let headerDiv = document.createElement("H4");
-    headerDiv.classList.add("structures-header");
-    headerDiv.textContent = "Enemy Structures";
-    container.appendChild(headerDiv);
-  }
+  let headerDiv = document.createElement("H4");
+  headerDiv.classList.add("structures-header");
+  headerDiv.textContent = "Enemy Structures";
+  container.appendChild(headerDiv);
 
   structures.forEach(function(structureObj, index) {
     let structDiv = document.createElement("Div");
     structDiv.classList.add("structure");
 
-    if (side === "player") {
-      // ====== PLAYER STRUCTURE RENDERING ======
-      let isComplete = structureObj.buildProgress >= structureObj.buildCost;
-      let isSelected = stateObj.selectedPlayerStructure === index;
-
-      if (isSelected) {
-        structDiv.classList.add("structure-selected");
-      } else {
-        structDiv.classList.add("structure-clickable");
-        structDiv.addEventListener("click", function() {
-          selectPlayerStructure(stateObj, index);
-        });
-      }
-
-      // Effect text
-      let effectDiv = document.createElement("P");
-      effectDiv.classList.add("structure-effect");
-      effectDiv.textContent = structureObj.effectText || "";
-      structDiv.appendChild(effectDiv);
-
-      // Build progress bar
-      let progressOuter = document.createElement("Div");
-      progressOuter.classList.add("structure-progress-bar-outer");
-      let progressFill = document.createElement("Div");
-      progressFill.classList.add("structure-progress-bar-fill");
-      if (isComplete) {
-        progressFill.classList.add("structure-progress-complete");
-      }
-      let progressPercent = Math.min(100, (structureObj.buildProgress / structureObj.buildCost) * 100);
-      progressFill.style.width = progressPercent + "%";
-      progressOuter.appendChild(progressFill);
-      structDiv.appendChild(progressOuter);
-
-      // Build progress text
-      let progressText = document.createElement("span");
-      progressText.classList.add("structure-progress-text");
-      progressText.textContent = structureObj.buildProgress + "/" + structureObj.buildCost;
-      structDiv.appendChild(progressText);
-
-      // Build button (only if not complete)
-      if (!isComplete) {
-        let buildBtn = document.createElement("button");
-        buildBtn.classList.add("structure-build-btn");
-        buildBtn.textContent = "Build (1 villager)";
-        if (stateObj.playerMonster.encounterEnergy >= 1) {
-          buildBtn.classList.add("structure-build-btn-active");
-          buildBtn.addEventListener("click", function(e) {
-            e.stopPropagation();
-            buildStructureByIndex(stateObj, index);
-          });
-        } else {
-          buildBtn.classList.add("structure-build-btn-disabled");
-        }
-        structDiv.appendChild(buildBtn);
-      }
-
-    } else {
       // ====== ENEMY STRUCTURE RENDERING ======
 
       // Stack badge
@@ -3956,7 +4030,6 @@ function renderStructures(stateObj, side) {
           targetThisStructure(stateObj, side, index);
         });
       }
-    }
 
     container.appendChild(structDiv);
   });
@@ -4462,7 +4535,39 @@ async function startEncounter(stateObj) {
 }
 
 async function endTurnIncrement(stateObj) {
-  stateObj = immer.produce(stateObj, async (newState) => {
+
+  // --- STEP 1: Animate poison and treason BEFORE state changes ---
+  for (let monsterIndex = 0; monsterIndex < stateObj.opponentMonster.length; monsterIndex++) {
+    let monsterObj = stateObj.opponentMonster[monsterIndex];
+
+    // Poison animation
+    if (monsterObj.poison > 0) {
+      await applyGreenFilter([document.querySelectorAll("#opponents .monster-top-row")[monsterIndex]], 500);
+    }
+
+    // Treason animation
+    if (monsterObj.treason && monsterObj.treason > 0) {
+      let monsterAvatar = document.querySelectorAll("#opponents .avatar")[monsterIndex];
+      if (monsterAvatar) {
+        monsterAvatar.classList.add('dark-filter');
+      }
+      await pause(400);
+      let treasonBadge = document.querySelectorAll("#opponents .treason")[monsterIndex];
+      if (treasonBadge) {
+        treasonBadge.classList.add('treason-pulse');
+      }
+      await pause(600);
+      if (monsterAvatar) {
+        monsterAvatar.classList.remove('dark-filter');
+      }
+      if (treasonBadge) {
+        treasonBadge.classList.remove('treason-pulse');
+      }
+    }
+  }
+
+  // --- STEP 2: Apply all state changes (pure math, no animation) ---
+  stateObj = immer.produce(stateObj, (newState) => {
 
     newState.playerMonster.strength -= newState.playerMonster.tempStrength;
     newState.playerMonster.dex -= newState.playerMonster.tempDex;
@@ -4471,64 +4576,41 @@ async function endTurnIncrement(stateObj) {
     newState.cardsPerTurn = 0;
     newState.comboPerTurn = 0;
     newState.combatTurnNumber += 1;
-    newState.playerMonster.encounterBlock = Math.floor(newState.playerMonster.encounterBlock / 2) + newState.blockPerTurn;
-    newState.playerMonster.encounterEnergy += newState.playerMonster.turnEnergy
-    newState.opponentMonster.forEach(async (monsterObj, monsterIndex) => {
+    newState.playerMonster.encounterBlock += newState.blockPerTurn;
+    newState.playerMonster.encounterEnergy += newState.playerMonster.turnEnergy;
+    newState.opponentMonster.forEach(function(monsterObj, monsterIndex) {
       if (monsterObj.hunted > 0) {
-        monsterObj.hunted -=1;
-      };
+        monsterObj.hunted -= 1;
+      }
       if (monsterObj.inflame) {
         monsterObj.strength += monsterObj.inflame;
       }
-      //can be fixed by pushing to an array and making happen outside the immer.produce??
       if (monsterObj.poison > 0) {
-        monsterObj.currentHP -= (monsterObj.poison)
-        await applyGreenFilter([document.querySelectorAll("#opponents .monster-top-row")[monsterIndex]], 500)
+        monsterObj.currentHP -= monsterObj.poison;
       }
-
-      // Treason: deal damage equal to treason, then tick up by 1
       if (monsterObj.treason && monsterObj.treason > 0) {
         monsterObj.currentHP -= monsterObj.treason;
-        // Dark filter on the enemy avatar
-        let monsterAvatar = document.querySelectorAll("#opponents .avatar")[monsterIndex];
-        if (monsterAvatar) {
-          monsterAvatar.classList.add('dark-filter');
-        }
-        await pause(400);
         monsterObj.treason += 1;
-        // Pulse the treason badge
-        let treasonBadge = document.querySelectorAll("#opponents .treason")[monsterIndex];
-        if (treasonBadge) {
-          treasonBadge.classList.add('treason-pulse');
-        }
-        await pause(600);
-        if (monsterAvatar) {
-          monsterAvatar.classList.remove('dark-filter');
-        }
-        if (treasonBadge) {
-          treasonBadge.classList.remove('treason-pulse');
-        }
       }
+    });
 
-      if (newState.doubleEndOfTurnVillagers === true) {
-        newState.playerMonster.encounterEnergy *= 2;
-      }
-    })
+    if (newState.doubleEndOfTurnVillagers === true) {
+      newState.playerMonster.encounterEnergy *= 2;
+    }
     newState.turnDouble = false;
     // Reset structure-granted combat flags (structures will re-set them when they fire)
     newState.doubleBlock = false;
     newState.extraAttackHit = false;
     newState.doubleAttackDamage = false;
-  })
+  });
   return stateObj;
 }
 
 //if you flip the order of this around, discard works, but not playing the move
 async function endTurn(stateObj) {
 
-  // Clear block (player, enemy monsters, and structures)
+  // Clear enemy block and structure block (so player structure effects hit through)
   stateObj = immer.produce(stateObj, (newState) => {
-    newState.playerMonster.encounterBlock = 0;
     newState.opponentMonster.forEach(function (monsterObj, index) {
       monsterObj.encounterBlock = 0;
     })
@@ -4558,6 +4640,13 @@ async function endTurn(stateObj) {
   stateObj = await handleStructureDeaths(stateObj);
 
   stateObj = await pickOpponentMove(stateObj);
+
+  // Clear player block at start of new turn (after enemy has attacked)
+  if (!stateObj.blockKeep) {
+    stateObj = immer.produce(stateObj, (newState) => {
+      newState.playerMonster.encounterBlock = 0;
+    });
+  }
 
   stateObj = await changeState(stateObj);
   stateObj = await discardHand(stateObj);

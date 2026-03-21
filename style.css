@@ -159,7 +159,7 @@
 }
 
 .fireball-move {
-  animation: slide 0.7s ease-in;
+  animation: slide 0.55s ease-in;
 }
 
 .fireball-move-2 {
@@ -167,7 +167,7 @@
 }
 
 .fireball-move-3 {
-  animation: slide3 0.75s ease-in;
+  animation: slide3 0.55s ease-in;
 }
 
 /* ====== Enemy Fireballs ====== */
@@ -209,7 +209,7 @@
 }
 
 .enemy-fireball-move {
-  animation: enemySlide 0.75s ease-in;
+  animation: enemySlide 0.55s ease-in;
 }
 
 /* ====== Block Gain Pulse ====== */
@@ -242,7 +242,46 @@
 }
 
 .structure-activating {
-  animation: structureActivate 0.4s forwards;
+  animation: structureActivate 0.6s forwards;
+}
+
+/* ====== Structure Fireballs (one per slot, same pattern as player/enemy fireballs) ====== */
+.structure-fireball {
+  position: absolute;
+  width: 6vmin;
+  height: 6vmin;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgb(255, 230, 120) 20%, rgb(255, 180, 30) 70%, rgb(200, 130, 0));
+  box-shadow: 0 0 8px rgb(255, 200, 50), 0 0 16px rgb(255, 160, 20);
+  z-index: 200;
+  pointer-events: none;
+  visibility: hidden;
+}
+
+/* Starting positions: each slot maps to a position in #stats
+   Player village is left ~45% of #stats, cube is ~90% of that.
+   Slot left% of cube → approximate left% of #stats.
+   Slot top% of cube → approximate top% of #stats (cube is ~60% of band height). */
+.structure-fireball-slot-0 { left: 5%;  top: 18%; }
+.structure-fireball-slot-1 { left: 12%; top: 18%; }
+.structure-fireball-slot-2 { left: 19%; top: 18%; }
+.structure-fireball-slot-3 { left: 5%;  top: 32%; }
+.structure-fireball-slot-4 { left: 12%; top: 32%; }
+.structure-fireball-slot-5 { left: 19%; top: 32%; }
+
+.structure-fireball-move {
+  animation: structureSlide 0.55s ease-in;
+}
+
+@keyframes structureSlide {
+  0% {
+    transform: translate(0, 0);
+    visibility: visible;
+  }
+  100% {
+    transform: translate(55vw, 0);
+    visibility: visible;
+  }
 }
 
 /* ====== Stat Change Pulses ====== */
@@ -2207,7 +2246,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 .discarding-6, .discarding-7 {
   animation-duration: 0.7s;
   animation-timing-function: ease-out;
-  animation-direction: forwards;
+  animation-fill-mode: forwards;
 }
 
 .draw-div-anim-0, .draw-div-anim-1, .draw-div-anim-2, .draw-div-anim-3, 
@@ -2418,7 +2457,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 .play-discarding-5, .play-discarding-6, .play-discarding-7 {
   animation-duration: 0.35s;
   animation-timing-function: ease-out;
-  animation-direction: forwards;
+  animation-fill-mode: forwards;
   overflow: hidden;
   position: absolute;
   margin: 0;
@@ -3053,7 +3092,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   letter-spacing: 0.1em;
 }
 
-.structure {
+#opponentStructures .structure {
   background: rgba(40, 40, 50, 0.9);
   border: 2px solid rgba(150, 130, 90, 0.6);
   border-radius: 4px;
@@ -3066,7 +3105,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   min-height: 8vh;
 }
 
-.structure:hover {
+#opponentStructures .structure:hover {
   border-color: rgba(200, 180, 120, 0.8);
   transform: scale(1.02);
 }
@@ -3195,4 +3234,102 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   background: #333;
   color: #666;
   border-color: #555;
+}
+
+/* ====== Player Structure Icon Overlays ====== */
+.structure-icon-slot {
+  position: absolute;
+  width: 18%;
+  aspect-ratio: 1;
+  z-index: 10;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+.structure-icon-slot:hover { transform: scale(1.15); }
+
+/* 6 fixed positions: top row (0-2), bottom row (3-5) */
+.structure-slot-0 { left: 8%;  top: 10%; }
+.structure-slot-1 { left: 40%; top: 10%; }
+.structure-slot-2 { left: 72%; top: 10%; }
+.structure-slot-3 { left: 8%;  top: 38%; }
+.structure-slot-4 { left: 40%; top: 38%; }
+.structure-slot-5 { left: 72%; top: 38%; }
+
+.structure-icon-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: rgba(100, 80, 50, 0.8);
+  border: 2px solid rgba(150, 130, 90, 0.8);
+  box-sizing: border-box;
+}
+
+.structure-icon-building {
+  opacity: 0.5;
+  filter: grayscale(0.6);
+}
+
+.structure-icon-built {
+  opacity: 1.0;
+  box-shadow: 0 0 6px rgba(255, 200, 50, 0.4);
+}
+
+.structure-icon-selected {
+  outline: 2px solid #ffd700;
+  outline-offset: 2px;
+  border-radius: 50%;
+}
+.structure-icon-selected .structure-icon-img {
+  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+}
+
+.structure-build-clickable:hover .structure-icon-img {
+  border-color: #7a9a3a;
+  box-shadow: 0 0 6px rgba(120, 180, 60, 0.5);
+}
+
+/* Mini progress bar */
+.structure-icon-progress {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 80%;
+  height: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1.5px solid #111;
+  border-radius: 3px;
+  overflow: hidden;
+  z-index: 2;
+}
+.structure-icon-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #30c040, #50e860);
+  transition: width 0.3s ease;
+}
+
+/* Tooltip */
+.structure-icon-tooltip {
+  display: none;
+  position: absolute;
+  bottom: 110%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(20, 20, 30, 0.95);
+  border: 1px solid rgba(150, 130, 90, 0.6);
+  border-radius: 4px;
+  padding: 0.5vmin 1vmin;
+  white-space: nowrap;
+  z-index: 100;
+  font-size: 1.4vmin;
+  color: #ddc;
+  pointer-events: none;
+}
+/* Top-row tooltips go below the icon instead */
+.structure-icon-tooltip-below {
+  bottom: auto;
+  top: 110%;
+}
+.structure-icon-slot:hover .structure-icon-tooltip {
+  display: block;
 }
