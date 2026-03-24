@@ -1737,6 +1737,11 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   border: 3px double yellow;
 }
 
+.uncommon-card {
+  background: linear-gradient(45deg, rgb(160, 140, 210), rgb(130, 110, 190), rgb(150, 130, 200), rgb(110, 90, 170), rgb(160, 140, 210));
+  border: 3px double rgb(180, 160, 220);
+}
+
 
 
 

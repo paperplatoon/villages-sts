@@ -80,11 +80,38 @@ The most important principle: **cards interact with each other through shared pr
 ## Animation Philosophy
 - Every game action should have clear visual feedback: source glows/activates → visual effect travels to target → target reacts
 - Animations should be snappy (0.3–0.5s) and never slow down gameplay
-- Use the **add-class → pause → remove-class** pattern for sequenced animations, or **fire-and-forget** (add class before `immer.produce`, DOM rebuild on `changeState` removes it naturally) for synchronous functions
+
+### The Critical Rule: Animate → State → Render
+`changeState()` calls `renderScreen()` which **destroys and rebuilds the entire DOM**. Any in-flight animation elements (projectile divs, glow classes) are destroyed instantly. Therefore:
+- **All animations must COMPLETE before any `changeState` call.** The sequence is always: play animation → `await pause()` → apply state via `immer.produce` → `changeState` to render.
+- **Never put animation code inside functions that also call `changeState`.** If a function needs both animation and state changes, animate first, then change state.
+- **Never use `async` inside `immer.produce`.** Immer producers are synchronous. `await` inside a producer causes the producer to return before the await resolves, creating race conditions with DOM animations.
+
+### Projectile Animation Pattern
+The only reliable projectile pattern is **pre-created divs + CSS keyframe animations**:
+1. Pre-create fireball divs during `renderScreen` (they exist in the DOM before animation starts)
+2. Append to `#stats` (shared ancestor, escapes stacking contexts)
+3. Position with CSS percentages, start `visibility: hidden`
+4. Animate with `@keyframes` using `transform: translate()` + `visibility: visible`
+5. Trigger by adding a class, clean up by removing it
+
+**Do NOT** dynamically create divs with JS-calculated `left`/`top` positions and CSS transitions — this approach is fragile and has repeatedly failed.
+
+### Other Animation Patterns
+- Use **add-class → pause → remove-class** for sequenced animations, or **fire-and-forget** (add class before `immer.produce`, DOM rebuild on `changeState` removes it naturally) for synchronous functions
+- CSS animations that should hold their end state need `animation-fill-mode: forwards` (not `animation-direction: forwards`)
 - Enemy attack projectiles (purple) mirror player fireballs (orange) but fly right-to-left
 - Structure activation uses a golden glow so players can see which structure fired
 - Stat changes pulse the relevant display element — use `animateStatChange(selector, "up"|"down"|"neutral")`
 - `gainBlock()` and `healPlayer()` use fire-and-forget pulses; first block gain of a turn won't animate (element doesn't exist yet — the number appearing is itself feedback)
+
+### Structure Animations: Two Systems
+- **Active structures** (onTurnEffect): animated by `fireStructureEffects` which handles glow → projectile → impact centrally, then calls `onTurnEffect` for pure state changes. Structures declare `projectileTarget: "opponent"` or `"opponent-all"` to get projectiles; structures without it get glow-only.
+- **Passive/reactive structures** (state flags like `damageOnDevChange`): animated by `animatePassiveStructure(stateObj, propertyName)` called from the central function where the trigger is checked (e.g., `gainDevelopment`/`loseDevelopment`). These structures have NO `onTurnEffect` — they set flags on build completion and react through central resolution functions.
+- **Structure fireball divs**: Pre-created for ALL completed structures (not just active ones), 6 slots with CSS position classes (`.structure-fireball-slot-0` through `-5`). Both active and passive structures can use them.
+
+### Debugging Approach
+- When first fix doesn't work, **immediately add console.log** to verify execution paths and values. Don't make multiple guesses — logs reveal the actual problem faster.
 
 ## Key Files
 - `main.js` — Core game logic, rendering, combat resolution (~4000 lines)
@@ -98,7 +125,7 @@ The most important principle: **cards interact with each other through shared pr
 - Fully convert names, variables, CSS classes, and UI text from creature/monster/energy terminology to village/warfare terminology
 
 - Fix player card animations so they deal right to left
-- fix player structure animations so they're actually visible.
+- add card rarity system
 - Change encounter enemies to be more like villages and less like craetures.
 -come up with names for strength, dex,  etc
 - Route remaining ~280 direct `development` modifications in encounter files (`easyEncounters.js`, `mediumEncounters.js`, `hardEncounters.js`, `bossEncounters.js`) through `gainDevelopment()`/`loseDevelopment()`

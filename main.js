@@ -135,7 +135,9 @@ let gameStartState = {
   playerHere: 1,
   townMapSet: false,
   playerXP: 0,
-  playerLevel: 1
+  playerLevel: 1,
+  rarityWeights: { common: 80, uncommon: 15, rare: 5 },
+  rarityPity: 0
 };
 
 const eventsArray = [
@@ -297,14 +299,14 @@ function fillMapWithArray(stateObj) {
   if (stateObj.testingMode === true) {
     townMonsterEncounters = [ [easyMultiEncounters.em3, easyMultiEncounters.em4], [easySoloEncounters.e8], [easyMultiEncounters.em3, easyMultiEncounters.em4],[easySoloEncounters.e5],[easySoloEncounters.e6], [easySoloEncounters.e7],[easySoloEncounters.e8]]
   } else {
-    // First 2 fights always come from the beginner pool
+    // First 3 fights always come from the beginner pool
     let shuffledBeginners = fisherYatesShuffle([...beginnerEncounterPool]);
     townMonsterEncounters[0] = shuffledBeginners[0];
     townMonsterEncounters[1] = shuffledBeginners[1];
+    townMonsterEncounters[2] = shuffledBeginners[2];
     // Remaining fights pull from the full town pool (beginner + moderate mixed)
     let shuffledRest = fisherYatesShuffle(towns[stateObj.gymCount]);
-    townMonsterEncounters[2] = shuffledRest[0];
-    townMonsterEncounters[3] = shuffledRest[1];
+    townMonsterEncounters[3] = shuffledRest[0];
     console.log(townMonsterEncounters);
   }
 
@@ -561,6 +563,29 @@ renderScreen(state);
 // - - - - - -  - - - - -Functions used by Cards.js and Monsters.js - - - - - -  - - - - -
 //----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
 //----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- ----- -----
+// Lightweight HP display update — call at impact time so HP drops visually when projectile hits
+// Does NOT rebuild DOM or change state. The full changeState/render happens after.
+function updateHPDisplay(hpEl, newHP, maxHP, blockEl, newBlock) {
+  if (hpEl) hpEl.textContent = newHP + "/" + maxHP;
+  if (blockEl) {
+    if (newBlock > 0) {
+      blockEl.textContent = newBlock;
+    } else {
+      blockEl.style.display = "none";
+    }
+  }
+}
+
+// Pre-compute what HP/block will be after taking damage (mirrors immer logic but read-only)
+function previewDamage(currentHP, currentBlock, damage) {
+  if (currentBlock >= damage) {
+    return { hp: currentHP, block: currentBlock - damage };
+  } else {
+    let remainder = damage - currentBlock;
+    return { hp: currentHP - remainder, block: 0 };
+  }
+}
+
 async function addDealOpponentDamageAnimation(stateObj, calculatedDamage, isAll=false) {
   document.querySelector("#playerStats .avatar").classList.add("player-windup");
   let fireballString = "fireball";
@@ -574,6 +599,14 @@ async function addDealOpponentDamageAnimation(stateObj, calculatedDamage, isAll=
   }
   document.getElementById(fireballString).classList.add(classString);
 
+  // Pre-compute HP after damage for visual update at impact
+  if (isAll === false) {
+    let targetIdx = stateObj.targetedMonster || 0;
+    let mon = stateObj.opponentMonster[targetIdx];
+    var preview = previewDamage(mon.currentHP, mon.encounterBlock, calculatedDamage);
+    var previewMaxHP = mon.maxHP;
+  }
+
   // Delay impact until fireball arrives (600ms into 750ms flight)
   setTimeout(() => {
     if (isAll===false) {
@@ -582,6 +615,11 @@ async function addDealOpponentDamageAnimation(stateObj, calculatedDamage, isAll=
         targetEl.classList.add("opponent-impact");
         spawnImpactSparks(targetEl);
       }
+      // Update HP display on impact
+      let targetIdx = stateObj.targetedMonster || 0;
+      let hpEl = document.querySelectorAll("#opponents .monster-hp")[targetIdx];
+      let blockEl = document.querySelectorAll("#opponents .monster-block")[targetIdx];
+      updateHPDisplay(hpEl, preview.hp, previewMaxHP, blockEl, preview.block);
     } else {
       stateObj.opponentMonster.forEach(function (monsterObj, index) {
         let el = document.querySelectorAll("#opponents .avatar")[index];
@@ -589,6 +627,11 @@ async function addDealOpponentDamageAnimation(stateObj, calculatedDamage, isAll=
           el.classList.add("opponent-impact");
           spawnImpactSparks(el);
         }
+        // Update each enemy HP on impact
+        let result = previewDamage(monsterObj.currentHP, monsterObj.encounterBlock, calculatedDamage);
+        let hpEl = document.querySelectorAll("#opponents .monster-hp")[index];
+        let blockEl = document.querySelectorAll("#opponents .monster-block")[index];
+        updateHPDisplay(hpEl, result.hp, monsterObj.maxHP, blockEl, result.block);
       })
     }
   }, 700);
@@ -783,19 +826,27 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
   if (animation === true) {
     // Pre-compute damage for fireball size
     let monsterObj = stateObj.opponentMonster[monsterIndex];
-    let previewDamage = (damageNumber + monsterObj.strength) * attackNumber;
+    let totalDamage = (damageNumber + monsterObj.strength) * attackNumber;
 
     // Pick fireball size
     let fireballId = "enemy-fireball-" + monsterIndex;
-    if (previewDamage > 29) {
+    if (totalDamage > 29) {
       fireballId = "enemy-hugefireball-" + monsterIndex;
-    } else if (previewDamage > 19) {
+    } else if (totalDamage > 19) {
       fireballId = "enemy-mediumfireball-" + monsterIndex;
     }
 
     let fireballEl = document.getElementById(fireballId);
     document.querySelectorAll("#opponents .avatar")[monsterIndex].classList.add("opponent-windup");
     if (fireballEl) fireballEl.classList.add("enemy-fireball-move");
+    // Pre-compute player HP after this hit for visual update at impact
+    let playerPreview = previewDamage(
+      stateObj.playerMonster.currentHP,
+      stateObj.playerMonster.encounterBlock,
+      totalDamage
+    );
+    let playerMaxHP = stateObj.playerMonster.maxHP;
+
     // Delay player impact until enemy fireball arrives
     setTimeout(() => {
       let playerEl = document.querySelectorAll("#playerStats .avatar")[0];
@@ -803,6 +854,10 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
         playerEl.classList.add("player-impact");
         spawnImpactSparks(playerEl);
       }
+      // Update player HP display on impact
+      let hpEl = document.querySelector("#playerStats .village-hp");
+      let blockEl = document.querySelector("#playerStats .monster-block");
+      updateHPDisplay(hpEl, playerPreview.hp, playerMaxHP, blockEl, playerPreview.block);
     }, 450);
     await pause(800);
     document.querySelectorAll("#opponents .avatar")[monsterIndex].classList.remove("opponent-windup");
@@ -1008,6 +1063,7 @@ async function loseDevelopment(stateObj, devToLose, targetIndex=0, playerTrigger
   await changeState(stateObj);
 
   if (stateObj.damageOnDevChange > 0) {
+    await animatePassiveStructure(stateObj, "damageOnDevChange");
     stateObj = await dealStructureEffectDamage(stateObj, stateObj.damageOnDevChange, targetIndex);
     await changeState(stateObj);
   }
@@ -1053,6 +1109,7 @@ async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTrigger
   await changeState(stateObj);
 
   if (stateObj.damageOnDevChange > 0) {
+    await animatePassiveStructure(stateObj, "damageOnDevChange");
     stateObj = await dealStructureEffectDamage(stateObj, stateObj.damageOnDevChange, targetIndex);
     await changeState(stateObj);
   }
@@ -1450,7 +1507,7 @@ async function chooseThisCard(stateObj, index, sampledCardPool) {
 
 function buyThisCard(stateObj, index, cardArray) {
   stateObj = immer.produce(stateObj, (newState) => {
-    if (cardArray[index].rare === true && stateObj.gold >= 100) {
+    if (cardArray[index].rarity === "rare" && stateObj.gold >= 100) {
       newState.gold -= 100;
       newState.availableCardPoolForShop.splice(index, 1)
       newState.playerDeck.push(cardArray[index]); 
@@ -1507,7 +1564,7 @@ async function retainCard(stateObj, index) {
 async function paidRemoval(stateObj, index) {
   console.log("removed " + stateObj.playerDeck[index].name + " from deck")
   stateObj = immer.produce(stateObj, (newState) => {
-    let goldReward = (stateObj.playerDeck[index].rare === true) ? 100 : 50;
+    let goldReward = (stateObj.playerDeck[index].rarity === "rare") ? 100 : 50;
     newState.gold += goldReward;
     newState.playerDeck.splice(index, 1);
     newState.status = Status.OverworldMap
@@ -1990,33 +2047,64 @@ function renderChoiceDiv(stateObj, classesArray, imgSrcString, divTextString, tr
 // ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ====== ======
 
 // Create a structure on either side. Stacks if same name already exists.
-function createStructure(stateObj, structureDef, side, buildCostOverride) {
+// Structure properties to copy from source (card or enemy def) onto the structure instance.
+// Card-only properties (cardID, text, action, cost, minReq, etc.) are excluded.
+let structurePropertyKeys = [
+  "name", "owner", "effectText", "avatar", "projectileTarget",
+  "buildCost", "baseDamage", "baseBlock", "baseHeal", "basePoison", "baseMilitia", "baseHPGain",
+  "escalatingDamage", "damageOnDevChange", "healOnCardPlay",
+  "singleUse", "maxHP", "currentHP", "encounterBlock",
+];
+
+function createStructure(stateObj, structureDef, side) {
   stateObj = immer.produce(stateObj, (newState) => {
     let arrayKey = (side === "player") ? "playerStructures" : "opponentStructures";
 
     if (side === "player") {
       if (newState.playerStructures.length >= 6) return;
-      // Player structures: each is a separate instance with build progress
-      let newStructure = JSON.parse(JSON.stringify(structureDef));
-      newStructure.onTurnEffect = structureDef.onTurnEffect;
+      // Copy only structure-relevant properties from the source object
+      let newStructure = {};
+      structurePropertyKeys.forEach(function (key) {
+        if (structureDef[key] !== undefined) newStructure[key] = structureDef[key];
+      });
+      if (structureDef.onTurnEffect) newStructure.onTurnEffect = structureDef.onTurnEffect;
       newStructure.buildProgress = 0;
-      newStructure.buildCost = buildCostOverride || structureDef.buildCost || 1;
+      newStructure.owner = "player";
+      // Generate effectText from current values so upgrades are reflected
+      if (newStructure.baseDamage && newStructure.projectileTarget) {
+        let target = newStructure.projectileTarget === "opponent-all" ? "all enemies" : "targeted enemy";
+        newStructure.effectText = `Deals ${newStructure.baseDamage} damage to ${target} each turn`;
+        if (newStructure.singleUse) newStructure.effectText = `Deal ${newStructure.baseDamage} damage. Then removed.`;
+      }
+      if (newStructure.baseBlock) newStructure.effectText = `Grants ${newStructure.baseBlock} fortification each turn`;
+      if (newStructure.baseHeal) newStructure.effectText = `Restores ${newStructure.baseHeal} HP each turn`;
+      if (newStructure.basePoison) newStructure.effectText = `Applies ${newStructure.basePoison} poison to targeted enemy each turn`;
+      if (newStructure.baseMilitia) newStructure.effectText = `Grants ${newStructure.baseMilitia} militia each turn`;
+      if (newStructure.baseHPGain) newStructure.effectText = `Increases max HP by ${newStructure.baseHPGain} and heals ${newStructure.baseHPGain}`;
+      if (newStructure.healOnCardPlay) newStructure.effectText = `Heal ${newStructure.healOnCardPlay} HP every time you play a card`;
+      if (newStructure.damageOnDevChange) newStructure.effectText = `Whenever enemy gains or loses development, deal ${newStructure.damageOnDevChange} damage`;
+      // Sync runtime damage values from baseDamage (so upgrades flow through)
+      if (newStructure.escalatingDamage && newStructure.baseDamage) {
+        newStructure.escalatingDamage = newStructure.baseDamage;
+        newStructure.effectText = `Deals ${newStructure.baseDamage} damage to all enemies. Doubles each turn`;
+      }
+      if (newStructure.damageOnDevChange && newStructure.baseDamage) {
+        newStructure.damageOnDevChange = newStructure.baseDamage;
+        newStructure.effectText = `Whenever enemy gains or loses development, deal ${newStructure.baseDamage} damage`;
+      }
+      if (newStructure.healOnCardPlay && newStructure.baseHeal) {
+        newStructure.healOnCardPlay = newStructure.baseHeal;
+      }
       newState[arrayKey].push(newStructure);
       // Auto-select the new structure if it's the only one
       if (newState.playerStructures.length === 1) {
         newState.selectedPlayerStructure = 0;
       }
     } else {
-      // Enemy structures: stack same-name structures
-      let existing = newState[arrayKey].findIndex(s => s.name === structureDef.name);
-      if (existing >= 0) {
-        newState[arrayKey][existing].stackCount = (newState[arrayKey][existing].stackCount || 1) + 1;
-      } else {
-        let newStructure = JSON.parse(JSON.stringify(structureDef));
-        newStructure.stackCount = 1;
-        newStructure.onTurnEffect = structureDef.onTurnEffect;
-        newState[arrayKey].push(newStructure);
-      }
+      // Enemy structures: deep copy the full definition
+      let newStructure = JSON.parse(JSON.stringify(structureDef));
+      newStructure.onTurnEffect = structureDef.onTurnEffect;
+      newState[arrayKey].push(newStructure);
     }
   });
   return stateObj;
@@ -2090,6 +2178,60 @@ function dealStructureDamage(stateObj, damage, side, structureIndex) {
   return stateObj;
 }
 
+// Animate a passive structure trigger (e.g. damageOnDevChange)
+// Finds the structure by property name, glows it, fires projectile, shows impact
+async function animatePassiveStructure(stateObj, propertyName) {
+  // Find which structure has this property
+  let structIndex = stateObj.playerStructures.findIndex(s =>
+    s.buildProgress >= s.buildCost && s[propertyName]
+  );
+  console.log("[PASSIVE ANIM] Looking for structure with " + propertyName + ", found index:", structIndex);
+  if (structIndex === -1) return;
+
+  // Glow the structure icon
+  let structEls = document.querySelectorAll(".village-cube.player-cube .structure");
+  let sourceEl = structEls[structIndex];
+  if (sourceEl) sourceEl.classList.add("structure-activating");
+  await pause(300);
+
+  // Fire projectile from this structure's slot
+  let fireballEl = document.getElementById("structure-fireball-" + structIndex);
+  console.log("[PASSIVE ANIM] fireball element:", fireballEl, "sourceEl:", sourceEl);
+  if (fireballEl) {
+    fireballEl.classList.add("structure-fireball-move");
+
+    // Impact on all enemy avatars
+    let targetEls = Array.from(document.querySelectorAll("#opponents .avatar"));
+    // Pre-compute damage for HP preview (passive structures store damage as their property value)
+    let passiveDmg = stateObj.playerStructures[structIndex][propertyName] || 0;
+
+    setTimeout(() => {
+      for (let t = 0; t < targetEls.length; t++) {
+        targetEls[t].classList.add("opponent-impact");
+        spawnImpactSparks(targetEls[t]);
+      }
+      // Update enemy HP display on impact
+      if (passiveDmg > 0) {
+        for (let mi = 0; mi < stateObj.opponentMonster.length; mi++) {
+          let mon = stateObj.opponentMonster[mi];
+          let result = previewDamage(mon.currentHP, mon.encounterBlock, passiveDmg);
+          let hpEl = document.querySelectorAll("#opponents .monster-hp")[mi];
+          let blockEl = document.querySelectorAll("#opponents .monster-block")[mi];
+          updateHPDisplay(hpEl, result.hp, mon.maxHP, blockEl, result.block);
+        }
+      }
+    }, 400);
+
+    await pause(600);
+
+    for (let t = 0; t < targetEls.length; t++) {
+      targetEls[t].classList.remove("opponent-impact");
+    }
+    fireballEl.classList.remove("structure-fireball-move");
+  }
+  // Glow cleanup happens when changeState rebuilds the DOM after this returns
+}
+
 async function dealStructureEffectDamage(stateObj, damage, targetIndex = 0) {
   // Pure state change — animation is handled by fireStructureEffects before this runs
   stateObj = immer.produce(stateObj, (newState) => {
@@ -2129,23 +2271,28 @@ async function fireStructureEffects(stateObj, side) {
     if (sourceEl) sourceEl.classList.add("structure-activating");
     await pause(300);
 
-    // --- STEP 2: PROJECTILE ANIMATION (if structure has a target) ---
-    if (struct.projectileTarget && side === "player") {
+    // --- STEP 2: PROJECTILE ANIMATION (player structures that deal damage) ---
+    if (side === "player") {
       let fireballEl = document.getElementById("structure-fireball-" + i);
+      console.log("[STRUCT ANIM] structure " + i + " (" + struct.name + ") projectileTarget:", struct.projectileTarget, "fireballEl:", fireballEl);
       if (fireballEl) {
         fireballEl.classList.add("structure-fireball-move");
+        console.log("[STRUCT ANIM] Added structure-fireball-move class to fireball-" + i, "classes now:", fireballEl.className);
 
-        // Delay impact until fireball arrives (match timing of regular fireballs)
+        // Collect impact targets — all enemy avatars for AOE, targeted for single
         let targetEls = [];
-        if (struct.projectileTarget === "opponent-all") {
-          for (let mi = 0; mi < stateObj.opponentMonster.length; mi++) {
-            let el = document.querySelectorAll("#opponents .avatar")[mi];
-            if (el) targetEls.push(el);
-          }
-        } else {
-          let targetIndex = stateObj.targetedMonster || 0;
-          let el = document.querySelectorAll("#opponents .avatar")[targetIndex];
-          if (el) targetEls.push(el);
+        let allOpponentAvatars = document.querySelectorAll("#opponents .avatar");
+        console.log("[STRUCT ANIM] Found " + allOpponentAvatars.length + " opponent avatars");
+        for (let mi = 0; mi < allOpponentAvatars.length; mi++) {
+          targetEls.push(allOpponentAvatars[mi]);
+        }
+
+        // Pre-compute HP preview for visual update at impact
+        let structDmg = struct.baseDamage || struct.escalatingDamage || 0;
+        // Structures using dealOpponentDamage get militia bonus; direct damage ones don't
+        if (struct.projectileTarget === "opponent" && structDmg > 0) {
+          structDmg += stateObj.playerMonster.strength;
+          if (stateObj.doubleAttackDamage) structDmg *= 2;
         }
 
         // Impact on arrival
@@ -2153,6 +2300,25 @@ async function fireStructureEffects(stateObj, side) {
           for (let t = 0; t < targetEls.length; t++) {
             targetEls[t].classList.add("opponent-impact");
             spawnImpactSparks(targetEls[t]);
+          }
+          // Update enemy HP display on impact
+          if (structDmg > 0) {
+            if (struct.projectileTarget === "opponent-all") {
+              for (let mi = 0; mi < stateObj.opponentMonster.length; mi++) {
+                let mon = stateObj.opponentMonster[mi];
+                let result = previewDamage(mon.currentHP, mon.encounterBlock, structDmg);
+                let hpEl = document.querySelectorAll("#opponents .monster-hp")[mi];
+                let blockEl = document.querySelectorAll("#opponents .monster-block")[mi];
+                updateHPDisplay(hpEl, result.hp, mon.maxHP, blockEl, result.block);
+              }
+            } else {
+              let targetIdx = stateObj.targetedMonster || 0;
+              let mon = stateObj.opponentMonster[targetIdx];
+              let result = previewDamage(mon.currentHP, mon.encounterBlock, structDmg);
+              let hpEl = document.querySelectorAll("#opponents .monster-hp")[targetIdx];
+              let blockEl = document.querySelectorAll("#opponents .monster-block")[targetIdx];
+              updateHPDisplay(hpEl, result.hp, mon.maxHP, blockEl, result.block);
+            }
           }
         }, 400);
 
@@ -2163,6 +2329,9 @@ async function fireStructureEffects(stateObj, side) {
           targetEls[t].classList.remove("opponent-impact");
         }
         fireballEl.classList.remove("structure-fireball-move");
+      } else {
+        console.log("[STRUCT ANIM] NO fireball element found for structure " + i + ". All structure-fireball IDs in DOM:",
+          Array.from(document.querySelectorAll(".structure-fireball")).map(el => el.id));
       }
     }
 
@@ -2252,7 +2421,7 @@ function resetAfterFight(stateObj) {
     newState.devGiftBlock = 0;
     newState.devGiftAttack = 0;
     newState.blockPerTurn = 0;
-    newState.blockKeep = true;
+    newState.blockKeep = false;
     newState.cantSelfDamage = false;
     newState.backstepDamage = false;
     newState.gainStrengthDevChange = 0;
@@ -2284,7 +2453,7 @@ function resetAfterFight(stateObj) {
       newState.healCost =  healStartCost;
       console.log("You head out to face Gym # " + newState.gymCount);
       newState.townEventChosen = false;
-      newState.availableCardPoolForShop = fisherYatesShuffle(Object.values(stateObj.playerMonster.cardPool));
+      newState.availableCardPoolForShop = false;
 
       newState.townMapSet = false;
       newState.fightingBoss = false;
@@ -2371,7 +2540,7 @@ function setUpEncounter(stateObj, isBoss=false) {
     newState.fightDevDrainTotal = 0;
     newState.gainLifePerCard = 0;
     newState.blockPerTurn = 0;
-    newState.blockKeep = true;
+    newState.blockKeep = false;
     newState.cantSelfDamage = false;
     newState.backstepDamage = false;
     newState.gainStrengthDevChange = 0;
@@ -2380,6 +2549,16 @@ function setUpEncounter(stateObj, isBoss=false) {
     newState.combatTurnNumber = 1;
     newState.playerStructures = [];
     newState.opponentStructures = [];
+    // Spawn starting structures for enemies that have them
+    newState.opponentMonster.forEach(function (monster) {
+      if (monster.startingStructures) {
+        monster.startingStructures.forEach(function (structDef) {
+          let newStructure = JSON.parse(JSON.stringify(structDef));
+          newStructure.onTurnEffect = structDef.onTurnEffect;
+          newState.opponentStructures.push(newStructure);
+        });
+      }
+    });
     newState.targetedStructure = null;
     newState.selectedPlayerStructure = 0;
     newState.diplomacy = 0;
@@ -2864,9 +3043,67 @@ function renderDoubleUpgradeCard(stateObj) {
   renderCardPile(stateObj, stateObj.playerDeck, "deckDiv")
   };
 
+function rollCardRewards(stateObj, count = 3) {
+  let cardPool = Object.values(stateObj.playerMonster.cardPool);
+  let rewardPool = cardPool.filter(card => card.rarity !== "starter");
+
+  let pools = {
+    common: rewardPool.filter(c => !c.rarity || c.rarity === "common"),
+    uncommon: rewardPool.filter(c => c.rarity === "uncommon"),
+    rare: rewardPool.filter(c => c.rarity === "rare"),
+  };
+
+  let rareChance = stateObj.rarityWeights.rare + stateObj.rarityPity;
+  let commonChance = stateObj.rarityWeights.common - stateObj.rarityPity;
+  let uncommonChance = stateObj.rarityWeights.uncommon;
+
+  let picked = [];
+  let sawRare = false;
+
+  for (let i = 0; i < count; i++) {
+    let roll = Math.random() * 100;
+    let rarity;
+    if (roll < rareChance) {
+      rarity = "rare";
+    } else if (roll < rareChance + uncommonChance) {
+      rarity = "uncommon";
+    } else {
+      rarity = "common";
+    }
+
+    if (rarity === "rare") sawRare = true;
+
+    let available = pools[rarity].filter(c => !picked.includes(c));
+
+    if (available.length === 0) {
+      let fallbackOrder = rarity === "rare" ? ["uncommon", "common"] :
+                          rarity === "common" ? ["uncommon", "rare"] :
+                          ["common", "rare"];
+      for (let fb of fallbackOrder) {
+        available = pools[fb].filter(c => !picked.includes(c));
+        if (available.length > 0) break;
+      }
+    }
+
+    if (available.length > 0) {
+      let idx = Math.floor(Math.random() * available.length);
+      picked.push(available[idx]);
+    }
+  }
+
+  return { cards: picked, sawRare: sawRare };
+}
+
 function renderChooseEncounterCardReward(stateObj) {
-  let shuffledCardPool = fisherYatesShuffle(Object.values(stateObj.playerMonster.cardPool));
-  let sampledCardPool = shuffledCardPool.slice(0, 3);
+  let result = rollCardRewards(stateObj);
+  let sampledCardPool = result.cards;
+
+  // Update pity on global state (can't call changeState from a render function)
+  if (result.sawRare) {
+    state.rarityPity = 0;
+  } else {
+    state.rarityPity += 5;
+  }
 
   document.getElementById("app").innerHTML = ""
   topRowDiv(stateObj, "app");
@@ -2886,7 +3123,7 @@ function renderChooseEncounterCardReward(stateObj) {
 // ----------------------------------------------------------------------------------------------------------------
 function renderChooseRareEvent(stateObj) {
   let cardPool = Object.values(stateObj.playerMonster.cardPool);
-  let rareCards = cardPool.filter(card => card.rare);
+  let rareCards = cardPool.filter(card => card.rarity === "rare");
   let shuffledCardPool = fisherYatesShuffle(rareCards);
   let sampledCardPool = shuffledCardPool.slice(0, 3);
 
@@ -3448,13 +3685,14 @@ function fullHeal(stateObj) {
 // ----------------------------------------------------------------------------------------------------------------
 function renderShop(stateObj) {
   if (stateObj.availableCardPoolForShop === false) {
+    let result = rollCardRewards(stateObj, 3);
     stateObj = immer.produce(stateObj, (newState) => {
       console.log("setting cards for shop")
-      newState.availableCardPoolForShop = fisherYatesShuffle(Object.values(stateObj.playerMonster.cardPool));
-    }) 
+      newState.availableCardPoolForShop = result.cards;
+    })
   }
-  
-  let sampledCardPool = stateObj.availableCardPoolForShop.slice(0, 3);
+
+  let sampledCardPool = stateObj.availableCardPoolForShop;
   if (stateObj.testingMode === true) {
     sampledCardPool = [cards.wellspring, cards.puffofsmoke, cards.retreatingslash] 
   }
@@ -3623,7 +3861,7 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
             cardDiv.append(costText);
           }
         } else if (goldCost === "paidremoval") {
-          let removalpayment = (cardObj.rare === true) ? 100 : 50;
+          let removalpayment = (cardObj.rarity === "rare") ? 100 : 50;
           let costText = document.createElement("P");
           costText.textContent = "(Get paid " + removalpayment + " gold to remove)";
           costText.classList.add("paid-invisible-cost")
@@ -3716,9 +3954,9 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
             cardDiv.append(topCardRowDiv, altUpgradeText, cardText);
         } else if (goldCost === "cardshop") {
           let costText = document.createElement("P");
-          if (cardObj.rare && stateObj.gold >= 100) {
+          if (cardObj.rarity === "rare" && stateObj.gold >= 100) {
             costText.textContent = "(100 gold to buy)";
-          } else if (cardObj.rare && stateObj.gold < 100) {
+          } else if (cardObj.rarity === "rare" && stateObj.gold < 100) {
             costText.textContent = "Not enough gold (100)";
             cardDiv.classList.remove("playable");
             costText.classList.add("non-buyable-card")
@@ -3804,8 +4042,11 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
           cardDiv.classList.add("ability-card");
         }
 
-        if (cardObj.rare) {
+        if (cardObj.rarity === "rare") {
           cardDiv.classList.add("rare-card")
+        }
+        if (cardObj.rarity === "uncommon") {
+          cardDiv.classList.add("uncommon-card")
         }
         if (cardObj.trigger && cardObj.trigger(stateObj, index, cardArray)) {
           cardDiv.classList.add("trigger-condition-met")
@@ -3896,12 +4137,14 @@ function renderStructures(stateObj, side) {
       let isComplete = structureObj.buildProgress >= structureObj.buildCost;
       let isSelected = stateObj.selectedPlayerStructure === index;
 
-      // Create structure fireball div (appended to #stats for animation)
-      if (isComplete && structureObj.projectileTarget) {
+      // Create structure fireball div for ALL completed structures
+      // (appended to #stats for animation — same pattern as player/enemy fireballs)
+      if (isComplete) {
         let fb = document.createElement("div");
         fb.setAttribute("id", "structure-fireball-" + index);
         fb.classList.add("structure-fireball", "structure-fireball-slot-" + index);
         document.getElementById("stats").appendChild(fb);
+        console.log("[STRUCT RENDER] Created fireball div: structure-fireball-" + index + " for " + structureObj.name);
       }
 
       let slot = document.createElement("div");
@@ -3976,14 +4219,6 @@ function renderStructures(stateObj, side) {
     structDiv.classList.add("structure");
 
       // ====== ENEMY STRUCTURE RENDERING ======
-
-      // Stack badge
-      if (structureObj.stackCount > 1) {
-        let stackBadge = document.createElement("span");
-        stackBadge.classList.add("structure-stack-badge");
-        stackBadge.textContent = "x" + structureObj.stackCount;
-        structDiv.appendChild(stackBadge);
-      }
 
       // Name
       let nameDiv = document.createElement("H4");

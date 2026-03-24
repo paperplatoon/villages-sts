@@ -1,6 +1,7 @@
 let basicCardsNew = {
 
 swordSlash: {
+    rarity: "starter",
     cardID: 24,
     name: "Raiding Party",
     text: (state, index, array) => { 
@@ -42,6 +43,7 @@ swordSlash: {
   },
 
   overheadSwing: {
+    rarity: "starter",
     cardID: 24,
     name: "Cavalry Charge",
     text: (state, index, array) => { 
@@ -83,6 +85,7 @@ swordSlash: {
   },
 
   bowShot: {
+    rarity: "starter",
     cardID: 24,
     name: "Archer Volley",
     text: (state, index, array) => { 
@@ -124,6 +127,7 @@ swordSlash: {
   },
 
   shieldBlock: {
+    rarity: "starter",
     cardID: 6,
     name: "Raise Walls",
     text: (state, index, array) => { 

@@ -33,6 +33,7 @@ let testCardPool = {
   testStrike: {
     cardID: 300,
     name: "Raid",
+    rarity: "starter",
     baseDamage: 5,
     baseHits: 1,
     text: (state, index, array) => {
@@ -60,6 +61,7 @@ let testCardPool = {
   testBlock: {
     cardID: 301,
     name: "Fortify",
+    rarity: "starter",
     baseBlock: 5,
     text: (state, index, array) => {
       return `Gain ${array[index].baseBlock + state.playerMonster.dex} fortification`
@@ -85,9 +87,15 @@ let testCardPool = {
   testTower: {
     cardID: 302,
     name: "Guard Tower",
-    buildCost: 2,
+    rarity: "common",
+    buildCost: 1,
+    baseDamage: 3,
+    projectileTarget: "opponent",
+    effectText: "Deals 3 damage to targeted enemy each turn",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: structureDefinitions.testTower.onTurnEffect,
     text: (state, index, array) => {
-      return `Deals 4 damage to targeted enemy each turn. (Build cost: ${array[index].buildCost})`
+      return `Deals ${array[index].baseDamage} damage each turn. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -97,7 +105,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.testTower, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -105,9 +113,14 @@ let testCardPool = {
   testWall: {
     cardID: 303,
     name: "Great Wall",
-    buildCost: 3,
+    rarity: "uncommon",
+    buildCost: 2,
+    baseBlock: 6,
+    effectText: "Grants 6 fortification each turn",
+    avatar: "img/structures/barricade.png",
+    onTurnEffect: structureDefinitions.testWall.onTurnEffect,
     text: (state, index, array) => {
-      return `Grants 6 fortification each turn. (Build cost: ${array[index].buildCost})`
+      return `Grants ${array[index].baseBlock} fortification each turn. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -117,7 +130,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.testWall, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -128,8 +141,14 @@ let testCardPool = {
     cardID: 311,
     name: "Escalating Cannon",
     buildCost: 2,
+    baseDamage: 2,
+    escalatingDamage: 2,
+    projectileTarget: "opponent-all",
+    effectText: "Deals 2 damage to all enemies. Doubles each turn",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: structureDefinitions.escalatingCannon.onTurnEffect,
     text: (state, index, array) => {
-      return `Deals 2 damage to all enemies each turn, doubling each turn. (Build cost: ${array[index].buildCost})`
+      return `Deals ${array[index].baseDamage} damage to all enemies each turn, doubling each turn. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -139,7 +158,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.escalatingCannon, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -150,6 +169,9 @@ let testCardPool = {
     cardID: 312,
     name: "Fortress Wall",
     buildCost: 3,
+    effectText: "Doubles your fortification at end of turn",
+    avatar: "img/structures/barricade.png",
+    onTurnEffect: structureDefinitions.fortressWall.onTurnEffect,
     text: (state, index, array) => {
       return `Doubles your fortification at end of turn. (Build cost: ${array[index].buildCost})`
     },
@@ -161,7 +183,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.fortressWall, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -172,6 +194,9 @@ let testCardPool = {
     cardID: 313,
     name: "War Drums",
     buildCost: 3,
+    effectText: "Your attacks hit an extra time",
+    avatar: "img/structures/traininggrounds.png",
+    onTurnEffect: structureDefinitions.warDrums.onTurnEffect,
     text: (state, index, array) => {
       return `Your attacks hit an extra time. (Build cost: ${array[index].buildCost})`
     },
@@ -183,7 +208,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.warDrums, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -194,6 +219,9 @@ let testCardPool = {
     cardID: 314,
     name: "Siege Workshop",
     buildCost: 4,
+    effectText: "Your attacks deal double damage",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: structureDefinitions.siegeWorkshop.onTurnEffect,
     text: (state, index, array) => {
       return `Your attacks deal double damage. (Build cost: ${array[index].buildCost})`
     },
@@ -205,7 +233,7 @@ let testCardPool = {
     elementType: "fire",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.siegeWorkshop, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -415,8 +443,12 @@ let testCardPool = {
     cardID: 315,
     name: "Healer's Hut",
     buildCost: 1,
+    baseHeal: 1,
+    healOnCardPlay: 1,
+    effectText: "Heal 1 HP every time you play a card",
+    avatar: "img/structures/healingwell.png",
     text: (state, index, array) => {
-      return `Heal 1 HP every time you play a card. (Build cost: ${array[index].buildCost})`
+      return `Heal ${array[index].baseHeal} HP every time you play a card. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -426,7 +458,7 @@ let testCardPool = {
     elementType: "water",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.healersHut, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -437,12 +469,17 @@ let testCardPool = {
     cardID: 316,
     name: "Catapult",
     buildCost: 2,
+    baseDamage: 4,
+    projectileTarget: "opponent",
+    effectText: "Deals 4 damage to targeted enemy each turn",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: structureDefinitions.catapult.onTurnEffect,
     text: (state, index, array) => {
       let existing = state.playerStructures.find(s => s.name === "Catapult" && s.buildProgress >= s.buildCost);
-      let dmg = existing ? existing.baseDamage : 4;
+      let dmg = existing ? existing.baseDamage : array[index].baseDamage;
       return existing
         ? `Upgrade Catapult to ${dmg + 1} damage per turn`
-        : `Deal 4 damage to targeted enemy each turn. (Build cost: ${array[index].buildCost})`
+        : `Deal ${array[index].baseDamage} damage to targeted enemy each turn. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -459,7 +496,7 @@ let testCardPool = {
           newState.playerStructures[existingIndex].effectText = `Deals ${newState.playerStructures[existingIndex].baseDamage} damage to targeted enemy each turn`;
         });
       } else {
-        stateObj = createStructure(stateObj, structureDefinitions.catapult, "player", array[index].buildCost);
+        stateObj = createStructure(stateObj, array[index], "player");
       }
       return stateObj;
     }
@@ -470,10 +507,13 @@ let testCardPool = {
   testSeismicSpire: {
     cardID: 318,
     name: "Seismic Spire",
-    buildCost: 1,
-    baseDamageOnDevChange: 4,
+    buildCost: 2,
+    baseDamage: 5,
+    damageOnDevChange: 5,
+    effectText: "Whenever enemy gains or loses development, deal 5 damage",
+    avatar: "img/structures/watchtower.png",
     text: (state, index, array) => {
-      return `Whenever enemy gains or loses development, deal ${array[index].baseDamageOnDevChange} damage. (Build cost: ${array[index].buildCost})`
+      return `Whenever enemy gains or loses development, deal ${array[index].baseDamage} damage. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -483,7 +523,7 @@ let testCardPool = {
     elementType: "earth",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.seismicSpire, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -494,8 +534,12 @@ let testCardPool = {
     cardID: 317,
     name: "More Housing",
     buildCost: 3,
+    baseHPGain: 5,
+    effectText: "Increases max HP by 5 and heals 5",
+    avatar: "img/structures/healingwell.png",
+    onTurnEffect: structureDefinitions.moreHousing.onTurnEffect,
     text: (state, index, array) => {
-      return `Gain 5 max HP and heal 5. (Build cost: ${array[index].buildCost})`
+      return `Gain ${array[index].baseHPGain} max HP and heal ${array[index].baseHPGain}. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
@@ -505,7 +549,7 @@ let testCardPool = {
     elementType: "earth",
     action: async (stateObj, index, array) => {
       await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, structureDefinitions.moreHousing, "player", array[index].buildCost);
+      stateObj = createStructure(stateObj, array[index], "player");
       return stateObj;
     }
   },
@@ -600,19 +644,15 @@ let testPlayerMonster = {
   turnCards: 6,
   avatar: "img/watertongue.png",
   startingDeck: [
-    // testCardPool.testStrike,
-    // testCardPool.testStrike,
-    // testCardPool.testStrike,
-    // testCardPool.testBlock,
-    // testCardPool.testBlock,
-    // testCardPool.testBlock,
+    testCardPool.testStrike,
+    testCardPool.testStrike,
+    testCardPool.testStrike,
+    testCardPool.testStrike,
+    testCardPool.testBlock,
+    testCardPool.testBlock,
+    testCardPool.testBlock,
     testCardPool.testSabotage,
     testCardPool.testPact,
-    testCardPool.testSabotage,
-    testCardPool.testPact,
     testCardPool.testSeismicSpire,
-    testCardPool.testSeismicSpire,
-    testCardPool.testSeismicSpire,
-    
   ]
 }

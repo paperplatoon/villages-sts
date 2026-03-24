@@ -387,7 +387,7 @@ let cards = {
       },
 
       thiefshield: {
-        rare: true,
+        rarity: "rare",
         cardID: 39,
         name: "Thief's Shield",
         text: (state, index, array) => { return `Enemy loses ${array[index].energyDrain + Math.floor(array[index].upgrades/2)} development. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification for each development drained.` },
@@ -937,7 +937,7 @@ let cards = {
           return (array[index].playCount >= 2);
         },
         name: "Ascension",
-        rare: true,
+        rarity: "rare",
         text: (stateObj, index, array) => {
           let cardBlock = array[index].baseBlock + stateObj.playerMonster.dex + array[index].upgrades;
           let cardDamage = array[index].baseDamage + stateObj.playerMonster.strength + (array[index].upgrades*10);
@@ -1231,7 +1231,7 @@ let cards = {
       },
 
       reformingshield: {
-        rare: true,
+        rarity: "rare",
         exhaust: true,
         cardID: 72,
         name: "Reforming Shield",
@@ -1299,7 +1299,7 @@ let cards = {
   
       unwaveringdefense: {
         cardID: 73,
-        rare: true,
+        rarity: "rare",
         name: "Unwavering Defense",
         text: (state, index, array) => { 
           return `Gain ${array[index].baseBlock + state.playerMonster.dex + (10*array[index].upgrades)} fortification. Your fortification does not disappear at end of turn.` 
@@ -1327,7 +1327,7 @@ let cards = {
 
       whirlwind: {
         cardID: 73,
-        rare: true,
+        rarity: "rare",
         exhaust: true,
         name: "Shield Spikes",
         text: (state, index, array) => { 
@@ -1357,7 +1357,7 @@ let cards = {
 
       expand: {
         cardID: 73,
-        rare: true,
+        rarity: "rare",
         exhaust: true,
         name: "Expand",
         text: (state, index, array) => { 
@@ -1465,7 +1465,7 @@ let cards = {
         }
       },
       rareFireEnergy: {
-        rare: true,
+        rarity: "rare",
         cardID: 3,
         name: "",
         text: (state, index, array) => {
@@ -1494,7 +1494,7 @@ let cards = {
       },
   
       accelerate: {
-        rare: true,
+        rarity: "rare",
         cardID: 4,
         name: "Accelerate",
         minReq: -99,
@@ -1545,7 +1545,7 @@ let cards = {
   
       //not in use
       energyconversion: {
-        rare: true,
+        rarity: "rare",
         cardID: 52,
         name: "Conversion",
         text: (state, index, array) => {
@@ -1590,7 +1590,7 @@ let cards = {
   
       //REMOVABLE ABILITIES - 1
       feast: {
-        rare: true,
+        rarity: "rare",
         exhaust: true,
         cardID: 54,
         name: "Feast",
@@ -1863,7 +1863,7 @@ let cards = {
       },
   
       clarity: {
-        rare: true,
+        rarity: "rare",
         cardID: 34,
         name: "Clarity",
         text: (state, index, array) => {
@@ -2006,7 +2006,7 @@ let cards = {
     },
   
       bloatedbomb: {
-        rare: true,
+        rarity: "rare",
         cardID: 35,
         name: "Bloated Bomb",
         text: (state, index, array) => { 
@@ -2205,7 +2205,7 @@ let cards = {
 
       // eighthdimension: {
       //   exhaust: true,
-      //   rare: true,
+      //   rarity: "rare",
       //   cardID: 57,
       //   retain: true,
       //   name: "Eigthth Dimension",
@@ -2247,7 +2247,7 @@ let cards = {
       // },
   
       buildingflame: {
-          rare: true,
+          rarity: "rare",
           cardID: 57,
           name: "Building Flame",
           text: (stateObj, index, array) => {
@@ -2596,7 +2596,7 @@ let cards = {
   
 
       // religiousfervor: {
-      //   rare: true,
+      //   rarity: "rare",
       //   exhaust: true,
       //   cardID: 62,
       //   name: "Divine Favor",
@@ -2634,7 +2634,7 @@ let cards = {
       // },
   
       forgeshield: {
-        rare: true,
+        rarity: "rare",
         cardID: 46,
         name: "Forged Shield",
         text: (state, index, array) => {
@@ -2681,7 +2681,7 @@ let cards = {
   
       //upgrades - 3
       hammerandtongs: {
-        rare: true,
+        rarity: "rare",
         exhaust: true,
         cardID: 56,
         name: "Hammer & Tongs",
@@ -2754,7 +2754,7 @@ let cards = {
       },
 
       makeshiftforge: {
-        rare: true,
+        rarity: "rare",
         exhaust: true,
         cardID: 56,
         name: "Makeshift Forge",
@@ -2819,7 +2819,7 @@ let cards = {
       },
   
       expertsforge: {
-        rare: true,
+        rarity: "rare",
         cardID: 53,
         name: "Expert's Forge",
         text: (state, index, array) => {
@@ -2972,7 +2972,7 @@ let cards = {
       },
   
       sunlight: {
-        rare: true,
+        rarity: "rare",
         cardID: 43,
         name: "Sunlight",
         text: (state, index, array) => { return `Restore ${array[index].upgrades + 1} health per card played for rest of combat. Remove` },
@@ -3044,7 +3044,7 @@ let cards = {
         },
         upgrades: 0,
         baseCost: 0,
-        rare: true,
+        rarity: "rare",
         cost:  (state, index, array) => {
           return array[index].baseCost;
         },
@@ -3175,7 +3175,7 @@ let cards = {
       },
   
       gainstrength: {
-        rare: true,
+        rarity: "rare",
         cardID: "strength4",
         name: "Bulk Up",
         text: (state, index, array) => {
@@ -3207,7 +3207,7 @@ let cards = {
       },
 
       gainstrengthtemp: {
-        rare: true,
+        rarity: "rare",
         cardID: "strength4",
         name: "Leg Day",
         text: (state, index, array) => {
@@ -3242,7 +3242,7 @@ let cards = {
       },
 
       gaindextemp: {
-        rare: true,
+        rarity: "rare",
         cardID: "strength4",
         name: "Footwork",
         text: (state, index, array) => {
@@ -3308,7 +3308,7 @@ let cards = {
       },
 
       chargedblast: {
-        rare: true,
+        rarity: "rare",
         cardID: 70,
         retain: true,
         name: "Stoke Up",
@@ -3723,7 +3723,7 @@ let cards = {
       },
 
       testingtoxin: {
-        rare: true,
+        rarity: "rare",
         cardID: 007,
         name: "Testing Toxin",
         text: (state, index, array) => { return `Apply ${array[index].basePoison + (array[index].upgrades*3)} poison`},
@@ -3766,7 +3766,7 @@ let cards = {
 
 let specialCardPool = {
     fataltoxin: {
-      rare: true,
+      rarity: "rare",
       cardID: 001,
       name: "Fatal Toxin",
       text: (state, index, array) => { return `Apply ${array[index].basePoison + (array[index].upgrades*2)} poison to the enemy.`},
@@ -3788,7 +3788,7 @@ let specialCardPool = {
     },
   
     pickoff: {
-      rare: true,
+      rarity: "rare",
       cardID: 002,
       name: "Pick Off",
       text: (state, index, array) => { return `If there is more than 1 opponent, kill targeted monster`},
@@ -3903,22 +3903,24 @@ let specialCardPool = {
     buildwatchtower: {
       cardID: 200,
       name: "Build Watchtower",
+      buildCost: 2,
+      baseDamage: 4,
+      projectileTarget: "opponent",
+      effectText: "Deals 4 damage to targeted enemy each turn",
+      avatar: "img/structures/watchtower.png",
+      onTurnEffect: structureDefinitions.watchtower.onTurnEffect,
       text: (state, index, array) => {
-        return `Deals 4 damage to front enemy each turn. (Build cost: ${structureDefinitions.watchtower.buildCost})`
+        return `Deals ${array[index].baseDamage} damage to front enemy each turn. (Build cost: ${array[index].buildCost})`
       },
-      minReq: (state, index, array) => {
-        return 0;
-      },
+      minReq: (state, index, array) => { return 0; },
       upgrades: 0,
       baseCost: 0,
-      cost: (state, index, array) => {
-        return 0;
-      },
+      cost: (state, index, array) => { return 0; },
       cardType: "structure",
       elementType: "fire",
       action: async (stateObj, index, array) => {
         await cardAnimationDiscard(index);
-        stateObj = createStructure(stateObj, structureDefinitions.watchtower, "player");
+        stateObj = createStructure(stateObj, array[index], "player");
         return stateObj;
       }
     },
@@ -3926,22 +3928,23 @@ let specialCardPool = {
     buildbarricade: {
       cardID: 201,
       name: "Build Barricade",
+      buildCost: 3,
+      baseBlock: 5,
+      effectText: "Grants 5 fortification each turn",
+      avatar: "img/structures/barricade.png",
+      onTurnEffect: structureDefinitions.barricade.onTurnEffect,
       text: (state, index, array) => {
-        return `Grants 5 fortification each turn. (Build cost: ${structureDefinitions.barricade.buildCost})`
+        return `Grants ${array[index].baseBlock} fortification each turn. (Build cost: ${array[index].buildCost})`
       },
-      minReq: (state, index, array) => {
-        return 0;
-      },
+      minReq: (state, index, array) => { return 0; },
       upgrades: 0,
       baseCost: 0,
-      cost: (state, index, array) => {
-        return 0;
-      },
+      cost: (state, index, array) => { return 0; },
       cardType: "structure",
       elementType: "fire",
       action: async (stateObj, index, array) => {
         await cardAnimationDiscard(index);
-        stateObj = createStructure(stateObj, structureDefinitions.barricade, "player");
+        stateObj = createStructure(stateObj, array[index], "player");
         return stateObj;
       }
     },
@@ -3949,22 +3952,23 @@ let specialCardPool = {
     buildtraininggrounds: {
       cardID: 202,
       name: "Build Training Grounds",
+      buildCost: 4,
+      baseMilitia: 1,
+      effectText: "Grants 1 militia each turn",
+      avatar: "img/structures/traininggrounds.png",
+      onTurnEffect: structureDefinitions.trainingGrounds.onTurnEffect,
       text: (state, index, array) => {
-        return `Grants 1 militia each turn. (Build cost: ${structureDefinitions.trainingGrounds.buildCost})`
+        return `Grants ${array[index].baseMilitia} militia each turn. (Build cost: ${array[index].buildCost})`
       },
-      minReq: (state, index, array) => {
-        return 0;
-      },
+      minReq: (state, index, array) => { return 0; },
       upgrades: 0,
       baseCost: 0,
-      cost: (state, index, array) => {
-        return 0;
-      },
+      cost: (state, index, array) => { return 0; },
       cardType: "structure",
       elementType: "fire",
       action: async (stateObj, index, array) => {
         await cardAnimationDiscard(index);
-        stateObj = createStructure(stateObj, structureDefinitions.trainingGrounds, "player");
+        stateObj = createStructure(stateObj, array[index], "player");
         return stateObj;
       }
     },
@@ -3972,22 +3976,23 @@ let specialCardPool = {
     buildhealingwell: {
       cardID: 203,
       name: "Build Healing Well",
+      buildCost: 3,
+      baseHeal: 3,
+      effectText: "Restores 3 HP each turn",
+      avatar: "img/structures/healingwell.png",
+      onTurnEffect: structureDefinitions.healingWell.onTurnEffect,
       text: (state, index, array) => {
-        return `Restores 3 HP each turn. (Build cost: ${structureDefinitions.healingWell.buildCost})`
+        return `Restores ${array[index].baseHeal} HP each turn. (Build cost: ${array[index].buildCost})`
       },
-      minReq: (state, index, array) => {
-        return 0;
-      },
+      minReq: (state, index, array) => { return 0; },
       upgrades: 0,
       baseCost: 0,
-      cost: (state, index, array) => {
-        return 0;
-      },
+      cost: (state, index, array) => { return 0; },
       cardType: "structure",
       elementType: "water",
       action: async (stateObj, index, array) => {
         await cardAnimationDiscard(index);
-        stateObj = createStructure(stateObj, structureDefinitions.healingWell, "player");
+        stateObj = createStructure(stateObj, array[index], "player");
         return stateObj;
       }
     },
@@ -3995,22 +4000,24 @@ let specialCardPool = {
     buildpoisontrap: {
       cardID: 204,
       name: "Build Poison Trap",
+      buildCost: 2,
+      basePoison: 2,
+      projectileTarget: "opponent",
+      effectText: "Applies 2 poison to targeted enemy each turn",
+      avatar: "img/structures/poisontrap.png",
+      onTurnEffect: structureDefinitions.poisonTrap.onTurnEffect,
       text: (state, index, array) => {
-        return `Applies 2 poison to front enemy each turn. (Build cost: ${structureDefinitions.poisonTrap.buildCost})`
+        return `Applies ${array[index].basePoison} poison to front enemy each turn. (Build cost: ${array[index].buildCost})`
       },
-      minReq: (state, index, array) => {
-        return 0;
-      },
+      minReq: (state, index, array) => { return 0; },
       upgrades: 0,
       baseCost: 0,
-      cost: (state, index, array) => {
-        return 0;
-      },
+      cost: (state, index, array) => { return 0; },
       cardType: "structure",
       elementType: "water",
       action: async (stateObj, index, array) => {
         await cardAnimationDiscard(index);
-        stateObj = createStructure(stateObj, structureDefinitions.poisonTrap, "player");
+        stateObj = createStructure(stateObj, array[index], "player");
         return stateObj;
       }
     },
@@ -4018,22 +4025,25 @@ let specialCardPool = {
     finalassault: {
       cardID: 211,
       name: "Final Assault",
+      buildCost: 4,
+      baseDamage: 35,
+      singleUse: true,
+      projectileTarget: "opponent",
+      effectText: "When complete: deal 35 damage. Then removed.",
+      avatar: "img/structures/watchtower.png",
+      onTurnEffect: structureDefinitions.finalAssault.onTurnEffect,
       text: (state, index, array) => {
-        return `Single use. Deals 35 damage when complete. (Build cost: 4)`
+        return `Single use. Deals ${array[index].baseDamage} damage when complete. (Build cost: ${array[index].buildCost})`
       },
-      minReq: (state, index, array) => {
-        return 0;
-      },
+      minReq: (state, index, array) => { return 0; },
       upgrades: 0,
       baseCost: 0,
-      cost: (state, index, array) => {
-        return 0;
-      },
+      cost: (state, index, array) => { return 0; },
       cardType: "structure",
       elementType: "fire",
       action: async (stateObj, index, array) => {
         await cardAnimationDiscard(index);
-        stateObj = createStructure(stateObj, structureDefinitions.finalAssault, "player");
+        stateObj = createStructure(stateObj, array[index], "player");
         return stateObj;
       }
     },

@@ -13,12 +13,13 @@ let structureDefinitions = {
     name: "Watchtower",
     owner: "player",
     buildCost: 2,
+    baseDamage: 4,
     projectileTarget: "opponent",
     effectText: "Deals 4 damage to targeted enemy each turn",
     avatar: "img/structures/watchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
       if (stateObj.opponentMonster.length > 0) {
-        stateObj = await dealOpponentDamage(stateObj, 4, 1, false, "specific");
+        stateObj = await dealOpponentDamage(stateObj, structures[index].baseDamage || 4, 1, false, "specific");
       }
       return stateObj;
     }
@@ -28,11 +29,12 @@ let structureDefinitions = {
     name: "Barricade",
     owner: "player",
     buildCost: 3,
+    baseBlock: 5,
     effectText: "Grants 5 fortification each turn",
     avatar: "img/structures/barricade.png",
     onTurnEffect: async function(stateObj, index, structures) {
       stateObj = immer.produce(stateObj, (newState) => {
-        newState.playerMonster.encounterBlock += 5;
+        newState.playerMonster.encounterBlock += structures[index].baseBlock;
       });
       return stateObj;
     }
@@ -42,6 +44,7 @@ let structureDefinitions = {
     name: "Poison Trap",
     owner: "player",
     buildCost: 2,
+    basePoison: 2,
     projectileTarget: "opponent",
     effectText: "Applies 2 poison to targeted enemy each turn",
     avatar: "img/structures/poisontrap.png",
@@ -49,7 +52,7 @@ let structureDefinitions = {
       if (stateObj.opponentMonster.length > 0) {
         let target = stateObj.targetedMonster || 0;
         stateObj = immer.produce(stateObj, (newState) => {
-          newState.opponentMonster[target].poison += 2;
+          newState.opponentMonster[target].poison += structures[index].basePoison;
         });
       }
       return stateObj;
@@ -60,12 +63,13 @@ let structureDefinitions = {
     name: "Training Grounds",
     owner: "player",
     buildCost: 4,
+    baseMilitia: 1,
     effectText: "Grants 1 militia each turn",
     avatar: "img/structures/traininggrounds.png",
     onTurnEffect: async function(stateObj, index, structures) {
       stateObj = immer.produce(stateObj, (newState) => {
-        newState.playerMonster.fightStrength += 1;
-        newState.playerMonster.strength += 1;
+        newState.playerMonster.fightStrength += structures[index].baseMilitia;
+        newState.playerMonster.strength += structures[index].baseMilitia;
       });
       return stateObj;
     }
@@ -75,10 +79,11 @@ let structureDefinitions = {
     name: "Healing Well",
     owner: "player",
     buildCost: 3,
+    baseHeal: 3,
     effectText: "Restores 3 HP each turn",
     avatar: "img/structures/healingwell.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      stateObj = await healPlayer(stateObj, 3);
+      stateObj = await healPlayer(stateObj, structures[index].baseHeal);
       return stateObj;
     }
   },
@@ -115,13 +120,14 @@ let structureDefinitions = {
     name: "More Housing",
     owner: "player",
     buildCost: 3,
+    baseHPGain: 5,
     effectText: "Increases max HP by 5 and heals 5",
     avatar: "img/structures/healingwell.png",
     onTurnEffect: async function(stateObj, index, structures) {
       if (!structures[index].applied) {
         stateObj = immer.produce(stateObj, (newState) => {
-          newState.playerMonster.maxHP += 5;
-          newState.playerMonster.currentHP += 5;
+          newState.playerMonster.maxHP += structures[index].baseHPGain;
+          newState.playerMonster.currentHP += structures[index].baseHPGain;
           newState.playerStructures[index].applied = true;
         });
       }
@@ -135,12 +141,13 @@ let structureDefinitions = {
     name: "Guard Tower",
     owner: "player",
     buildCost: 2,
+    baseDamage: 4,
     projectileTarget: "opponent",
     effectText: "Deals 4 damage to targeted enemy each turn",
     avatar: "img/structures/watchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
       if (stateObj.opponentMonster.length > 0) {
-        stateObj = await dealOpponentDamage(stateObj, 4, 1, false, "specific");
+        stateObj = await dealOpponentDamage(stateObj, structures[index].baseDamage || 4, 1, false, "specific");
       }
       return stateObj;
     }
@@ -150,11 +157,12 @@ let structureDefinitions = {
     name: "Great Wall",
     owner: "player",
     buildCost: 3,
+    baseBlock: 6,
     effectText: "Grants 6 fortification each turn",
     avatar: "img/structures/barricade.png",
     onTurnEffect: async function(stateObj, index, structures) {
       stateObj = immer.produce(stateObj, (newState) => {
-        newState.playerMonster.encounterBlock += 6;
+        newState.playerMonster.encounterBlock += structures[index].baseBlock;
       });
       return stateObj;
     }
@@ -166,6 +174,7 @@ let structureDefinitions = {
     name: "Escalating Cannon",
     owner: "player",
     buildCost: 2,
+    baseDamage: 2,
     escalatingDamage: 2,
     projectileTarget: "opponent-all",
     effectText: "Deals 2 damage to all enemies. Doubles each turn",
@@ -261,7 +270,7 @@ let structureDefinitions = {
     effectText: "Deals 5 damage to your village each turn",
     avatar: "img/structures/enemywatchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let damage = 5 * (structures[index].stackCount || 1);
+      let damage = 5;
       stateObj = await dealPlayerDamage(stateObj, damage, 0, false, 1);
       return stateObj;
     }
@@ -276,7 +285,7 @@ let structureDefinitions = {
     effectText: "Grants 5 fortification to all enemies each turn",
     avatar: "img/structures/enemybarricade.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let blockGain = 5 * (structures[index].stackCount || 1);
+      let blockGain = 5;
       stateObj = immer.produce(stateObj, (newState) => {
         newState.opponentMonster.forEach(function(monsterObj) {
           monsterObj.encounterBlock += blockGain;
@@ -295,7 +304,7 @@ let structureDefinitions = {
     effectText: "Heals all enemies for 5 HP each turn",
     avatar: "img/structures/enemyhealshrine.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let healAmount = 5 * (structures[index].stackCount || 1);
+      let healAmount = 5;
       for (let i = 0; i < stateObj.opponentMonster.length; i++) {
         stateObj = await healOpponent(stateObj, healAmount, i);
       }
@@ -312,7 +321,7 @@ let structureDefinitions = {
     effectText: "Drains 1 villager each turn",
     avatar: "img/structures/enemydraintower.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let drainAmount = 1 * (structures[index].stackCount || 1);
+      let drainAmount = 1;
       stateObj = immer.produce(stateObj, (newState) => {
         newState.playerMonster.encounterEnergy = Math.max(0, newState.playerMonster.encounterEnergy - drainAmount);
       });
@@ -324,12 +333,13 @@ let structureDefinitions = {
     name: "Final Assault",
     owner: "player",
     buildCost: 4,
+    baseDamage: 35,
     singleUse: true,
     projectileTarget: "opponent",
     effectText: "When complete: deal 35 damage. Then removed.",
     avatar: "img/structures/watchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      stateObj = await dealStructureEffectDamage(stateObj, 35, 0);
+      stateObj = await dealStructureEffectDamage(stateObj, structures[index].baseDamage, 0);
       return stateObj;
     }
   },
@@ -343,7 +353,7 @@ let structureDefinitions = {
     effectText: "Applies 2 poison to your village each turn",
     avatar: "img/structures/enemypoisontrap.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let damage = 2 * (structures[index].stackCount || 1);
+      let damage = 2;
       stateObj = await dealPlayerDamage(stateObj, damage, 0, false, 1);
       return stateObj;
     }

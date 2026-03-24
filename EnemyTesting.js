@@ -14,7 +14,7 @@ let testEnemyStructures = {
     effectText: "Deals 7 damage to your village each turn",
     avatar: "img/structures/enemywatchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let damage = 7 * (structures[index].stackCount || 1);
+      let damage = 7;
       stateObj = await dealPlayerDamage(stateObj, damage, 0, false, 1);
       return stateObj;
     }
@@ -29,7 +29,7 @@ let testEnemyStructures = {
     effectText: "Deals 3 damage to your village each turn",
     avatar: "img/structures/enemywatchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let damage = 3 * (structures[index].stackCount || 1);
+      let damage = 3;
       stateObj = await dealPlayerDamage(stateObj, damage, 0, false, 1);
       return stateObj;
     }
@@ -44,12 +44,27 @@ let testEnemyStructures = {
     effectText: "Grants 1 militia each turn",
     avatar: "img/structures/enemywatchtower.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let stacks = structures[index].stackCount || 1;
+      let stacks = 1;
       stateObj = immer.produce(stateObj, (newState) => {
         newState.opponentMonster.forEach(function (monster) {
           monster.strength += stacks;
         })
       })
+      return stateObj;
+    }
+  },
+
+  guardTower: {
+    name: "Guard Tower",
+    owner: "opponent",
+    maxHP: 6,
+    currentHP: 6,
+    encounterBlock: 0,
+    effectText: "Deals 3 damage to your village each turn",
+    avatar: "img/structures/enemywatchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      let damage = 3;
+      stateObj = await dealPlayerDamage(stateObj, damage, 0, false, 1);
       return stateObj;
     }
   },
@@ -63,7 +78,7 @@ let testEnemyStructures = {
     effectText: "Grants 4 fortification each turn",
     avatar: "img/structures/enemybarricade.png",
     onTurnEffect: async function(stateObj, index, structures) {
-      let stacks = structures[index].stackCount || 1;
+      let stacks = 1;
       stateObj = immer.produce(stateObj, (newState) => {
         newState.opponentMonster.forEach(function (monster) {
           monster.encounterBlock += 4 * stacks;
@@ -89,10 +104,10 @@ let testEnemies = {
     XPGain: 10,
     goldOnDefeat: 15,
     Level: 1,
-    maxHP: 30,
+    maxHP: 35,
     development: 0,
     opponentMoveIndex: 0,
-    currentHP: 30,
+    currentHP: 35,
     encounterBlock: 0,
     strength: 0,
     dex: 0,
@@ -161,10 +176,10 @@ let testEnemies = {
     XPGain: 10,
     goldOnDefeat: 15,
     Level: 1,
-    maxHP: 25,
+    maxHP: 40,
     development: 0,
     opponentMoveIndex: 0,
-    currentHP: 25,
+    currentHP: 40,
     encounterBlock: 0,
     strength: 0,
     dex: 0,
@@ -182,11 +197,11 @@ let testEnemies = {
         name: "Raid",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${4 + array[index].strength} damage. +1 Dev`
+          return `Deal ${4 + array[index].strength} damage. +2 Dev`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 4, index, false, 1);
-          stateObj = await gainDevelopment(stateObj, 1, index);
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
@@ -230,10 +245,10 @@ let testEnemies = {
     XPGain: 10,
     goldOnDefeat: 15,
     Level: 1,
-    maxHP: 20,
+    maxHP: 35,
     development: 0,
     opponentMoveIndex: 0,
-    currentHP: 20,
+    currentHP: 35,
     encounterBlock: 0,
     strength: 0,
     dex: 0,
@@ -305,10 +320,10 @@ let testEnemies = {
     XPGain: 10,
     goldOnDefeat: 15,
     Level: 1,
-    maxHP: 22,
+    maxHP: 51,
     development: 0,
     opponentMoveIndex: 0,
-    currentHP: 22,
+    currentHP: 51,
     encounterBlock: 0,
     strength: 0,
     dex: 0,
@@ -326,7 +341,7 @@ let testEnemies = {
         name: "Pillage",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${5 + array[index].strength} damage. +2 Dev`
+          return `Deal ${6 + array[index].strength} damage. +2 Dev`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 5, index, false, 1);
@@ -376,10 +391,10 @@ let testEnemies = {
     XPGain: 10,
     goldOnDefeat: 15,
     Level: 1,
-    maxHP: 28,
+    maxHP: 45,
     development: 0,
     opponentMoveIndex: 0,
-    currentHP: 28,
+    currentHP: 45,
     encounterBlock: 0,
     strength: 0,
     dex: 0,
@@ -397,7 +412,7 @@ let testEnemies = {
         name: "Stand Guard",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Gain 4 fortification. Deal ${2 + array[index].strength} damage. +1 Dev`
+          return `Gain 2 fortification. Deal ${6 + array[index].strength} damage. +2 Dev`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 2, index, false, 1);
@@ -412,7 +427,7 @@ let testEnemies = {
         name: "Arrow Volley",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Gain 6 fortification. Deal ${5 + array[index].strength} damage. +2 Dev`
+          return `Gain 6 fortification. Deal ${7 + array[index].strength} damage. +2 Dev`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 5, index, false, 1);
@@ -427,7 +442,7 @@ let testEnemies = {
         name: "Fortified Barrage",
         devRequirement: 7,
         text: (state, index, array) => {
-          return `Gain 10 fortification. Deal ${10 + array[index].strength} damage. Reset Dev`
+          return `Gain 10 fortification. Deal ${11 + array[index].strength} damage. Reset Dev`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, 10, index, false, 1);
@@ -756,10 +771,10 @@ let testEnemies = {
     XPGain: 10,
     goldOnDefeat: 15,
     Level: 1,
-    maxHP: 30,
+    maxHP: 36,
     development: 0,
     opponentMoveIndex: 0,
-    currentHP: 30,
+    currentHP: 36,
     encounterBlock: 0,
     strength: 0,
     dex: 0,
@@ -816,6 +831,66 @@ let testEnemies = {
       }
     ]
   },
+
+  // Moderate: Garrison Village (35 HP)
+  // Starts with 2 guard towers (3 dmg each, 6 HP each)
+  // Default: Gain 3 block, +1 dev
+  // Dev 5: Deal 16 damage, reset dev
+  garrisonVillage: {
+    name: "Garrison Village",
+    type: "Fire",
+    XPGain: 15,
+    goldOnDefeat: 20,
+    Level: 1,
+    maxHP: 35,
+    development: 0,
+    opponentMoveIndex: 0,
+    currentHP: 35,
+    encounterBlock: 0,
+    strength: 0,
+    dex: 0,
+    drown: 0,
+    hunted: 0,
+    poison: 0,
+    treason: 0,
+    baseHeal: 0,
+    baseBlock: 0,
+    baseDamage: 0,
+    baseScale: 0,
+    avatar: "img/medium/firecat5.png",
+    startingStructures: [testEnemyStructures.guardTower, testEnemyStructures.guardTower],
+    moves: [
+      {
+        name: "Fortify",
+        devRequirement: 0,
+        text: (state, index, array) => {
+          return `Gain ${3 + array[index].dex} fortification. +1 Dev`
+        },
+        action: async (stateObj, index, array) => {
+          stateObj = immer.produce(stateObj, (newState) => {
+            newState.opponentMonster[index].encounterBlock += 3;
+          })
+          stateObj = await gainDevelopment(stateObj, 1, index);
+          return stateObj;
+        }
+      },
+      {
+        name: "Volley",
+        devRequirement: 5,
+        text: (state, index, array) => {
+          return `Deal ${16 + array[index].strength} damage. Reset Dev`
+        },
+        action: async (stateObj, index, array) => {
+          stateObj = await dealPlayerDamage(stateObj, 16, index, false, 1);
+          let currentDev = stateObj.opponentMonster[index].development;
+          if (currentDev > 0) {
+            stateObj = await loseDevelopment(stateObj, currentDev, index);
+          }
+          return stateObj;
+        }
+      }
+    ]
+  },
 }
 
 
@@ -825,19 +900,20 @@ let testEnemies = {
 let beginnerEncounterPool = [
   [testEnemies.outpost],
   [testEnemies.fortifier],
-  [testEnemies.raiderCamp],
-  [testEnemies.watchtower],
   [testEnemies.siegeCamp],
-  [testEnemies.banditCamp],
+  //[testEnemies.banditCamp],
   [testEnemies.stockade],
 ]
 
 let moderateEncounterPool = [
   [testEnemies.warCamp],
   [testEnemies.armoredGarrison],
+  [testEnemies.watchtower],
+  [testEnemies.raiderCamp],
   [testEnemies.plagueVillage],
   [testEnemies.siegeCamp],
   [testEnemies.fortifier],
+  [testEnemies.garrisonVillage],
 ]
 
 
