@@ -34,7 +34,7 @@ let bossMonsters = {
         name: "Storm Gust",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*2) + 2 + array[index].attack} damage. Gain ${Math.floor(array[index].baseScale/3)} attack. +2 Dev`
+          return `Deal ${(array[index].baseDamage*2) + 2 + array[index].attack} damage. Gain ${Math.floor(array[index].baseScale/3)} attack. +[EE:2]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*2)+2, index, false, 1)
@@ -49,7 +49,7 @@ let bossMonsters = {
         name: "Lightning Barrage",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Gain ${Math.floor(array[index].baseScale/3)} attack. +1 Dev`
+          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Gain ${Math.floor(array[index].baseScale/3)} attack. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*3), index, false, 1)
@@ -64,7 +64,7 @@ let bossMonsters = {
         name: "Meteor Shower",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(Math.floor(array[index].baseDamage/5)+1) + array[index].attack} damage 5 times. Reset Dev`
+          return `Deal ${(Math.floor(array[index].baseDamage/5)+1) + array[index].attack} damage 5 times. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage/5)+1, index, false, 5);
@@ -109,7 +109,7 @@ let bossMonsters = {
         name: "Tail Swipes",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage-2) + array[index].attack} damage 4 times. +2 Dev`
+          return `Deal ${(array[index].baseDamage-2) + array[index].attack} damage 4 times. +[EE:2]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage-2), index, false, 4)
@@ -123,7 +123,7 @@ let bossMonsters = {
         name: "Dragon Breath",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. +1 Dev`
+          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*3), index, false, 1)
@@ -137,7 +137,7 @@ let bossMonsters = {
         name: "Inferno",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(Math.floor(array[index].baseDamage*5)) + array[index].attack} damage. Reset Dev`
+          return `Deal ${(Math.floor(array[index].baseDamage*5)) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage * 5), index, false, 1);
@@ -182,7 +182,7 @@ let bossMonsters = {
         name: "Lunging Strike",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*2)+2 + array[index].attack} damage. +2 Dev`
+          return `Deal ${(array[index].baseDamage*2)+2 + array[index].attack} damage. +[EE:2]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*2)+2, index, false, 1)
@@ -196,7 +196,7 @@ let bossMonsters = {
         name: "War Charge",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*3) + 3 + array[index].attack} damage. +1 Dev`
+          return `Deal ${(array[index].baseDamage*3) + 3 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*3)+3, index, false, 1)
@@ -210,7 +210,7 @@ let bossMonsters = {
         name: "Spinning Blade Storm",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(Math.floor(array[index].baseDamage*6)) + array[index].attack} damage. Reset Dev`
+          return `Deal ${(Math.floor(array[index].baseDamage*6)) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage * 6), index, false, 1);
@@ -255,7 +255,7 @@ let bossMonsters = {
         name: "Flaming Claws",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage/4) + array[index].attack} damage 4 times. +2 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage/4) + array[index].attack} damage 4 times. +[EE:2]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage/4), index, false, 4);
@@ -269,7 +269,7 @@ let bossMonsters = {
         name: "Rear Up",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Gain ${Math.floor(array[index].baseScale/3)} attack. +1 Dev`
+          return `Gain ${Math.floor(array[index].baseScale/3)} attack. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -283,7 +283,7 @@ let bossMonsters = {
         name: "Fire Slam",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage*6) + array[index].attack} damage. Reset Dev`
+          return `Deal ${Math.floor(array[index].baseDamage*6) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage*6), index, false, 1)
@@ -324,7 +324,7 @@ let bossMonsters = {
         name: "Ticking Clock",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage + array[index].attack) * state.combatTurnNumber} damage. Drain 1 villager. +2 Dev`
+          return `Deal ${(array[index].baseDamage + array[index].attack) * state.combatTurnNumber} damage. Drain 1 villager. +[EE:2]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage/4), index, false, 4);
@@ -341,7 +341,7 @@ let bossMonsters = {
         name: "Lightning Cloud",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Drain 2 villagers. Gain ${Math.floor(array[index].baseScale/3)} attack. +1 Dev`
+          return `Drain 2 villagers. Gain ${Math.floor(array[index].baseScale/3)} attack. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -356,7 +356,7 @@ let bossMonsters = {
         name: "Thunderstorm",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage*6) + array[index].attack} damage. Reset Dev`
+          return `Deal ${Math.floor(array[index].baseDamage*6) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage*6), index, false, 1)
@@ -395,7 +395,7 @@ let bossMonsters = {
         name: "Mend",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Restore ${array[index].baseHeal} health. +1 Dev`
+          return `Restore ${array[index].baseHeal} health. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await healOpponent(stateObj, array[index].baseHeal, index)
@@ -409,7 +409,7 @@ let bossMonsters = {
         name: "Vine Strike",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*2) + array[index].attack} damage. +1 Dev`
+          return `Deal ${(array[index].baseDamage*2) + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*2), index, false, 1);
@@ -423,7 +423,7 @@ let bossMonsters = {
         name: "Seed Eruption",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
+          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*3), index, false, 1);
@@ -463,7 +463,7 @@ let bossMonsters = {
         name: "Acid Rain",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*2) + array[index].attack} damage to ALL. Heal ${(array[index].baseHeal)} health. +2 Dev`
+          return `Deal ${(array[index].baseDamage*2) + array[index].attack} damage to ALL. Heal ${(array[index].baseHeal)} health. +[EE:2]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage*2, index, false, 1);
@@ -489,7 +489,7 @@ let bossMonsters = {
         name: "Thorned Growth",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Heal ${array[index].baseHeal*2} health. +1 Dev`
+          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Heal ${array[index].baseHeal*2} health. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage*3, index, false, 1);
@@ -504,7 +504,7 @@ let bossMonsters = {
         name: "Unleash Growth",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal damage equal to total healed (${state.enemyFightHealTotal + array[index].attack}). Reset Dev`
+          return `Deal damage equal to total healed (${state.enemyFightHealTotal + array[index].attack}). Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, stateObj.enemyFightHealTotal, index, false, 1);

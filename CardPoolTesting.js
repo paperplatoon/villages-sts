@@ -645,11 +645,6 @@ let testPlayerMonster = {
   avatar: "img/watertongue.png",
   startingDeck: [
     testCardPool.testStrike,
-    testCardPool.testStrike,
-    testCardPool.testStrike,
-    testCardPool.testStrike,
-    testCardPool.testBlock,
-    testCardPool.testBlock,
     testCardPool.testBlock,
     testCardPool.testSabotage,
     testCardPool.testPact,

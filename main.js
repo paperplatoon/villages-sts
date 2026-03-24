@@ -1100,6 +1100,7 @@ async function loseDevelopment(stateObj, devToLose, targetIndex=0, playerTrigger
   stateObj = immer.produce(stateObj, (newState) => {
       newState.opponentMonster[targetIndex].development -= devToLose;
   })
+  stateObj = await pickOpponentMove(stateObj);
   await changeState(stateObj);
 
   if (stateObj.damageOnDevChange > 0) {
@@ -1108,7 +1109,6 @@ async function loseDevelopment(stateObj, devToLose, targetIndex=0, playerTrigger
     await changeState(stateObj);
   }
 
-  stateObj = await pickOpponentMove(stateObj);
   return stateObj
 }
 
@@ -1147,6 +1147,7 @@ async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTrigger
   stateObj = immer.produce(stateObj, (newState) => {
       newState.opponentMonster[targetIndex].development += devToGain;
   })
+  stateObj = await pickOpponentMove(stateObj);
   await changeState(stateObj);
 
   if (stateObj.damageOnDevChange > 0) {
@@ -1155,7 +1156,6 @@ async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTrigger
     await changeState(stateObj);
   }
 
-  stateObj = await pickOpponentMove(stateObj);
   return stateObj
 }
 

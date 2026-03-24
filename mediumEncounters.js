@@ -28,7 +28,7 @@ let mediumSoloEncounters = {
         name: "Rebuild Walls",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Restore ${array[index].baseHeal * 2} health. +1 Dev`
+          return `Restore ${array[index].baseHeal * 2} health. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await healOpponent(stateObj, array[index].baseHeal * 2, index)
@@ -42,7 +42,7 @@ let mediumSoloEncounters = {
         name: "Trident Volley",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage*2) + 4 + array[index].attack} damage. +1 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage*2) + 4 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage*2) + 4, index, false, 1);
@@ -56,7 +56,7 @@ let mediumSoloEncounters = {
         name: "Mega Drain",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(4 * array[index].baseDamage) + array[index].attack} damage. Restore ${array[index].baseHeal*2} health. Reset Dev`
+          return `Deal ${(4 * array[index].baseDamage) + array[index].attack} damage. Restore ${array[index].baseHeal*2} health. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (4 * array[index].baseDamage), index, false, 1);
@@ -96,7 +96,7 @@ let mediumSoloEncounters = {
         name: "Barricade",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Gain ${Math.floor(array[index].baseBlock *1.5) + array[index].defense} fortification. Gain ${Math.floor(array[index].baseScale/3)} defense. +1 Dev`
+          return `Gain ${Math.floor(array[index].baseBlock *1.5) + array[index].defense} fortification. Gain ${Math.floor(array[index].baseScale/3)} defense. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -111,7 +111,7 @@ let mediumSoloEncounters = {
         name: "Strangle Hold",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*2) + 2 + array[index].defense + array[index].attack} damage. Scales with defense. +1 Dev`
+          return `Deal ${(array[index].baseDamage*2) + 2 + array[index].defense + array[index].attack} damage. Scales with defense. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, ((array[index].baseDamage*2) + 2 + array[index].defense), index, false, 1);
@@ -125,7 +125,7 @@ let mediumSoloEncounters = {
         name: "Siege Breaker",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*4) + array[index].defense + array[index].attack} damage. Gain ${array[index].baseScale} defense. Reset Dev`
+          return `Deal ${(array[index].baseDamage*4) + array[index].defense + array[index].attack} damage. Gain ${array[index].baseScale} defense. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*4) + array[index].defense, index, false, 1);
@@ -170,7 +170,7 @@ let mediumSoloEncounters = {
         name: "Skirmish",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${array[index].baseDamage+3 + array[index].attack} damage. +1 Dev`
+          return `Deal ${array[index].baseDamage+3 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage+3, index, false, 1)
@@ -184,7 +184,7 @@ let mediumSoloEncounters = {
         name: "Thorn Volley",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*2) + 3 + array[index].attack} damage. Gain ${array[index].baseScale} defense. +1 Dev`
+          return `Deal ${(array[index].baseDamage*2) + 3 + array[index].attack} damage. Gain ${array[index].baseScale} defense. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*2) + 3, index, false, 1);
@@ -199,7 +199,7 @@ let mediumSoloEncounters = {
         name: "Soul Consume",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*4) + 2 + array[index].attack} damage. Reset Dev`
+          return `Deal ${(array[index].baseDamage*4) + 2 + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*4) + 2, index, false, 1);
@@ -243,7 +243,7 @@ let mediumSoloEncounters = {
         name: "Flame Raid",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${array[index].baseDamage + 4 + array[index].attack} damage. +1 Dev`
+          return `Deal ${array[index].baseDamage + 4 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage+4, index, false, 1)
@@ -257,7 +257,7 @@ let mediumSoloEncounters = {
         name: "Blazing Assault",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage) + array[index].attack} damage twice. +1 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage) + array[index].attack} damage twice. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage), index, false, 2);
@@ -271,7 +271,7 @@ let mediumSoloEncounters = {
         name: "Inferno Strike",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Gain ${array[index].baseScale} attack. Reset Dev`
+          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Gain ${array[index].baseScale} attack. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage*3, index, false, 1);
@@ -311,7 +311,7 @@ let mediumSoloEncounters = {
         name: "Sword Raid",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${array[index].baseDamage*2 + array[index].attack} damage. +1 Dev`
+          return `Deal ${array[index].baseDamage*2 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*2), index, false, 1);
@@ -325,7 +325,7 @@ let mediumSoloEncounters = {
         name: "Forge Weapons",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Gain ${(array[index].baseBlock*2) + array[index].defense} fortification. Gain ${array[index].baseScale} attack. +1 Dev`
+          return `Gain ${(array[index].baseBlock*2) + array[index].defense} fortification. Gain ${array[index].baseScale} attack. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -340,7 +340,7 @@ let mediumSoloEncounters = {
         name: "Arsenal Unleash",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset Dev`
+          return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage*4, index, false, 1);
@@ -378,7 +378,7 @@ let mediumSoloEncounters = {
         name: "Rising Tide",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${array[index].baseDamage +3+ array[index].attack} damage. Gain ${Math.floor(array[index].baseScale)} defense. +1 Dev`
+          return `Deal ${array[index].baseDamage +3+ array[index].attack} damage. Gain ${Math.floor(array[index].baseScale)} defense. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage+3, index, false, 1);
@@ -393,7 +393,7 @@ let mediumSoloEncounters = {
         name: "Sea Wall",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Gain ${array[index].baseBlock + array[index].defense} fortification. Deal ${(array[index].baseDamage*2) + array[index].attack} damage. +1 Dev`
+          return `Gain ${array[index].baseBlock + array[index].defense} fortification. Deal ${(array[index].baseDamage*2) + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -410,7 +410,7 @@ let mediumSoloEncounters = {
         name: "Tidal Wave",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*4) + array[index].defense + array[index].attack} damage. Reset Dev`
+          return `Deal ${(array[index].baseDamage*4) + array[index].defense + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*4) + array[index].defense, index, false, 1);
@@ -449,7 +449,7 @@ let mediumSoloEncounters = {
         name: "Naval Raid",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*2) + 3 + array[index].attack} damage. Gain ${Math.ceil(array[index].baseScale/2)} defense. +1 Dev`
+          return `Deal ${(array[index].baseDamage*2) + 3 + array[index].attack} damage. Gain ${Math.ceil(array[index].baseScale/2)} defense. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage*2) + 3, index, false, 1);
@@ -464,7 +464,7 @@ let mediumSoloEncounters = {
         name: "Fortify Harbor",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Gain ${(array[index].baseBlock) + array[index].defense} fortification. Gain ${array[index].baseScale} attack & defense. +1 Dev`
+          return `Gain ${(array[index].baseBlock) + array[index].defense} fortification. Gain ${array[index].baseScale} attack & defense. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -480,7 +480,7 @@ let mediumSoloEncounters = {
         name: "Broadside",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset Dev`
+          return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage*4, index, false, 1);
@@ -524,7 +524,7 @@ let mediumSoloEncounters = {
         name: "Raise Walls",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Gain ${array[index].baseBlock+4 + array[index].defense} fortification. +1 Dev`
+          return `Gain ${array[index].baseBlock+4 + array[index].defense} fortification. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -541,7 +541,7 @@ let mediumSoloEncounters = {
         name: "Catapult Strike",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage*2) + array[index].attack} damage. +1 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage*2) + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage*2), index, false, 1);
@@ -555,7 +555,7 @@ let mediumSoloEncounters = {
         name: "Siege Smash",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
+          return `Deal ${Math.floor(array[index].baseDamage*3) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage*3), index, false, 1);
@@ -599,7 +599,7 @@ let mediumSoloEncounters = {
         name: "Battering Ram",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage) + 1 + array[index].attack} damage. +1 Dev`
+          return `Deal ${(array[index].baseDamage) + 1 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage+1, index, false, 1)
@@ -613,7 +613,7 @@ let mediumSoloEncounters = {
         name: "Payback",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage-2) + array[index].attack} damage for each breach (${state.fightDamageCount}). +1 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage-2) + array[index].attack} damage for each breach (${state.fightDamageCount}). +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage-2), index, false, stateObj.fightDamageCount);
@@ -627,7 +627,7 @@ let mediumSoloEncounters = {
         name: "Golden Plunder",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${array[index].baseDamage + array[index].attack} damage 5 times. Steal 20 gold. Reset Dev`
+          return `Deal ${array[index].baseDamage + array[index].attack} damage 5 times. Steal 20 gold. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage, index, false, 5);
@@ -676,7 +676,7 @@ let mediumSoloEncounters = {
         name: "Fire Raid",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${array[index].baseDamage + 6 + array[index].attack} damage. +1 Dev`
+          return `Deal ${array[index].baseDamage + 6 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage + 6, index, false, 1)
@@ -690,7 +690,7 @@ let mediumSoloEncounters = {
         name: "Retribution",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage-2)} damage for each breach (${state.fightDamageCount}). Unaffected by attack. +1 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage-2)} damage for each breach (${state.fightDamageCount}). Unaffected by attack. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage-2) - array[index].attack, index, false, stateObj.fightDamageCount);
@@ -704,7 +704,7 @@ let mediumSoloEncounters = {
         name: "Total War",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset Dev`
+          return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage*4, index, false, 1);
@@ -743,7 +743,7 @@ let mediumSoloEncounters = {
         name: "Erect Watchtower",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Build an Enemy Watchtower (15 HP, deals 5 damage/turn). +1 Dev`
+          return `Build an Enemy Watchtower (15 HP, deals 5 damage/turn). +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = createStructure(stateObj, structureDefinitions.enemyWatchtower, "opponent");
@@ -757,7 +757,7 @@ let mediumSoloEncounters = {
         name: "Fortify Position",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Build an Enemy Barricade (20 HP, grants 5 fort/turn). Gain ${array[index].baseBlock + array[index].defense} fortification. +1 Dev`
+          return `Build an Enemy Barricade (20 HP, grants 5 fort/turn). Gain ${array[index].baseBlock + array[index].defense} fortification. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = createStructure(stateObj, structureDefinitions.enemyBarricade, "opponent");
@@ -772,7 +772,7 @@ let mediumSoloEncounters = {
         name: "Siege Assembly",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Build Enemy Watchtower + Barricade. Reset Dev`
+          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Build Enemy Watchtower + Barricade. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage*3, index, false, 1);
@@ -815,7 +815,7 @@ let mediumMultiEncounters = {
         name: "Fortify All",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `All enemies gain ${Math.floor(array[index].baseBlock) + 2 + array[index].defense} fortification. +1 Dev`
+          return `All enemies gain ${Math.floor(array[index].baseBlock) + 2 + array[index].defense} fortification. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -831,7 +831,7 @@ let mediumMultiEncounters = {
         name: "Arrow Volley",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage * 2) + 3 + array[index].attack} damage. +1 Dev`
+          return `Deal ${(array[index].baseDamage * 2) + 3 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage * 2) + 3, index, false, 1);
@@ -845,7 +845,7 @@ let mediumMultiEncounters = {
         name: "Dive Strike",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage * 3) + 3 + array[index].attack} damage. Reset Dev`
+          return `Deal ${(array[index].baseDamage * 3) + 3 + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage * 3) + 3, index, false, 1);
@@ -884,7 +884,7 @@ let mediumMultiEncounters = {
         name: "Shield Wall",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `All enemies gain +${Math.floor(array[index].baseBlock) + 1 + array[index].defense} fortification. +1 Dev`
+          return `All enemies gain +${Math.floor(array[index].baseBlock) + 1 + array[index].defense} fortification. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -900,7 +900,7 @@ let mediumMultiEncounters = {
         name: "Aimed Shot",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage * 2) + array[index].attack} damage. Weaken defense by 1. +1 Dev`
+          return `Deal ${(array[index].baseDamage * 2) + array[index].attack} damage. Weaken defense by 1. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage * 2), index, false, 1);
@@ -916,7 +916,7 @@ let mediumMultiEncounters = {
         name: "Deadly Plumage",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage* 3) + array[index].attack} damage. Weaken defense by 1. Reset Dev`
+          return `Deal ${(array[index].baseDamage* 3) + array[index].attack} damage. Weaken defense by 1. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, (array[index].baseDamage * 3), index, false, 1);
@@ -957,7 +957,7 @@ let mediumMultiEncounters = {
         name: "Rapid Strikes",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage/2) + array[index].attack} damage 5 times. +1 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage/2) + array[index].attack} damage 5 times. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage/2), index, false, 5);
@@ -971,7 +971,7 @@ let mediumMultiEncounters = {
         name: "Train Militia",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Gain ${array[index].baseBlock - 2 + array[index].defense} fortification. Gain ${Math.floor(array[index].baseScale/3)} attack. +1 Dev`
+          return `Gain ${array[index].baseBlock - 2 + array[index].defense} fortification. Gain ${Math.floor(array[index].baseScale/3)} attack. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = immer.produce(stateObj, (newState) => {
@@ -986,7 +986,7 @@ let mediumMultiEncounters = {
         name: "Full Assault",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
+          return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, array[index].baseDamage*3, index, false, 1);
@@ -1025,7 +1025,7 @@ let mediumMultiEncounters = {
         name: "Left Broadside",
         devRequirement: 0,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage) + 3 + array[index].attack} damage. +1 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage) + 3 + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage + 3), index, false, 1);
@@ -1039,7 +1039,7 @@ let mediumMultiEncounters = {
         name: "Right Broadside",
         devRequirement: 4,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage*2) + array[index].attack} damage. +1 Dev`
+          return `Deal ${Math.floor(array[index].baseDamage*2) + array[index].attack} damage. +[EE:1]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage * 2), index, false, 1);
@@ -1053,7 +1053,7 @@ let mediumMultiEncounters = {
         name: "Full Broadside",
         devRequirement: 6,
         text: (state, index, array) => {
-          return `Deal ${Math.floor(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
+          return `Deal ${Math.floor(array[index].baseDamage*3) + array[index].attack} damage. Reset [EE]`
         },
         action: async (stateObj, index, array) => {
           stateObj = await dealPlayerDamage(stateObj, Math.floor(array[index].baseDamage * 3), index, false, 1);
