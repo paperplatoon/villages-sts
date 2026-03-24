@@ -60,7 +60,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Siege Bombardment",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage * 5) + array[index].attack} damage. Reset Dev`
         },
@@ -132,7 +132,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Unleash Fury",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal damage equal to total damage taken (${state.fightDamageTotal + array[index].attack}). Reset Dev`
         },
@@ -200,7 +200,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Body Blows",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal attack value (${array[index].attack}) two times. Reset Dev`
         },
@@ -272,7 +272,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Reload & Fire",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Gain ${array[index].baseBlock + array[index].defense} fortification. Gain ${Math.ceil(array[index].baseScale/2)} attack. Reset Dev`
         },
@@ -348,7 +348,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Dive Bomb",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + 2 + array[index].attack} damage. Gain ${array[index].baseScale} defense. Reset Dev`
         },
@@ -422,7 +422,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Kraken Strike",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset Dev`
         },
@@ -494,7 +494,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Crushing Bite",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + 2 + array[index].attack} damage. Gain ${array[index].baseScale} defense. Reset Dev`
         },
@@ -562,7 +562,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Seed Eruption",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + 4 + array[index].attack} damage. Reset Dev`
         },
@@ -634,7 +634,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Total Raid",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
         },
@@ -701,7 +701,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Triple Strike",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${array[index].baseDamage + 3 + array[index].attack} damage 3 times. Reset Dev`
         },
@@ -774,7 +774,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Scorched Earth",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
         },
@@ -842,7 +842,7 @@ let hardSoloEncounters = {
       },
       {
         name: "Tsunami",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage * 3) + array[index].attack} damage. Reset Dev`
         },

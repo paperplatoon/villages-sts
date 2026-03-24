@@ -721,7 +721,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
 
             if (monsterObj.deflate && calculatedDamage >= monsterObj.deflate && monsterObj.development > 0) {
               devChanges.push({ index: monsterIndex, amount: -1 });
-            } else if (monsterObj.angry && monsterObj.development < 7) {
+            } else if (monsterObj.angry && monsterObj.development < 6) {
               devChanges.push({ index: monsterIndex, amount: 1 });
             } else if (monsterObj.shakedown) {
               newState.gold += monsterObj.shakedown;
@@ -739,7 +739,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
 
             if (monsterObj.deflate && takenDamage >= monsterObj.deflate && monsterObj.development > 0) {
               devChanges.push({ index: monsterIndex, amount: -1 });
-            } else if (monsterObj.angry && monsterObj.development < 7) {
+            } else if (monsterObj.angry && monsterObj.development < 6) {
               devChanges.push({ index: monsterIndex, amount: 1 });
             } else if (monsterObj.shakedown) {
               newState.gold += monsterObj.shakedown;
@@ -761,7 +761,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
           newState.fightDamageTotal += calculatedDamage;
           if (monsterObj.deflate && calculatedDamage >= monsterObj.deflate && monsterObj.development > 0) {
             devChanges.push({ index: targetIndex, amount: -1 });
-          } else if (monsterObj.angry && monsterObj.development < 7) {
+          } else if (monsterObj.angry && monsterObj.development < 6) {
             devChanges.push({ index: targetIndex, amount: 1 });
           } else if (monsterObj.shakedown) {
             newState.gold += monsterObj.shakedown;
@@ -779,7 +779,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
           newState.fightDamageTotal += takenDamage
           if (monsterObj.deflate && takenDamage >= monsterObj.deflate && monsterObj.development > 0) {
             devChanges.push({ index: targetIndex, amount: -1 });
-          } else if (monsterObj.angry && monsterObj.development < 7) {
+          } else if (monsterObj.angry && monsterObj.development < 6) {
             devChanges.push({ index: targetIndex, amount: 1 });
           } else if (monsterObj.shakedown) {
             newState.gold += monsterObj.shakedown;
@@ -908,15 +908,47 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
 
 // Animate the existing development bar BEFORE changeState rebuilds the DOM
 async function animateDevBar(monsterIndex, newDev) {
-  let bars = document.querySelectorAll("#opponents .dev-bar-fill");
-  let bar = bars[monsterIndex];
-  if (!bar) return;
-  let newPercent = Math.min((newDev / 7) * 100, 100);
-  let glowClass = (newPercent > parseFloat(bar.style.width)) ? "dev-bar-growing" : "dev-bar-draining";
-  bar.classList.add(glowClass);
-  bar.style.width = newPercent + "%";
+  // Segments are now distributed across move cards
+  let monsterDivs = document.querySelectorAll("#opponents .monster");
+  let monsterDiv = monsterDivs[monsterIndex];
+  if (!monsterDiv) return;
+  let segments = monsterDiv.querySelectorAll(".dev-segment");
+  let oldDev = 0;
+  segments.forEach((seg, i) => { if (seg.classList.contains("dev-segment-filled")) oldDev++; });
+  let growing = newDev > oldDev;
+
+  segments.forEach((seg, i) => {
+    if (i < newDev) {
+      seg.classList.add("dev-segment-filled");
+      if (growing && i >= oldDev) seg.classList.add("dev-segment-growing");
+    } else {
+      seg.classList.remove("dev-segment-filled");
+      if (!growing && i >= newDev && i < oldDev) seg.classList.add("dev-segment-draining");
+    }
+  });
+
+  // Also update active move highlight
+  let moveDivs = monsterDiv.querySelectorAll(".move");
+  let moves = state.opponentMonster[monsterIndex].moves;
+  let newMoveIndex = 0;
+  moves.forEach((m, mi) => { if (newDev >= (m.devRequirement || 0)) newMoveIndex = mi; });
+  moveDivs.forEach((md, mi) => {
+    md.classList.remove("move-active", "chosen", "move-unlocked", "move-locked");
+    let devReq = moves[mi] ? (moves[mi].devRequirement || 0) : 0;
+    if (mi === newMoveIndex) {
+      md.classList.add("chosen", "move-active");
+    } else if (newDev >= devReq) {
+      md.classList.add("move-unlocked");
+    } else {
+      md.classList.add("move-locked");
+    }
+  });
+
   await pause(600);
-  bar.classList.remove(glowClass);
+  segments.forEach(seg => {
+    seg.classList.remove("dev-segment-growing");
+    seg.classList.remove("dev-segment-draining");
+  });
 }
 
 // Centralized stat change animation — fire-and-forget, DOM rebuild cleans up
@@ -1009,6 +1041,14 @@ function healPlayer(stateObj, amountToHeal, energyCost=false) {
   return stateObj
 }
 
+const HAMMER_IMG = '<img src="img/hammer.png" class="inline-hammer">';
+function formatCardText(text) {
+  text = text.replace(/\[EE:(\d+)\]/g, '<span class="enemy-energy-token">$1' + HAMMER_IMG + '</span>');
+  text = text.replace(/\[EE\]/g, '<span class="enemy-energy-token">' + HAMMER_IMG + '</span>');
+  text = text.replace(/\[E\]/g, HAMMER_IMG);
+  return text;
+}
+
 function fisherYatesShuffle(arrayObj) {
   let arrayCopy = [...arrayObj];
   for (let x = arrayCopy.length-1; x > 0; x--) { 
@@ -1081,7 +1121,7 @@ async function opponentLoseEnergy(stateObj, energyToLose, targetIndex=0, playerT
 
 async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTriggered=false) {
   let currentDev = stateObj.opponentMonster[targetIndex].development;
-  const maxDev = 7;
+  const maxDev = 6;
 
   if (currentDev + devToGain < 0 || devToGain <= 0) {
     return stateObj
@@ -1834,7 +1874,7 @@ async function renderPlayerMonster(stateObj) {
     villagersDisplay.innerHTML = "";
     let playerEnergyText = document.createElement("H4");
     playerEnergyText.classList.add("player-energy");
-    playerEnergyText.textContent = "Villagers: " + stateObj.playerMonster.encounterEnergy;
+    playerEnergyText.innerHTML = stateObj.playerMonster.encounterEnergy + HAMMER_IMG;
     villagersDisplay.appendChild(playerEnergyText);
 
     if (stateObj.diplomacy > 0) {
@@ -3823,16 +3863,11 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
         
         let cardCost = document.createElement("H3")
         if (typeof cardObj.cost === 'function') {
-          cardCost.textContent = cardObj.cost(stateObj, index, cardArray);
+          cardCost.innerHTML = cardObj.cost(stateObj, index, cardArray) + HAMMER_IMG;
           cardCost.classList.add("hand-card-cost");
-          if (stateObj.playerMonster.type === "fire") {
-            cardCost.classList.add("hand-card-cost-fire")
-          } else if (stateObj.playerMonster.type === "water") {
-            cardCost.classList.add("hand-card-cost-water")
-          }
           topCardRowDiv.append(cardCost);
         } else if (cardObj.cost !== "energy") {
-          cardCost.textContent = cardObj.cost;
+          cardCost.innerHTML = cardObj.cost + HAMMER_IMG;
           cardCost.classList.add("hand-card-cost");
           topCardRowDiv.append(cardCost);
         } else {}
@@ -3842,7 +3877,7 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
         
         let cardText = document.createElement("P");
         cardText.classList.add("card-text")
-        cardText.innerHTML = cardObj.text(stateObj, index, cardArray);
+        cardText.innerHTML = formatCardText(cardObj.text(stateObj, index, cardArray));
         cardDiv.append(topCardRowDiv);
         cardDiv.append(cardText);
 
@@ -3871,7 +3906,7 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
         } else if (goldCost === "upgrade") {
           cardDiv.classList.add("card-change-text");
           let altUpgradeText =  document.createElement("P");
-          altUpgradeText.textContent = showChangedUpgradeText(stateObj, index, cardArray, cardObj, "upgrades", 1)
+          altUpgradeText.innerHTML = formatCardText(showChangedUpgradeText(stateObj, index, cardArray, cardObj, "upgrades", 1))
           altUpgradeText.classList.add("alt-card-text");
           cardDiv.append(altUpgradeText);
 
@@ -3894,13 +3929,13 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
         } else if (goldCost === "moreHits") {
           cardDiv.classList.add("card-change-text");
           let altHitsText =  document.createElement("P");
-          altHitsText.textContent = showChangedUpgradeText(stateObj, index, cardArray, cardObj, "baseHits", 1)
+          altHitsText.innerHTML = formatCardText(showChangedUpgradeText(stateObj, index, cardArray, cardObj, "baseHits", 1))
           altHitsText.classList.add("alt-card-text");
           cardDiv.append(altHitsText);
         } else if (goldCost === "doubleupgrade") {
           cardDiv.classList.add("card-change-text");
           let altUpgradeText =  document.createElement("P");
-          altUpgradeText.textContent = showChangedUpgradeText(stateObj, index, cardArray, cardObj, "upgrades", 2)
+          altUpgradeText.innerHTML = formatCardText(showChangedUpgradeText(stateObj, index, cardArray, cardObj, "upgrades", 2))
           altUpgradeText.classList.add("alt-card-text");
           cardDiv.append(altUpgradeText);
 
@@ -3914,13 +3949,13 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
         } else if (goldCost === "increaseblock") {
           cardDiv.classList.add("card-change-text");
           let altUpgradeText =  document.createElement("P");
-          altUpgradeText.textContent = showChangedUpgradeText(stateObj, index, cardArray, cardObj, "baseBlock", 7)
+          altUpgradeText.innerHTML = formatCardText(showChangedUpgradeText(stateObj, index, cardArray, cardObj, "baseBlock", 7))
           altUpgradeText.classList.add("alt-card-text");
           cardDiv.append(altUpgradeText);
         } else if (goldCost === "increaseattack") {
           cardDiv.classList.add("card-change-text");
           let altUpgradeText =  document.createElement("P");
-          altUpgradeText.textContent = showChangedUpgradeText(stateObj, index, cardArray, cardObj, "baseDamage", 3)
+          altUpgradeText.innerHTML = formatCardText(showChangedUpgradeText(stateObj, index, cardArray, cardObj, "baseDamage", 3))
           altUpgradeText.classList.add("alt-card-text");
           cardDiv.append(altUpgradeText);
         } else if (goldCost === "doubleattack") {
@@ -3931,7 +3966,7 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
           cardAltCost.classList.add("alt-cost")
 
           let altUpgradeText =  document.createElement("P");
-          altUpgradeText.textContent = showChangedUpgradeText(stateObj, index, cardArray, cardObj, "baseDamage", cardArray[index].baseDamage)
+          altUpgradeText.innerHTML = formatCardText(showChangedUpgradeText(stateObj, index, cardArray, cardObj, "baseDamage", cardArray[index].baseDamage))
           altUpgradeText.classList.add("alt-card-text");
 
           cardDiv.innerHTML = "";
@@ -3947,7 +3982,7 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
 
             cardDiv.classList.add("card-change-text");
             let altUpgradeText =  document.createElement("P");
-            altUpgradeText.textContent = cardObj.text(stateObj, index, cardArray)
+            altUpgradeText.innerHTML = formatCardText(cardObj.text(stateObj, index, cardArray))
             altUpgradeText.classList.add("alt-card-text");
 
             cardDiv.innerHTML = "";
@@ -4407,47 +4442,15 @@ function renderOpponents(stateObj) {
 
     monsterDiv.appendChild(cubeWrapper);
 
-    // ====== Development Bar ======
-    let devBarContainer = document.createElement("Div");
-    devBarContainer.classList.add("dev-bar-container");
-
+    // ====== Move Cards with Dev Segments ======
     let currentDev = monsterObj.development || 0;
-    let devLabel = document.createElement("span");
-    devLabel.classList.add("dev-label");
-    devLabel.textContent = "Development: " + currentDev + "/7";
-    devBarContainer.append(devLabel);
-
-    let devBarOuter = document.createElement("Div");
-    devBarOuter.classList.add("dev-bar-outer");
-
-    let devBarFill = document.createElement("Div");
-    devBarFill.classList.add("dev-bar-fill");
-    let fillPercent = Math.min((currentDev / 7) * 100, 100);
-    devBarFill.style.width = fillPercent + "%";
-
-    if (currentDev >= 7) {
-      devBarFill.classList.add("dev-bar-critical");
-    } else if (currentDev >= 4) {
-      devBarFill.classList.add("dev-bar-warning");
-    }
-
-    let marker4 = document.createElement("Div");
-    marker4.classList.add("dev-marker");
-    marker4.style.left = ((4/7)*100) + "%";
-    let marker7 = document.createElement("Div");
-    marker7.classList.add("dev-marker");
-    marker7.style.left = "100%";
-
-    devBarOuter.append(devBarFill, marker4, marker7);
-    devBarContainer.append(devBarOuter);
-    monsterDiv.appendChild(devBarContainer);
-
-    // ====== Move Cards ======
     const chosenIndex = monsterObj.opponentMoveIndex;
 
     let movesRowDiv = document.createElement("Div");
     movesRowDiv.classList.add("moves-row");
 
+    // Figure out segment ranges for each move
+    let prevDevReq = 0;
     monsterObj.moves.forEach(function(moveObj, moveIndex) {
       if (!moveObj.name) return;
 
@@ -4476,21 +4479,30 @@ function renderOpponents(stateObj) {
         moveDiv.classList.add("move-unlocked");
       }
 
-      let tierLabel = document.createElement("span");
-      tierLabel.classList.add("move-tier-label");
-      if (devReq === 0) {
-        tierLabel.textContent = "DEFAULT";
-      } else {
-        tierLabel.textContent = "AT " + devReq + " DEV";
+      // Dev segments for this move (segments from prevDevReq to devReq-1)
+      let segCount = devReq - prevDevReq;
+      if (segCount > 0) {
+        let segRow = document.createElement("div");
+        segRow.classList.add("move-dev-segments");
+        for (let s = prevDevReq; s < devReq; s++) {
+          let seg = document.createElement("div");
+          seg.classList.add("dev-segment");
+          if (s < currentDev) seg.classList.add("dev-segment-filled");
+          seg.innerHTML = HAMMER_IMG;
+          segRow.appendChild(seg);
+        }
+        moveDiv.appendChild(segRow);
       }
+      prevDevReq = devReq;
 
       let moveName = document.createElement("H3");
       moveName.textContent = moveObj.name || "";
 
       let moveText = document.createElement("P");
-      moveText.textContent = (typeof moveObj.text === "function")
+      let moveTextStr = (typeof moveObj.text === "function")
         ? moveObj.text(stateObj, index, stateObj.opponentMonster)
         : (moveObj.text || "");
+      moveText.innerHTML = formatCardText(moveTextStr);
 
       if (!isUnlocked) {
         let lockIcon = document.createElement("span");
@@ -4499,7 +4511,7 @@ function renderOpponents(stateObj) {
         moveDiv.append(lockIcon);
       }
 
-      moveDiv.append(tierLabel, moveName, moveText);
+      moveDiv.append(moveName, moveText);
       movesRowDiv.appendChild(moveDiv);
     });
 

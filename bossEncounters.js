@@ -62,7 +62,7 @@ let bossMonsters = {
       },
       {
         name: "Meteor Shower",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(Math.floor(array[index].baseDamage/5)+1) + array[index].attack} damage 5 times. Reset Dev`
         },
@@ -135,7 +135,7 @@ let bossMonsters = {
       },
       {
         name: "Inferno",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(Math.floor(array[index].baseDamage*5)) + array[index].attack} damage. Reset Dev`
         },
@@ -208,7 +208,7 @@ let bossMonsters = {
       },
       {
         name: "Spinning Blade Storm",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(Math.floor(array[index].baseDamage*6)) + array[index].attack} damage. Reset Dev`
         },
@@ -281,7 +281,7 @@ let bossMonsters = {
       },
       {
         name: "Fire Slam",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${Math.floor(array[index].baseDamage*6) + array[index].attack} damage. Reset Dev`
         },
@@ -354,7 +354,7 @@ let bossMonsters = {
       },
       {
         name: "Thunderstorm",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${Math.floor(array[index].baseDamage*6) + array[index].attack} damage. Reset Dev`
         },
@@ -421,7 +421,7 @@ let bossMonsters = {
       },
       {
         name: "Seed Eruption",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
         },
@@ -502,7 +502,7 @@ let bossMonsters = {
       },
       {
         name: "Unleash Growth",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal damage equal to total healed (${state.enemyFightHealTotal + array[index].attack}). Reset Dev`
         },

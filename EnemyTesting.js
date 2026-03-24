@@ -150,7 +150,7 @@ let testEnemies = {
       },
       {
         name: "Deploy Battering Ram",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Build a Battering Ram (15 HP). Deals 7 damage each turn. Reset Dev`
         },
@@ -219,7 +219,7 @@ let testEnemies = {
       },
       {
         name: "Full Assault",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${14 + array[index].attack} damage. Reset Dev`
         },
@@ -284,13 +284,13 @@ let testEnemies = {
         },
         action: async (stateObj, index, array) => {
           stateObj = createStructure(stateObj, testEnemyStructures.miniTrebuchet, "opponent");
-          stateObj = await gainDevelopment(stateObj, 3, index);
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
       {
         name: "Kamikaze Bombers",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal 15 damage to enemy village. Deal 5 damage to self. Reset Dev`
         },
@@ -364,7 +364,7 @@ let testEnemies = {
       },
       {
         name: "Raze",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${18 + array[index].attack} damage. Reset Dev`
         },
@@ -440,7 +440,7 @@ let testEnemies = {
       },
       {
         name: "Fortified Barrage",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Gain 10 fortification. Deal ${11 + array[index].attack} damage. Reset Dev`
         },
@@ -521,7 +521,7 @@ let testEnemies = {
       },
       {
         name: "Sound the War Drums",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Build War Drums (12 HP). Grants 1 attack each turn. Reset Dev`
         },
@@ -596,7 +596,7 @@ let testEnemies = {
       },
       {
         name: "Fortify and Crush",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Build Spiked Wall (14 HP, 4 fort/turn). Deal ${12 + array[index].attack} damage. Reset Dev`
         },
@@ -674,7 +674,7 @@ let testEnemies = {
       },
       {
         name: "Pandemic",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${10 + array[index].attack} damage. Apply 6 poison. Reset Dev`
         },
@@ -810,13 +810,13 @@ let testEnemies = {
           stateObj = immer.produce(stateObj, (newState) => {
             newState.opponentMonster[index].encounterBlock += 8;
           })
-          stateObj = await gainDevelopment(stateObj, 3, index);
+          stateObj = await gainDevelopment(stateObj, 2, index);
           return stateObj;
         }
       },
       {
         name: "Sortie",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${13 + array[index].attack} damage. Reset Dev`
         },
@@ -876,7 +876,7 @@ let testEnemies = {
       },
       {
         name: "Volley",
-        devRequirement: 5,
+        devRequirement: 4,
         text: (state, index, array) => {
           return `Deal ${16 + array[index].attack} damage. Reset Dev`
         },

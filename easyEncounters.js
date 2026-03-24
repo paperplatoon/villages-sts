@@ -53,7 +53,7 @@ let newTestOpponentMonsters = {
       },
       {
         name: "Full Assault",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 5) + array[index].attack} damage. Reset Dev`
         },
@@ -121,7 +121,7 @@ let newTestOpponentMonsters = {
       },
       {
         name: "Battering Ram",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 6) + array[index].attack} damage. Reset Dev`
         },
@@ -188,7 +188,7 @@ let newTestOpponentMonsters = {
       },
       {
         name: "Pillage",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 4) + array[index].attack} damage. Reset Dev`
         },
@@ -261,7 +261,7 @@ let easySoloEncounters = {
       },
       {
         name: "Blazing Charge",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 5) + array[index].attack} damage. Reset Dev`
         },
@@ -332,7 +332,7 @@ let easySoloEncounters = {
       },
       {
         name: "Sortie",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 4) + array[index].attack} damage. Gain ${array[index].baseBlock * 2} fortification. Reset Dev`
         },
@@ -402,7 +402,7 @@ let easySoloEncounters = {
       },
       {
         name: "Stampede",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 4) + array[index].attack} damage. Reset Dev`
         },
@@ -470,7 +470,7 @@ let easySoloEncounters = {
       },
       {
         name: "Full Ambush",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 5) + array[index].attack} damage. Reset Dev`
         },
@@ -540,7 +540,7 @@ let easySoloEncounters = {
       },
       {
         name: "Avalanche",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 6) + array[index].attack} damage. Reset Dev`
         },
@@ -609,7 +609,7 @@ let easySoloEncounters = {
       },
       {
         name: "Timber Crush",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 5) + array[index].attack} damage. Reset Dev`
         },
@@ -678,7 +678,7 @@ let easySoloEncounters = {
       },
       {
         name: "Tidal Wave",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 5) + array[index].attack} damage. Reset Dev`
         },
@@ -747,7 +747,7 @@ let easySoloEncounters = {
       },
       {
         name: "Rockslide",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
             return `Deal ${(array[index].baseDamage * 6) + array[index].attack} damage. Reset Dev`
         },

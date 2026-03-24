@@ -1271,7 +1271,7 @@
 }
 
 .card {
-  background: linear-gradient(90deg, rgb(255, 238, 208),rgb(230, 171, 94), rgb(255, 200, 127), rgb(243, 133, 23));
+  background: linear-gradient(90deg, rgb(220, 245, 220), rgb(120, 190, 110), rgb(160, 215, 150), rgb(80, 170, 70));
   width: 9.5vw;
   height: 26vh;
   justify-content: center;
@@ -1283,7 +1283,7 @@
 
 .card-pile-card {
   border: 1px solid black;
-  background: linear-gradient(90deg, rgb(255, 238, 208),rgb(230, 171, 94), rgb(255, 200, 127), rgb(243, 133, 23));
+  background: linear-gradient(90deg, rgb(220, 245, 220), rgb(120, 190, 110), rgb(160, 215, 150), rgb(80, 170, 70));
   margin: 0.5%;
   height: 10vh;
   width: 18%;
@@ -1358,13 +1358,51 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 
 
 .player-energy {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
   font-size: 4vmin;
-  background-color: rgb(8, 61, 0);
+  background-color: rgb(60, 160, 50);
   color: white;
-  border-radius: 10px;
-  padding: 0.3vh 0.4vw;
+  border-radius: 50%;
+  width: 6vmin;
+  height: 6vmin;
   margin-left: 0.1vw;
   text-align: center;
+  font-weight: bold;
+}
+
+.inline-hammer {
+  height: 1.5em;
+  width: auto;
+  vertical-align: middle;
+  display: inline;
+  padding: 0;
+  margin: 0;
+  border: 0;
+}
+
+.enemy-energy-token {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  background-color: rgb(160, 130, 200);
+  border-radius: 50%;
+  height: 1.8em;
+  min-width: 1.8em;
+  width: auto;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  color: white;
+  font-weight: bold;
+  vertical-align: middle;
+}
+
+.enemy-energy-token .inline-hammer {
+  height: 1em;
 }
 
 .player-energy-fire, .hand-card-cost-fire {
@@ -1379,20 +1417,26 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 }
 
 .energy-cost, .hand-card-cost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
   width: 4.5vmin;
   height: 4.5vmin;
   min-width: 4.5vmin;
   min-height: 4.5vmin;
-  text-align: center;
   border-radius: 50%;
   font-size: 3.2vmin;
-  background-color: rgba(255, 219, 219, 0.916);
+  background-color: rgb(60, 160, 50);
   font-weight: bold;
-  line-height: 4.5vmin;
-  color: rgb(0, 0, 0);
+  color: white;
   flex-shrink: 0;
   transition: background-color 0.25s;
  }
+
+.hand-card-cost .inline-hammer {
+  height: 1.05em;
+}
 
 
 
@@ -2946,66 +2990,47 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 
 /* ===== DEVELOPMENT SYSTEM UI ===== */
 
-/* Development progress bar */
-.dev-bar-container {
-  padding: 0.5vmin 0.8vmin;
-  margin: 0.5vmin 0;
+/* Development segments (distributed across move cards) */
+.move-dev-segments {
+  display: flex;
+  justify-content: center;
+  gap: 0.3vmin;
+  margin-bottom: 0.4vmin;
 }
 
-.dev-label {
-  font-size: 2.2vmin;
-  color: rgba(255, 255, 255, 0.85);
-  font-weight: bold;
-  display: block;
-  margin-bottom: 0.3vmin;
-}
-
-.dev-bar-outer {
-  width: 100%;
-  height: 1.6vh;
-  background-color: rgba(0, 0, 0, 0.5);
+.dev-segment {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.8vmin;
+  height: 2.8vmin;
   border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  position: relative;
-  overflow: visible;
+  border: 2px solid rgb(160, 130, 200);
+  background-color: rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s, box-shadow 0.3s;
 }
 
-.dev-bar-fill {
-  height: 100%;
-  background: linear-gradient(90deg, #4a9eff, #6bb3ff);
-  border-radius: 3px;
-  transition: width 0.5s ease-out, box-shadow 0.5s ease-out;
+.dev-segment .inline-hammer {
+  height: 1.4vmin;
+  opacity: 0.25;
+  transition: opacity 0.3s;
 }
 
-.dev-bar-growing {
-  box-shadow: 0 0 8px rgba(255, 150, 0, 0.7), 0 0 16px rgba(255, 100, 0, 0.4);
+.dev-segment-filled {
+  background-color: rgb(160, 130, 200);
 }
 
-.dev-bar-draining {
-  box-shadow: 0 0 8px rgba(80, 160, 255, 0.7), 0 0 16px rgba(80, 160, 255, 0.4);
+.dev-segment-filled .inline-hammer {
+  opacity: 1;
+  filter: brightness(10);
 }
 
-.dev-bar-warning {
-  background: linear-gradient(90deg, #ff9500, #ffb347);
+.dev-segment-growing {
+  box-shadow: 0 0 8px rgba(160, 130, 200, 0.8), 0 0 14px rgba(160, 130, 200, 0.4);
 }
 
-.dev-bar-critical {
-  background: linear-gradient(90deg, #ff2d2d, #ff6b6b);
-  animation: devPulse 1s infinite alternate;
-}
-
-@keyframes devPulse {
-  0% { opacity: 0.8; }
-  100% { opacity: 1; box-shadow: 0 0 8px rgba(255, 45, 45, 0.6); }
-}
-
-.dev-marker {
-  position: absolute;
-  top: -3px;
-  width: 2px;
-  height: calc(100% + 6px);
-  background-color: rgba(255, 255, 255, 0.7);
-  transform: translateX(-1px);
+.dev-segment-draining {
+  box-shadow: 0 0 8px rgba(100, 80, 180, 0.8), 0 0 14px rgba(100, 80, 180, 0.4);
 }
 
 /* Escalation Cards - 3 moves in a row */
@@ -3042,11 +3067,12 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 
 /* Active move - the one that will fire this turn */
 .move-active {
-  border: 3px solid #fff;
+  border: 3px solid rgba(255, 120, 120, 0.8);
+  background-color: rgba(200, 60, 60, 0.35) !important;
   color: white;
   font-size: 2.2vmin;
   transform: scale(1.02);
-  box-shadow: 0 0 12px rgba(255, 255, 255, 0.4);
+  box-shadow: 0 0 12px rgba(255, 100, 100, 0.4);
   z-index: 2;
 }
 
@@ -3073,7 +3099,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   right: 0.3vmin;
 }
 
-/* Move tier label */
+/* Move tier label (kept for backward compat) */
 .move-tier-label {
   font-size: 1.4vmin;
   text-transform: uppercase;
@@ -3280,12 +3306,12 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 }
 
 .structure-icon-selected {
-  outline: 2px solid #ffd700;
+  outline: 2px solid rgb(60, 160, 50);
   outline-offset: 2px;
   border-radius: 50%;
 }
 .structure-icon-selected .structure-icon-img {
-  box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
+  box-shadow: 0 0 8px rgba(60, 160, 50, 0.6);
 }
 
 .structure-build-clickable:hover .structure-icon-img {

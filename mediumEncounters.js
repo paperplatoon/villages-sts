@@ -54,7 +54,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Mega Drain",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(4 * array[index].baseDamage) + array[index].attack} damage. Restore ${array[index].baseHeal*2} health. Reset Dev`
         },
@@ -123,7 +123,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Siege Breaker",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + array[index].defense + array[index].attack} damage. Gain ${array[index].baseScale} defense. Reset Dev`
         },
@@ -197,7 +197,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Soul Consume",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + 2 + array[index].attack} damage. Reset Dev`
         },
@@ -269,7 +269,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Inferno Strike",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Gain ${array[index].baseScale} attack. Reset Dev`
         },
@@ -338,7 +338,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Arsenal Unleash",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset Dev`
         },
@@ -408,7 +408,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Tidal Wave",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + array[index].defense + array[index].attack} damage. Reset Dev`
         },
@@ -478,7 +478,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Broadside",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset Dev`
         },
@@ -553,7 +553,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Siege Smash",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${Math.floor(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
         },
@@ -625,7 +625,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Golden Plunder",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${array[index].baseDamage + array[index].attack} damage 5 times. Steal 20 gold. Reset Dev`
         },
@@ -702,7 +702,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Total War",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*4) + array[index].attack} damage. Reset Dev`
         },
@@ -770,7 +770,7 @@ let mediumSoloEncounters = {
       },
       {
         name: "Siege Assembly",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Build Enemy Watchtower + Barricade. Reset Dev`
         },
@@ -843,7 +843,7 @@ let mediumMultiEncounters = {
       },
       {
         name: "Dive Strike",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage * 3) + 3 + array[index].attack} damage. Reset Dev`
         },
@@ -914,7 +914,7 @@ let mediumMultiEncounters = {
       },
       {
         name: "Deadly Plumage",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage* 3) + array[index].attack} damage. Weaken defense by 1. Reset Dev`
         },
@@ -984,7 +984,7 @@ let mediumMultiEncounters = {
       },
       {
         name: "Full Assault",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
         },
@@ -1051,7 +1051,7 @@ let mediumMultiEncounters = {
       },
       {
         name: "Full Broadside",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${Math.floor(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
         },

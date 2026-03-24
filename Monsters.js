@@ -62,7 +62,7 @@ let opponentMonsters = {
       },
       {
         name: "Catapult Strike",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${((array[index].baseDamage * 2) + 1) + array[index].attack} damage. Reset Dev`
         },
@@ -129,7 +129,7 @@ let opponentMonsters = {
       },
       {
         name: "Seed Explosion",
-        devRequirement: 7,
+        devRequirement: 6,
         text: (state, index, array) => {
           return `Deal ${(array[index].baseDamage*3) + array[index].attack} damage. Reset Dev`
         },

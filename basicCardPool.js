@@ -11,7 +11,7 @@ let cards = {
         cardID: 8,
         name: "Winter Siege",
         text: (state, index, array) => {
-          return `Gain ${array[index].baseBlock + state.playerMonster.defense + (5*array[index].upgrades)} fortification. All enemies lose ${array[index].energyDrain + Math.floor(array[index].upgrades/2)} development` 
+          return `Gain ${array[index].baseBlock + state.playerMonster.defense + (5*array[index].upgrades)} fortification. -[EE:${array[index].energyDrain + Math.floor(array[index].upgrades/2)}] all` 
         },
         minReq: (state, index, array) => {
           return array[index].baseCost;
@@ -78,7 +78,7 @@ let cards = {
         cardID: 8,
         name: "Dampen",
         text: (state, index, array) => {
-                return `All enemies lose ${array[index].energyDestroy + Math.floor(array[index].upgrades)} development` 
+                return `-[EE:${array[index].energyDestroy + Math.floor(array[index].upgrades)}] all` 
         },
         minReq: (state, index, array) => {
           return array[index].baseCost;
@@ -102,7 +102,7 @@ let cards = {
       sanguineshield: {
         cardID: 13,
         name: "Blood Pact Shield",
-        text: (state, index, array) => { return `Enemy gains ${array[index].energyGift} development. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification` },
+        text: (state, index, array) => { return `+[EE:${array[index].energyGift}]. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification` },
         minReq: (state, index, array) => {
           return array[index].baseCost;
         },
@@ -126,7 +126,7 @@ let cards = {
       wallofichor: {
         cardID: 14,
         name: "Wall of Ichor",
-        text: (state, index, array) => { return `Enemy gains ${array[index].energyGift} development. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification` },
+        text: (state, index, array) => { return `+[EE:${array[index].energyGift}]. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification` },
         minReq: (state, index, array) => {
           return array[index].baseCost;
         },
@@ -150,7 +150,7 @@ let cards = {
       shatteringshield: {
         cardID: 15,
         name: "Disruption Shield",
-        text: (state, index, array) => { return `Enemy loses ${array[index].energyDestroy} development. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification` },
+        text: (state, index, array) => { return `-[EE:${array[index].energyDestroy}]. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification` },
         minReq: (state, index, array) => {
           return array[index].baseCost;
         },
@@ -203,7 +203,7 @@ let cards = {
       essencedrain: {
         cardID: 19,
         name: "Essence Drain",
-        text: (state, index, array) => { return `Enemy loses ${array[index].energyDrain} development. Gain ${array[index].baseBlock + state.playerMonster.defense + (array[index].upgrades*5)} fortification` },
+        text: (state, index, array) => { return `-[EE:${array[index].energyDrain}]. Gain ${array[index].baseBlock + state.playerMonster.defense + (array[index].upgrades*5)} fortification` },
         minReq: (state, index, array) => {
           return array[index].baseCost;
         },
@@ -230,7 +230,7 @@ let cards = {
         name: "War Cry",
         text: (stateObj, index, array) => {
           let calculatedDamage = array[index].baseDamage + stateObj.playerMonster.attack + (array[index].upgrades*5)
-          let textString = `Enemy gains ${array[index].energyGift} development. Deal ${calculatedDamage} damage`
+          let textString = `+[EE:${array[index].energyGift}]. Deal ${calculatedDamage} damage`
           if (array[index].baseHits > 1) {
             textString += ` ${(array[index].baseHits)} times`
           }
@@ -332,9 +332,9 @@ let cards = {
         name: "Decimate",
         text: (state, index, array) => { 
           if (array[index].baseHits === 1) {
-            return `Deal ${array[index].baseDamage + (array[index].upgrades*10) + state.playerMonster.attack} damage. Enemy loses ${array[index].energyDrain + array[index].upgrades} development`;
+            return `Deal ${array[index].baseDamage + (array[index].upgrades*10) + state.playerMonster.attack} damage. -[EE:${array[index].energyDrain + array[index].upgrades}]`;
           } else {
-            return `Deal ${array[index].baseDamage + (array[index].upgrades*10) + state.playerMonster.attack} damage ${array[index].baseHits} times. Enemy loses ${array[index].energyDrain + array[index].upgrades} development`
+            return `Deal ${array[index].baseDamage + (array[index].upgrades*10) + state.playerMonster.attack} damage ${array[index].baseHits} times. -[EE:${array[index].energyDrain + array[index].upgrades}]`
           }
       },
       minReq: (state, index, array) => {
@@ -364,7 +364,7 @@ let cards = {
       sabotage: {
         name: "Sabotage",
         text: (state, index, array) => {
-          return `Gain ${array[index].baseBlock + state.playerMonster.defense + (array[index].upgrades*5)} fortification. Enemy loses ${array[index].energyDrain+Math.floor(array[index].upgrades/2)} development`
+          return `Gain ${array[index].baseBlock + state.playerMonster.defense + (array[index].upgrades*5)} fortification. -[EE:${array[index].energyDrain+Math.floor(array[index].upgrades/2)}]`
         },
         minReq: (state, index, array) => {
           return array[index].baseCost;
@@ -390,7 +390,7 @@ let cards = {
         rarity: "rare",
         cardID: 39,
         name: "Thief's Shield",
-        text: (state, index, array) => { return `Enemy loses ${array[index].energyDrain + Math.floor(array[index].upgrades/2)} development. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification for each development drained.` },
+        text: (state, index, array) => { return `-[EE:${array[index].energyDrain + Math.floor(array[index].upgrades/2)}]. Gain ${array[index].baseBlock + (array[index].upgrades*5)} fortification for each [EE] drained.` },
         minReq: (state, index, array) => {
           return array[index].baseCost;
         },
@@ -548,9 +548,9 @@ let cards = {
         elementType: "fire",
         text: (state, index, array) => {
             if (array[index].upgrades < array[index].baseCost) {
-                return `Double your villagers. Remove`
+                return `Double your [E]. Remove`
             } else {
-                return `Double your villagers. Gain ${(array[index].baseBlock * array[index].upgrades) + state.playerMonster.defense} fortification. Remove`
+                return `Double your [E]. Gain ${(array[index].baseBlock * array[index].upgrades) + state.playerMonster.defense} fortification. Remove`
             }
         },
         action: async (stateObj, index, array) => {
@@ -1077,7 +1077,7 @@ let cards = {
     ignite: {
         cardID: 65,
         name: "Ignite",
-        text: (state, index, array) => { return `Enemy gains ${array[index].energyGift} development. Attacks deal +${5 + (array[index].upgrades*5)} damage this turn.` },
+        text: (state, index, array) => { return `+[EE:${array[index].energyGift}]. Attacks deal +${5 + (array[index].upgrades*5)} damage this turn.` },
         minReq: -99,
         baseCost: 0,
         cost:  (state, index, array) => {
@@ -1201,9 +1201,9 @@ let cards = {
         name: "Rewind Time",
         text: (state, index, array) => { 
           if (array[index].upgrades === 0) {
-            return `Destroy all of your opponent's development. Remove`
+            return `Destroy all enemy [E]. Remove`
           } else {
-            return `Destroy all of your opponent's development. Deal ${4*array[index].upgrades} damage. Remove` 
+            return `Destroy all enemy [E]. Deal ${4*array[index].upgrades} damage. Remove` 
           }
         },
         minReq: (state, index, array) => {
@@ -1429,7 +1429,7 @@ let cards = {
         cardID: 1,
         name: "",
         text: (state, index, array) => {
-          return `Gain ${1 + Math.floor(array[index].upgrades/2)} villager${(1 + Math.floor(array[index].upgrades/2)) > 1 ? 's' : ''}`
+          return `+${1 + Math.floor(array[index].upgrades/2)}[E]`
         },
         minReq: -99,
         cost: "energy",

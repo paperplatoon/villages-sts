@@ -305,7 +305,7 @@ let testCardPool = {
     baseHits: 1,
     devDestroy: 1,
     text: (state, index, array) => {
-      return `Deal ${array[index].baseDamage + state.playerMonster.attack} damage. Destroy ${array[index].devDestroy} enemy development`
+      return `Deal ${array[index].baseDamage + state.playerMonster.attack} damage. -[EE:${array[index].devDestroy}]`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -334,7 +334,7 @@ let testCardPool = {
     baseBlock: 12,
     devGift: 1,
     text: (state, index, array) => {
-      return `Gain ${array[index].baseBlock + state.playerMonster.defense} fortification. Enemy gains ${array[index].devGift} development`
+      return `Gain ${array[index].baseBlock + state.playerMonster.defense} fortification. +[EE:${array[index].devGift}]`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -510,10 +510,10 @@ let testCardPool = {
     buildCost: 2,
     baseDamage: 5,
     damageOnDevChange: 5,
-    effectText: "Whenever enemy gains or loses development, deal 5 damage",
+    effectText: "Whenever enemy gains or loses [E], deal 5 damage",
     avatar: "img/avatars/batteringram.png",
     text: (state, index, array) => {
-      return `Whenever enemy gains or loses development, deal ${array[index].baseDamage} damage. (Build cost: ${array[index].buildCost})`
+      return `Whenever enemy gains or loses [E], deal ${array[index].baseDamage} damage. (Build cost: ${array[index].buildCost})`
     },
     minReq: (state, index, array) => { return 0; },
     upgrades: 0,
