@@ -5,7 +5,7 @@ swordSlash: {
     cardID: 24,
     name: "Raiding Party",
     text: (state, index, array) => { 
-        let textString = `Deal ${array[index].baseDamage + (array[index].upgrades*5) + state.playerMonster.strength} damage`;
+        let textString = `Deal ${array[index].baseDamage + (array[index].upgrades*5) + state.playerMonster.attack} damage`;
       if (array[index].baseHits > 1) {
         textString += ` ${array[index].baseHits} times` 
       } 
@@ -47,7 +47,7 @@ swordSlash: {
     cardID: 24,
     name: "Cavalry Charge",
     text: (state, index, array) => { 
-        let textString = `Deal ${array[index].baseDamage + (array[index].upgrades*5) + state.playerMonster.strength} damage`;
+        let textString = `Deal ${array[index].baseDamage + (array[index].upgrades*5) + state.playerMonster.attack} damage`;
       if (array[index].baseHits > 1) {
         textString += ` ${array[index].baseHits} times` 
       } 
@@ -89,7 +89,7 @@ swordSlash: {
     cardID: 24,
     name: "Archer Volley",
     text: (state, index, array) => { 
-        let textString = `Deal ${array[index].baseDamage + (array[index].upgrades*5) + state.playerMonster.strength} damage`;
+        let textString = `Deal ${array[index].baseDamage + (array[index].upgrades*5) + state.playerMonster.attack} damage`;
       if (array[index].baseHits > 1) {
         textString += ` ${array[index].baseHits} times` 
       } 
@@ -131,7 +131,7 @@ swordSlash: {
     cardID: 6,
     name: "Raise Walls",
     text: (state, index, array) => { 
-      return `Gain ${array[index].baseBlock + state.playerMonster.dex + (5*array[index].upgrades)} block` 
+      return `Gain ${array[index].baseBlock + state.playerMonster.defense + (5*array[index].upgrades)} block` 
     },
     minReq: (state, index, array) => {
       return array[index].baseCost;

@@ -8,8 +8,8 @@
 //
 // SYSTEM           | CARD PROPERTY        | FUNCTION TO CALL                         | MODIFIABLE STATE VAR
 // -----------------|----------------------|------------------------------------------|---------------------
-// Damage           | baseDamage, baseHits | dealOpponentDamage(state, dmg, hits, cost, targetType) | strength (adds to dmg)
-// Block            | baseBlock            | gainBlock(state, amount, cost)            | dex (adds to block)
+// Damage           | baseDamage, baseHits | dealOpponentDamage(state, dmg, hits, cost, targetType) | attack (adds to dmg)
+// Block            | baseBlock            | gainBlock(state, amount, cost)            | defense (adds to block)
 // Structures       | cardType:"structure", buildCost | createStructure(state, structDef, "player", buildCost) | buildCost on card
 // Build Progress   | buildAmount          | buildSelectedStructure(state, amount)     | selectedPlayerStructure
 // Treason          | treasonAmount        | applyTreason(state, amount)               | treason on enemy (ticks up each turn)
@@ -37,7 +37,7 @@ let testCardPool = {
     baseDamage: 5,
     baseHits: 1,
     text: (state, index, array) => {
-      return `Deal ${array[index].baseDamage + state.playerMonster.strength} damage`
+      return `Deal ${array[index].baseDamage + state.playerMonster.attack} damage`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -64,7 +64,7 @@ let testCardPool = {
     rarity: "starter",
     baseBlock: 5,
     text: (state, index, array) => {
-      return `Gain ${array[index].baseBlock + state.playerMonster.dex} fortification`
+      return `Gain ${array[index].baseBlock + state.playerMonster.defense} fortification`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -92,7 +92,7 @@ let testCardPool = {
     baseDamage: 3,
     projectileTarget: "opponent",
     effectText: "Deals 3 damage to targeted enemy each turn",
-    avatar: "img/structures/watchtower.png",
+    avatar: "img/avatars/guardtower.png",
     onTurnEffect: structureDefinitions.testTower.onTurnEffect,
     text: (state, index, array) => {
       return `Deals ${array[index].baseDamage} damage each turn. (Build cost: ${array[index].buildCost})`
@@ -117,7 +117,7 @@ let testCardPool = {
     buildCost: 2,
     baseBlock: 6,
     effectText: "Grants 6 fortification each turn",
-    avatar: "img/structures/barricade.png",
+    avatar: "img/avatars/greatwall.png",
     onTurnEffect: structureDefinitions.testWall.onTurnEffect,
     text: (state, index, array) => {
       return `Grants ${array[index].baseBlock} fortification each turn. (Build cost: ${array[index].buildCost})`
@@ -145,7 +145,7 @@ let testCardPool = {
     escalatingDamage: 2,
     projectileTarget: "opponent-all",
     effectText: "Deals 2 damage to all enemies. Doubles each turn",
-    avatar: "img/structures/watchtower.png",
+    avatar: "img/avatars/escalatingcannon.png",
     onTurnEffect: structureDefinitions.escalatingCannon.onTurnEffect,
     text: (state, index, array) => {
       return `Deals ${array[index].baseDamage} damage to all enemies each turn, doubling each turn. (Build cost: ${array[index].buildCost})`
@@ -170,7 +170,7 @@ let testCardPool = {
     name: "Fortress Wall",
     buildCost: 3,
     effectText: "Doubles your fortification at end of turn",
-    avatar: "img/structures/barricade.png",
+    avatar: "img/avatars/fortifyworkshop.png",
     onTurnEffect: structureDefinitions.fortressWall.onTurnEffect,
     text: (state, index, array) => {
       return `Doubles your fortification at end of turn. (Build cost: ${array[index].buildCost})`
@@ -195,7 +195,7 @@ let testCardPool = {
     name: "War Drums",
     buildCost: 3,
     effectText: "Your attacks hit an extra time",
-    avatar: "img/structures/traininggrounds.png",
+    avatar: "img/avatars/wardrum.png",
     onTurnEffect: structureDefinitions.warDrums.onTurnEffect,
     text: (state, index, array) => {
       return `Your attacks hit an extra time. (Build cost: ${array[index].buildCost})`
@@ -220,7 +220,7 @@ let testCardPool = {
     name: "Siege Workshop",
     buildCost: 4,
     effectText: "Your attacks deal double damage",
-    avatar: "img/structures/watchtower.png",
+    avatar: "img/avatars/trebuchet.png",
     onTurnEffect: structureDefinitions.siegeWorkshop.onTurnEffect,
     text: (state, index, array) => {
       return `Your attacks deal double damage. (Build cost: ${array[index].buildCost})`
@@ -248,7 +248,7 @@ let testCardPool = {
     baseHits: 1,
     buildAmount: 1,
     text: (state, index, array) => {
-      return `Deal ${array[index].baseDamage + state.playerMonster.strength} damage. Build ${array[index].buildAmount} on selected structure`
+      return `Deal ${array[index].baseDamage + state.playerMonster.attack} damage. Build ${array[index].buildAmount} on selected structure`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -276,7 +276,7 @@ let testCardPool = {
     baseDamage: 12,
     baseHits: 1,
     text: (state, index, array) => {
-      return `Deal ${array[index].baseDamage + state.playerMonster.strength} damage to ALL enemies`
+      return `Deal ${array[index].baseDamage + state.playerMonster.attack} damage to ALL enemies`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -305,7 +305,7 @@ let testCardPool = {
     baseHits: 1,
     devDestroy: 1,
     text: (state, index, array) => {
-      return `Deal ${array[index].baseDamage + state.playerMonster.strength} damage. Destroy ${array[index].devDestroy} enemy development`
+      return `Deal ${array[index].baseDamage + state.playerMonster.attack} damage. Destroy ${array[index].devDestroy} enemy development`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -334,7 +334,7 @@ let testCardPool = {
     baseBlock: 12,
     devGift: 1,
     text: (state, index, array) => {
-      return `Gain ${array[index].baseBlock + state.playerMonster.dex} fortification. Enemy gains ${array[index].devGift} development`
+      return `Gain ${array[index].baseBlock + state.playerMonster.defense} fortification. Enemy gains ${array[index].devGift} development`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -417,7 +417,7 @@ let testCardPool = {
     baseHits: 1,
     text: (state, index, array) => {
       let cost = getEffectiveTribute(state, array[index].tribute);
-      return `Pay ${cost} tribute. Deal ${array[index].baseDamage + state.playerMonster.strength} damage`
+      return `Pay ${cost} tribute. Deal ${array[index].baseDamage + state.playerMonster.attack} damage`
     },
     minReq: (state, index, array) => { return array[index].baseCost; },
     upgrades: 0,
@@ -446,7 +446,7 @@ let testCardPool = {
     baseHeal: 1,
     healOnCardPlay: 1,
     effectText: "Heal 1 HP every time you play a card",
-    avatar: "img/structures/healingwell.png",
+    avatar: "img/avatars/healershut.png",
     text: (state, index, array) => {
       return `Heal ${array[index].baseHeal} HP every time you play a card. (Build cost: ${array[index].buildCost})`
     },
@@ -472,7 +472,7 @@ let testCardPool = {
     baseDamage: 4,
     projectileTarget: "opponent",
     effectText: "Deals 4 damage to targeted enemy each turn",
-    avatar: "img/structures/watchtower.png",
+    avatar: "img/avatars/catapult.png",
     onTurnEffect: structureDefinitions.catapult.onTurnEffect,
     text: (state, index, array) => {
       let existing = state.playerStructures.find(s => s.name === "Catapult" && s.buildProgress >= s.buildCost);
@@ -511,7 +511,7 @@ let testCardPool = {
     baseDamage: 5,
     damageOnDevChange: 5,
     effectText: "Whenever enemy gains or loses development, deal 5 damage",
-    avatar: "img/structures/watchtower.png",
+    avatar: "img/avatars/batteringram.png",
     text: (state, index, array) => {
       return `Whenever enemy gains or loses development, deal ${array[index].baseDamage} damage. (Build cost: ${array[index].buildCost})`
     },
@@ -634,12 +634,12 @@ let testPlayerMonster = {
   opponentMoveIndex: false,
   maxHP: 50,
   currentHP: 50,
-  strength: 0,
-  dex: 0,
-  tempStrength: 0,
-  tempDex: 0,
-  fightStrength: 0,
-  fightDex: 0,
+  attack: 0,
+  defense: 0,
+  tempAttack: 0,
+  tempDefense: 0,
+  fightAttack: 0,
+  fightDefense: 0,
   turnEnergy: 3,
   turnCards: 6,
   avatar: "img/watertongue.png",

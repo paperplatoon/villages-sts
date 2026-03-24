@@ -63,13 +63,13 @@ let structureDefinitions = {
     name: "Training Grounds",
     owner: "player",
     buildCost: 4,
-    baseMilitia: 1,
-    effectText: "Grants 1 militia each turn",
+    baseAttackBuff: 1,
+    effectText: "Grants 1 attack each turn",
     avatar: "img/structures/traininggrounds.png",
     onTurnEffect: async function(stateObj, index, structures) {
       stateObj = immer.produce(stateObj, (newState) => {
-        newState.playerMonster.fightStrength += structures[index].baseMilitia;
-        newState.playerMonster.strength += structures[index].baseMilitia;
+        newState.playerMonster.fightAttack += structures[index].baseAttackBuff;
+        newState.playerMonster.attack += structures[index].baseAttackBuff;
       });
       return stateObj;
     }

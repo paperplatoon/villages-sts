@@ -1533,7 +1533,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   font-size: 1.5vmin;
 }
 
-#gainstrengthenergy {
+#gainattackenergy {
   background-image: url(img/icons/status/energychange.png);
   filter: invert(92%) sepia(0%) saturate(933%) hue-rotate(350deg) brightness(98%) contrast(88%);
   position: relative;
@@ -1543,14 +1543,14 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   width: 2.5vw;
 }
 
-.gainstrengthenergynumber {
+.gainattackenergynumber {
   color: blue;
   margin-block-start: 0;
   margin-block-end: 0;
   font-size: 2vmin;
 }
 
-#backstepdamagepopup, #blockkeeppopup, #cantselfdamagepopup, #reformingshieldpopup, #gainstrengthenergypopup {
+#backstepdamagepopup, #blockkeeppopup, #cantselfdamagepopup, #reformingshieldpopup, #gainattackenergypopup {
     display: none;
     position: absolute;
     top: 6%;

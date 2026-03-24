@@ -105,7 +105,7 @@ let gameStartState = {
   comboPerTurn: 0,
   blockKeep: false,
   cantSelfDamage: false,
-  gainStrengthDevChange: 0,
+  gainAttackDevChange: 0,
   damageOnDevChange: 0,
   backstepDamage: false,
   healOpponentBlocked: false,
@@ -702,7 +702,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
   if (stateObj.extraAttackHit) {
     attackNumber = attackNumber + 1;
   }
-  let calculatedDamage = (damageNumber + stateObj.playerMonster.strength) * attackNumber;
+  let calculatedDamage = (damageNumber + stateObj.playerMonster.attack) * attackNumber;
 
   let devChanges = [];
 
@@ -744,7 +744,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
             } else if (monsterObj.shakedown) {
               newState.gold += monsterObj.shakedown;
             } else if (monsterObj.enrage) {
-              monsterObj.strength += monsterObj.enrage;
+              monsterObj.attack += monsterObj.enrage;
             }
             monsterObj.currentHP -= takenDamage;
             monsterObj.encounterBlock = 0;
@@ -766,7 +766,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
           } else if (monsterObj.shakedown) {
             newState.gold += monsterObj.shakedown;
           } else if (monsterObj.enrage) {
-            monsterObj.strength += monsterObj.enrage;
+            monsterObj.attack += monsterObj.enrage;
           }
           monsterObj.currentHP -= calculatedDamage;
         } else if (monsterObj.encounterBlock >= calculatedDamage) {
@@ -784,7 +784,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
           } else if (monsterObj.shakedown) {
             newState.gold += monsterObj.shakedown;
           } else if (monsterObj.enrage) {
-            monsterObj.strength += monsterObj.enrage;
+            monsterObj.attack += monsterObj.enrage;
           }
           monsterObj.currentHP -= takenDamage;
           monsterObj.encounterBlock = 0;
@@ -809,13 +809,13 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
     console.log("all is true")
     for (let i = 0; i < stateObj.opponentMonster.length; i++) {
       if (stateObj.opponentMonster[i].prickles) {
-        stateObj = await dealPlayerDamage(stateObj, stateObj.opponentMonster[i].prickles-stateObj.opponentMonster[0].strength, 0, false, 1, false)
+        stateObj = await dealPlayerDamage(stateObj, stateObj.opponentMonster[i].prickles-stateObj.opponentMonster[0].attack, 0, false, 1, false)
       }
     }
   } else {
     if (stateObj.opponentMonster[targetIndex].prickles) {
       console.log("has one prickle")
-      stateObj = await dealPlayerDamage(stateObj, stateObj.opponentMonster[targetIndex].prickles-stateObj.opponentMonster[0].strength, 0, false, 1, false)
+      stateObj = await dealPlayerDamage(stateObj, stateObj.opponentMonster[targetIndex].prickles-stateObj.opponentMonster[0].attack, 0, false, 1, false)
     }
   }
   return stateObj;
@@ -826,7 +826,7 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
   if (animation === true) {
     // Pre-compute damage for fireball size
     let monsterObj = stateObj.opponentMonster[monsterIndex];
-    let totalDamage = (damageNumber + monsterObj.strength) * attackNumber;
+    let totalDamage = (damageNumber + monsterObj.attack) * attackNumber;
 
     // Pick fireball size
     let fireballId = "enemy-fireball-" + monsterIndex;
@@ -877,7 +877,7 @@ async function dealPlayerDamage(stateObj, damageNumber, monsterIndex = 0, energy
   
   stateObj = immer.produce(stateObj, (newState) => {
     let monsterObj = newState.opponentMonster[monsterIndex]
-    calculatedDamage = ((damageNumber + monsterObj.strength) * attackNumber);
+    calculatedDamage = ((damageNumber + monsterObj.attack) * attackNumber);
     if (calculatedDamage > 0) {
       if (newState.playerMonster.encounterBlock == 0) {
         console.log("you took " + calculatedDamage + " damage")
@@ -1068,6 +1068,7 @@ async function loseDevelopment(stateObj, devToLose, targetIndex=0, playerTrigger
     await changeState(stateObj);
   }
 
+  stateObj = await pickOpponentMove(stateObj);
   return stateObj
 }
 
@@ -1114,6 +1115,7 @@ async function gainDevelopment(stateObj, devToGain, targetIndex=0, playerTrigger
     await changeState(stateObj);
   }
 
+  stateObj = await pickOpponentMove(stateObj);
   return stateObj
 }
 
@@ -1137,16 +1139,16 @@ async function energyGift(stateObj, devToGain, villagerCost=false, all=false) {
       if (newState.devGiftBlock > 0) {
         newState.playerMonster.encounterBlock += newState.devGiftBlock;
       }
-      if (newState.gainStrengthDevChange > 0) {
-        newState.playerMonster.strength += newState.gainStrengthDevChange;
-        newState.playerMonster.fightStrength += newState.gainStrengthDevChange;
+      if (newState.gainAttackDevChange > 0) {
+        newState.playerMonster.attack += newState.gainAttackDevChange;
+        newState.playerMonster.fightAttack += newState.gainAttackDevChange;
       }
 
   })
 
   if (stateObj.devGiftAttack > 0) {
     let targetIndex = Math.floor(Math.random() * (stateObj.opponentMonster.length))
-    stateObj = await dealOpponentDamage(stateObj, (stateObj.devGiftAttack-stateObj.playerMonster.strength), attackNumber=1, all=true);
+    stateObj = await dealOpponentDamage(stateObj, (stateObj.devGiftAttack-stateObj.playerMonster.attack), attackNumber=1, all=true);
   }
 
   return stateObj
@@ -1209,9 +1211,9 @@ async function destroyEnergy(stateObj, devToDestroy, villagerCost=false, all=fal
       if (villagerCost) {
         newState.playerMonster.encounterEnergy -= villagerCost
       }
-      if (newState.gainStrengthDevChange > 0) {
-        newState.playerMonster.strength += newState.gainStrengthDevChange;
-        newState.playerMonster.fightStrength += newState.gainStrengthDevChange;
+      if (newState.gainAttackDevChange > 0) {
+        newState.playerMonster.attack += newState.gainAttackDevChange;
+        newState.playerMonster.fightAttack += newState.gainAttackDevChange;
       }
   })
   return stateObj
@@ -1221,14 +1223,14 @@ function gainBlock(stateObj, blockToGain, energyCost=false, blockNumber=1) {
   let blockEl = document.querySelector("#playerStats .village-block");
   if (blockEl) blockEl.classList.add("block-gain-pulse");
   stateObj = immer.produce(stateObj, (newState) => {
-    newState.playerMonster.encounterBlock += (blockToGain + stateObj.playerMonster.dex)*blockNumber;
+    newState.playerMonster.encounterBlock += (blockToGain + stateObj.playerMonster.defense)*blockNumber;
     console.log("player is gaining " + blockToGain + " block")
     if (energyCost) {
       newState.playerMonster.encounterEnergy -= energyCost
     }
     newState.opponentMonster.forEach((monsterObj) => {
-      if (monsterObj.strengthOnBlock && monsterObj.strengthOnBlock > 0) {
-        monsterObj.strength += monsterObj.strengthOnBlock
+      if (monsterObj.attackOnBlock && monsterObj.attackOnBlock > 0) {
+        monsterObj.attack += monsterObj.attackOnBlock
       }
     })
   })
@@ -1378,7 +1380,7 @@ async function dealSelfDamage(stateObj, damageToDo) {
       }
       if (newState.selfDamageAttack > 0) {
         let targetIndex = Math.floor(Math.random() * (newState.opponentMonster.length))
-        let tempState = await dealOpponentDamage(newState, (newState.selfDamageAttack-stateObj.playerMonster.strength), attackNumber=1, all=false, specifiedIndex=targetIndex);
+        let tempState = await dealOpponentDamage(newState, (newState.selfDamageAttack-stateObj.playerMonster.attack), attackNumber=1, all=false, specifiedIndex=targetIndex);
         newState.opponentMonster[targetIndex].currentHP = tempState.opponentMonster[targetIndex].currentHP;
         newState.opponentMonster[targetIndex].encounterBlock = tempState.opponentMonster[targetIndex].encounterBlock;
       }
@@ -1801,24 +1803,24 @@ async function renderPlayerMonster(stateObj) {
     playerStatusDiv.appendChild(statusDiv);
   }
 
-  if (stateObj.gainStrengthDevChange > 0) {
+  if (stateObj.gainAttackDevChange > 0) {
     let statusDiv = document.createElement("Div");
-    statusDiv.setAttribute("id", "gainstrengthenergy");
+    statusDiv.setAttribute("id", "gainattackenergy");
     let shieldNumber = document.createElement("P");
-    shieldNumber.classList.add("gainstrengthenergynumber");
-    shieldNumber.textContent = stateObj.gainStrengthDevChange;
+    shieldNumber.classList.add("gainattackenergynumber");
+    shieldNumber.textContent = stateObj.gainAttackDevChange;
     statusDiv.append(shieldNumber);
     statusDiv.addEventListener('mouseover', function() {
-      const statusText = document.querySelector("#gainstrengthenergypopup");
+      const statusText = document.querySelector("#gainattackenergypopup");
       statusText.style.display = 'block';
     });
     statusDiv.addEventListener('mouseout', function() {
-      const statusText = document.querySelector("#gainstrengthenergypopup");
+      const statusText = document.querySelector("#gainattackenergypopup");
       statusText.style.display = 'none';
     });
     let statusTextDiv = document.createElement("Div");
-    statusTextDiv.setAttribute("id", "gainstrengthenergypopup");
-    statusTextDiv.textContent = `Gain ${stateObj.gainStrengthDevChange} militia whenever you change an opponent's development`;
+    statusTextDiv.setAttribute("id", "gainattackenergypopup");
+    statusTextDiv.textContent = `Gain ${stateObj.gainAttackDevChange} attack whenever you change an opponent's development`;
     playerStatusDiv.appendChild(statusTextDiv);
     playerStatusDiv.appendChild(statusDiv);
   }
@@ -2051,7 +2053,7 @@ function renderChoiceDiv(stateObj, classesArray, imgSrcString, divTextString, tr
 // Card-only properties (cardID, text, action, cost, minReq, etc.) are excluded.
 let structurePropertyKeys = [
   "name", "owner", "effectText", "avatar", "projectileTarget",
-  "buildCost", "baseDamage", "baseBlock", "baseHeal", "basePoison", "baseMilitia", "baseHPGain",
+  "buildCost", "baseDamage", "baseBlock", "baseHeal", "basePoison", "baseAttackBuff", "baseHPGain",
   "escalatingDamage", "damageOnDevChange", "healOnCardPlay",
   "singleUse", "maxHP", "currentHP", "encounterBlock",
 ];
@@ -2079,7 +2081,7 @@ function createStructure(stateObj, structureDef, side) {
       if (newStructure.baseBlock) newStructure.effectText = `Grants ${newStructure.baseBlock} fortification each turn`;
       if (newStructure.baseHeal) newStructure.effectText = `Restores ${newStructure.baseHeal} HP each turn`;
       if (newStructure.basePoison) newStructure.effectText = `Applies ${newStructure.basePoison} poison to targeted enemy each turn`;
-      if (newStructure.baseMilitia) newStructure.effectText = `Grants ${newStructure.baseMilitia} militia each turn`;
+      if (newStructure.baseAttackBuff) newStructure.effectText = `Grants ${newStructure.baseAttackBuff} attack each turn`;
       if (newStructure.baseHPGain) newStructure.effectText = `Increases max HP by ${newStructure.baseHPGain} and heals ${newStructure.baseHPGain}`;
       if (newStructure.healOnCardPlay) newStructure.effectText = `Heal ${newStructure.healOnCardPlay} HP every time you play a card`;
       if (newStructure.damageOnDevChange) newStructure.effectText = `Whenever enemy gains or loses development, deal ${newStructure.damageOnDevChange} damage`;
@@ -2289,9 +2291,9 @@ async function fireStructureEffects(stateObj, side) {
 
         // Pre-compute HP preview for visual update at impact
         let structDmg = struct.baseDamage || struct.escalatingDamage || 0;
-        // Structures using dealOpponentDamage get militia bonus; direct damage ones don't
+        // Structures using dealOpponentDamage get attack bonus; direct damage ones don't
         if (struct.projectileTarget === "opponent" && structDmg > 0) {
-          structDmg += stateObj.playerMonster.strength;
+          structDmg += stateObj.playerMonster.attack;
           if (stateObj.doubleAttackDamage) structDmg *= 2;
         }
 
@@ -2394,14 +2396,14 @@ function resetAfterFight(stateObj) {
   }
 
   stateObj = immer.produce(stateObj, (newState) => {
-    newState.playerMonster.strength -= newState.playerMonster.tempStrength;
-    newState.playerMonster.tempStrength = 0;
-    newState.playerMonster.strength -= newState.playerMonster.fightStrength;
-    newState.playerMonster.fightStrength = 0;
-    newState.playerMonster.dex -= newState.playerMonster.tempDex;
-    newState.playerMonster.tempDex = 0;
-    newState.playerMonster.dex -= newState.playerMonster.fightDex;
-    newState.playerMonster.fightDex = 0;
+    newState.playerMonster.attack -= newState.playerMonster.tempAttack;
+    newState.playerMonster.tempAttack = 0;
+    newState.playerMonster.attack -= newState.playerMonster.fightAttack;
+    newState.playerMonster.fightAttack = 0;
+    newState.playerMonster.defense -= newState.playerMonster.tempDefense;
+    newState.playerMonster.tempDefense = 0;
+    newState.playerMonster.defense -= newState.playerMonster.fightDefense;
+    newState.playerMonster.fightDefense = 0;
     newState.playerMonster.encounterBlock = 0;
 
     newState.fightHealCount = 0;
@@ -2424,7 +2426,7 @@ function resetAfterFight(stateObj) {
     newState.blockKeep = false;
     newState.cantSelfDamage = false;
     newState.backstepDamage = false;
-    newState.gainStrengthDevChange = 0;
+    newState.gainAttackDevChange = 0;
     newState.damageOnDevChange = 0;
     newState.cardsPerTurn = 0;
     newState.combatTurnNumber = 0;
@@ -2543,7 +2545,7 @@ function setUpEncounter(stateObj, isBoss=false) {
     newState.blockKeep = false;
     newState.cantSelfDamage = false;
     newState.backstepDamage = false;
-    newState.gainStrengthDevChange = 0;
+    newState.gainAttackDevChange = 0;
     newState.damageOnDevChange = 0;
     newState.comboPerTurn = 0;
     newState.combatTurnNumber = 1;
@@ -2580,9 +2582,9 @@ function setUpEncounter(stateObj, isBoss=false) {
   });
 
   stateObj = immer.produce(stateObj, (newState) => {
-    newState.playerMonster.tempStrength = 0;
-    newState.playerMonster.fightStrength = 0;
-    newState.playerMonster.tempDex = 0;
+    newState.playerMonster.tempAttack = 0;
+    newState.playerMonster.fightAttack = 0;
+    newState.playerMonster.tempDefense = 0;
     newState.playerMonster.encounterBlock = 0;
     newState.opponentMonster.forEach(function (monster, index) {
       newState.opponentMonster[index].development = 0;
@@ -3184,7 +3186,7 @@ function assassinTraining(stateObj) {
 async function increaseDexEvent(stateObj, statusToChange=false, valueToPass) {
   stateObj = immer.produce(stateObj, (newState) => {
     newState.eventUsed = true;
-    newState.playerMonster.dex += valueToPass;
+    newState.playerMonster.defense += valueToPass;
     newState.status = Status.OverworldMap
     newState.townMapSquares[newState.playerHere] = "completed"
   })
@@ -3242,7 +3244,7 @@ async function renderLevelUp(stateObj) {
 
 function increaseStrengthEvent(stateObj) {
   stateObj = immer.produce(stateObj, (newState) => {
-    newState.playerMonster.strength += 1;
+    newState.playerMonster.attack += 1;
     newState.status = Status.OverworldMap
     newState.townMapSquares[newState.playerHere] = "completed"
   })
@@ -4804,10 +4806,10 @@ async function endTurnIncrement(stateObj) {
   // --- STEP 2: Apply all state changes (pure math, no animation) ---
   stateObj = immer.produce(stateObj, (newState) => {
 
-    newState.playerMonster.strength -= newState.playerMonster.tempStrength;
-    newState.playerMonster.dex -= newState.playerMonster.tempDex;
-    newState.playerMonster.tempStrength = 0;
-    newState.playerMonster.tempDex = 0;
+    newState.playerMonster.attack -= newState.playerMonster.tempAttack;
+    newState.playerMonster.defense -= newState.playerMonster.tempDefense;
+    newState.playerMonster.tempAttack = 0;
+    newState.playerMonster.tempDefense = 0;
     newState.cardsPerTurn = 0;
     newState.comboPerTurn = 0;
     newState.combatTurnNumber += 1;
@@ -4818,7 +4820,7 @@ async function endTurnIncrement(stateObj) {
         monsterObj.hunted -= 1;
       }
       if (monsterObj.inflame) {
-        monsterObj.strength += monsterObj.inflame;
+        monsterObj.attack += monsterObj.inflame;
       }
       if (monsterObj.poison > 0) {
         monsterObj.currentHP -= monsterObj.poison;

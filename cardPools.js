@@ -13,15 +13,15 @@ let fireCardPool = {
     hammerandtongs: {...cards.hammerandtongs},
     expertsforge: {...cards.expertsforge},
     sunlight: {...cards.sunlight},
-    gainstrength: {...cards.gainstrength},
+    gainattack: {...cards.gainattack},
     expand: {...cards.expand},
 
     makeshiftforge: {...cards.makeshiftforge},
-    gainstrengthtemp: {...cards.gainstrengthtemp},
-    gaindextemp: {...cards.gaindextemp},
+    gainattacktemp: {...cards.gainattacktemp},
+    gaindefensetemp: {...cards.gaindefensetemp},
 //MISC ABILITIES
 // ------------------------------------------  12
-    //strength scaling - 4
+    //attack scaling - 4
     cursedritual: {...cards.cursedritual},
     ritual: {...cards.ritual},
     brandingiron: {...cards.brandingiron},
@@ -64,7 +64,7 @@ let fireCardPool = {
     banish: {...cards.banish},
     insight: {...cards.insight},
     clarity: {...cards.clarity},
-    //strength-scalers -3 
+    //attack-scalers -3 
     // finisher: {...cards.flurryfinisher},
     explode: {...cards.explode},
     fireball: {...cards.fireball},
@@ -151,8 +151,8 @@ let fireCardPool = {
     expand: {...cards.expand},
     buildingflame: {...cards.buildingflame},
     makeshiftforge: {...cards.makeshiftforge},
-    gainstrengthtemp: {...cards.gainstrengthtemp},
-    gaindextemp: {...cards.gaindextemp},
+    gainattacktemp: {...cards.gainattacktemp},
+    gaindefensetemp: {...cards.gaindefensetemp},
     
     //draw and recall - 4
     darkknowledge: {...cards.darkknowledge},
@@ -279,10 +279,10 @@ let simpleCardPool = {
     hammerandtongs: {...cards.hammerandtongs},
     expertsforge: {...cards.expertsforge},
     sunlight: {...cards.sunlight},
-    gainstrength: {...cards.gainstrength},
+    gainattack: {...cards.gainattack},
     expand: {...cards.expand},
 
-    //strength
+    //attack
     ritual: {...cards.ritual},
     hypertrain: {...cards.hypertrain},
 
@@ -310,7 +310,7 @@ let simpleCardPool = {
     honeclaws: {...cards.honeclaws},
     clarity: {...cards.clarity},
     // generosity: {...cards.generosity},
-    //strength-scalers -3 
+    //attack-scalers -3 
     explode: {...cards.explode},
     fireball: {...cards.fireball},
     //energy effects - 3

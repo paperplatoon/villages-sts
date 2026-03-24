@@ -4,7 +4,7 @@
 A Slay the Spire-inspired card game with a village/kingdom warfare theme. Vanilla JS + Immer.js, no framework.
 
 ## Ongoing Conversion: Creatures → Villages
-This game was originally built around creature-vs-creature battles with energy systems. It is being converted to village-vs-village warfare. The mechanics are similar but the aesthetics and naming are different. Many legacy names remain in the code from the creature era — variable names like `strength`, `dex`, `playerMonster`, `opponentMonster`, function names like `energyGift`, `opponentGainEnergy`, CSS classes like `.monster-block`, `.monster-hp`, and UI text. These should be updated to village-themed equivalents over time, but legacy aliases must be preserved for backward compatibility until all references are migrated.
+This game was originally built around creature-vs-creature battles with energy systems. It is being converted to village-vs-village warfare. The mechanics are similar but the aesthetics and naming are different. Many legacy names remain in the code from the creature era — variable names like `playerMonster`, `opponentMonster`, function names like `energyGift`, `opponentGainEnergy`, CSS classes like `.monster-block`, `.monster-hp`, and UI text. These should be updated to village-themed equivalents over time, but legacy aliases must be preserved for backward compatibility until all references are migrated. (`strength`/`dex` have been renamed to `attack`/`defense`.)
 
 ## Core Design Philosophy: Emergent Synergies
 The most important principle: **cards interact with each other through shared properties and centralized resolution functions, creating multiplicative combos.**
@@ -12,7 +12,7 @@ The most important principle: **cards interact with each other through shared pr
 ### The Pattern
 1. **Cards declare base properties** as object fields: `baseDamage`, `baseBlock`, `baseHeal`, `baseHits`, `energyDrain`, etc.
 2. **Central functions resolve effects** and apply all modifiers automatically:
-   - `dealOpponentDamage(stateObj, damage, attackNumber, energyCost, targetType)` — adds militia (strength), checks hunted (2x), applies structure bonuses (doubleAttackDamage, extraAttackHit), triggers enemy traits (deflate, angry, shakedown, enrage)
+   - `dealOpponentDamage(stateObj, damage, attackNumber, energyCost, targetType)` — adds attack buff, checks hunted (2x), applies structure bonuses (doubleAttackDamage, extraAttackHit), triggers enemy traits (deflate, angry, shakedown, enrage)
    - `dealPlayerDamage(stateObj, damage, index, ...)` — enemy damage to player
    - `healPlayer(stateObj, amount)` — player healing
 3. **New mechanics = new state flags or properties**, not new resolution logic. Structures set flags like `doubleAttackDamage`, `extraAttackHit`, `doubleBlock`. Central functions check these flags.
@@ -31,7 +31,7 @@ The most important principle: **cards interact with each other through shared pr
   - Block: `gainBlock()`
 - Add new combat modifiers as state flags checked in the central functions
 - Use existing properties (`baseDamage`, `baseHits`, etc.) so cards automatically benefit from the modifier ecosystem
-- Card `text` functions should dynamically calculate displayed values (e.g., `baseDamage + strength`) so the UI always shows the actual damage
+- Card `text` functions should dynamically calculate displayed values (e.g., `baseDamage + attack`) so the UI always shows the actual damage
 - **NOTE:** The real encounter files (`easyEncounters.js`, `mediumEncounters.js`, `hardEncounters.js`, `bossEncounters.js`) still have ~280 direct `development` modifications that need to be routed through `gainDevelopment()`/`loseDevelopment()`. `EnemyTesting.js` has already been updated.
 
 ### Passive vs. Active Structures
@@ -63,9 +63,9 @@ The most important principle: **cards interact with each other through shared pr
 |---|---|
 | Villagers (player energy) | `encounterEnergy` |
 | Development (enemy energy, 0-7) | `development` |
-| Militia (player strength) | `strength` / `fightStrength` |
-| Walls (player dex) | `dex` / `fightDex` |
-| Fortification (block) | `encounterBlock` |
+| Attack (damage buff) | `attack` / `fightAttack` |
+| Defense (block buff) | `defense` / `fightDefense` |
+| Block | `encounterBlock` |
 
 ## UI Preferences
 - **Minimal UI** — Avoid redundant labels, headers, and explanatory text. Let visuals and context communicate rather than adding extra words. If a card name already tells you what it builds, the card text doesn't need to repeat it. If structures are visually obvious, they don't need a "Your Structures" header.
@@ -127,5 +127,5 @@ The only reliable projectile pattern is **pre-created divs + CSS keyframe animat
 - Fix player card animations so they deal right to left
 - add card rarity system
 - Change encounter enemies to be more like villages and less like craetures.
--come up with names for strength, dex,  etc
+- ~~come up with names for strength, dex~~ (done: renamed to attack/defense)
 - Route remaining ~280 direct `development` modifications in encounter files (`easyEncounters.js`, `mediumEncounters.js`, `hardEncounters.js`, `bossEncounters.js`) through `gainDevelopment()`/`loseDevelopment()`
