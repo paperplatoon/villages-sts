@@ -62,7 +62,7 @@ The most important principle: **cards interact with each other through shared pr
 | Game Term | Internal Variable |
 |---|---|
 | Villagers (player energy) | `encounterEnergy` |
-| Development (enemy energy, 0-7) | `development` |
+| Development (enemy energy, 0-6) | `development` |
 | Attack (damage buff) | `attack` / `fightAttack` |
 | Defense (block buff) | `defense` / `fightDefense` |
 | Block | `encounterBlock` |
@@ -86,6 +86,7 @@ The most important principle: **cards interact with each other through shared pr
 - **All animations must COMPLETE before any `changeState` call.** The sequence is always: play animation → `await pause()` → apply state via `immer.produce` → `changeState` to render.
 - **Never put animation code inside functions that also call `changeState`.** If a function needs both animation and state changes, animate first, then change state.
 - **Never use `async` inside `immer.produce`.** Immer producers are synchronous. `await` inside a producer causes the producer to return before the await resolves, creating race conditions with DOM animations.
+- **State must be fully resolved before `changeState`.** If you change a field that other fields derive from (e.g., `development` → `opponentMoveIndex`), update the derived fields *immediately* — not after a later `changeState`. Every `changeState` call rebuilds the entire DOM from `stateObj`, so any stale derived state will briefly render on screen, causing flicker.
 
 ### Projectile Animation Pattern
 The only reliable projectile pattern is **pre-created divs + CSS keyframe animations**:

@@ -1043,9 +1043,23 @@ function healPlayer(stateObj, amountToHeal, energyCost=false) {
 
 const HAMMER_IMG = '<img src="img/hammer.png" class="inline-hammer">';
 function formatCardText(text) {
+  // Mark energy token lines BEFORE HTML replacement (easier to regex on raw tokens)
+  // Trailing: "Deal 5 damage. +[EE:1]" or "...fortification. -[EE:2] all"
+  text = text.replace(/\.\s*([+\-]\[EE[:\d]*\](?:\s*all)?)$/, '|||$1');
+  text = text.replace(/\.\s*(Reset \[EE\])$/, '|||$1');
+  text = text.replace(/\.\s*(Lose all \[EE\])$/, '|||$1');
+  // Leading: "+[EE:2]. Gain 5 fortification"
+  text = text.replace(/^([+\-]\[EE[:\d]*\])\.\s*/, '$1|||');
+  // Standalone: "-[EE:1] all" (entire text is just the token)
+  // No separator needed — it's the whole line
+
+  // Token replacement
   text = text.replace(/\[EE:(\d+)\]/g, '<span class="enemy-energy-token">$1' + HAMMER_IMG + '</span>');
   text = text.replace(/\[EE\]/g, '<span class="enemy-energy-token">' + HAMMER_IMG + '</span>');
   text = text.replace(/\[E\]/g, HAMMER_IMG);
+
+  // Convert markers to line breaks
+  text = text.replace(/\|\|\|/g, '<div class="energy-line-break"></div>');
   return text;
 }
 
@@ -4023,6 +4037,8 @@ function renderCard(stateObj, cardArray, index, divName=false, functionToAdd=fal
             cardDiv.addEventListener("click", function () {
               playACard(stateObj, index, stateObj.encounterHand);
             });
+          } else {
+            cardDiv.classList.add("card-unplayable");
           }
         }
 

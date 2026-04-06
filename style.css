@@ -1393,7 +1393,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   height: 1.8em;
   min-width: 1.8em;
   width: auto;
-  padding: 0;
+  padding: 0 0.25em;
   margin: 0;
   border: 0;
   color: white;
@@ -1403,6 +1403,10 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 
 .enemy-energy-token .inline-hammer {
   height: 1em;
+}
+
+.energy-line-break {
+  height: 0.3em;
 }
 
 .player-energy-fire, .hand-card-cost-fire {
@@ -1435,7 +1439,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
  }
 
 .hand-card-cost .inline-hammer {
-  height: 1.05em;
+  height: 1.4em;
 }
 
 
@@ -1739,13 +1743,14 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 }
 
 .hand-card-cost {
-  width: 5vmin;
-  height: 3vmin;
-  font-size: 1em;
-  padding: 2vmin;
+  width: auto;
+  height: auto;
+  font-size: 0.75em;
+  padding: 0.6vmin 1.2vmin;
   margin-right: 3%;
-  line-height: 3vmin;
-  background-color: rgb(8, 61, 0);
+  line-height: normal;
+  border-radius: 999px;
+  background-color: rgb(60, 160, 50);
   color: white;
  }
 
@@ -2069,8 +2074,17 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 }
 
 #handContainer2 .playable {
-  box-shadow: 0 0 10px rgb(178, 95, 0); 
+  box-shadow: 0 0 10px rgb(178, 95, 0);
   background: linear-gradient(90deg, rgb(208, 194, 170),rgb(192, 142, 78), rgb(210, 164, 103), rgb(213, 116, 20));
+}
+
+#handContainer2 .card-unplayable {
+  filter: grayscale(50%) brightness(0.7);
+  opacity: 0.75;
+}
+
+#handContainer2 .card-unplayable .hand-card-cost {
+  background-color: rgb(120, 120, 120);
 }
 
 .card-upgrade .upgrade-text, 
@@ -3004,7 +3018,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   justify-content: center;
   width: 2.8vmin;
   height: 2.8vmin;
-  border-radius: 4px;
+  border-radius: 50%;
   border: 2px solid rgb(160, 130, 200);
   background-color: rgba(0, 0, 0, 0.3);
   transition: background-color 0.3s, box-shadow 0.3s;
