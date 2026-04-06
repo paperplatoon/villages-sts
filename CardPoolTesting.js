@@ -10,7 +10,7 @@
 // -----------------|----------------------|------------------------------------------|---------------------
 // Damage           | baseDamage, baseHits | dealOpponentDamage(state, dmg, hits, cost, targetType) | attack (adds to dmg)
 // Block            | baseBlock            | gainBlock(state, amount, cost)            | defense (adds to block)
-// Structures       | cardType:"structure", buildCost | createStructure(state, structDef, "player", buildCost) | buildCost on card
+// Structures       | cardType:"structure", buildCost | createStructure(state, cardObj, "player") | buildCost on card
 // Build Progress   | buildAmount          | buildSelectedStructure(state, amount)     | selectedPlayerStructure
 // Treason          | treasonAmount        | applyTreason(state, amount)               | treason on enemy (ticks up each turn)
 // Diplomacy        | diplomacyAmount      | gainDiplomacy(state, amount)              | diplomacy, diplomacyThreshold
@@ -79,164 +79,9 @@ let testCardPool = {
     }
   },
 
-  // ====== STRUCTURE (BUILDING) ======
-  // createStructure(state, structDef, "player", buildCost)
-  // Structure definitions live in structures.js. cardType must be "structure".
-  // buildCost lives on the card so it can be modified per-card during a run.
-  // Cards are FREE to play. Player spends villagers via Build button over time.
-  testTower: {
-    cardID: 302,
-    name: "Guard Tower",
-    rarity: "common",
-    buildCost: 1,
-    baseDamage: 3,
-    projectileTarget: "opponent",
-    effectText: "Deals 3 damage to targeted enemy each turn",
-    avatar: "img/avatars/guardtower.png",
-    onTurnEffect: structureDefinitions.testTower.onTurnEffect,
-    text: (state, index, array) => {
-      return `Deals ${array[index].baseDamage} damage each turn. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "fire",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
-
-  testWall: {
-    cardID: 303,
-    name: "Great Wall",
-    rarity: "uncommon",
-    buildCost: 2,
-    baseBlock: 6,
-    effectText: "Grants 6 fortification each turn",
-    avatar: "img/avatars/greatwall.png",
-    onTurnEffect: structureDefinitions.testWall.onTurnEffect,
-    text: (state, index, array) => {
-      return `Grants ${array[index].baseBlock} fortification each turn. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "fire",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
-
-  // ====== ESCALATING STRUCTURE ======
-  // Deals damage that doubles each turn. Damage tracked on the structure instance itself.
-  testCannon: {
-    cardID: 311,
-    name: "Escalating Cannon",
-    buildCost: 2,
-    baseDamage: 2,
-    escalatingDamage: 2,
-    projectileTarget: "opponent-all",
-    effectText: "Deals 2 damage to all enemies. Doubles each turn",
-    avatar: "img/avatars/escalatingcannon.png",
-    onTurnEffect: structureDefinitions.escalatingCannon.onTurnEffect,
-    text: (state, index, array) => {
-      return `Deals ${array[index].baseDamage} damage to all enemies each turn, doubling each turn. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "fire",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
-
-  // ====== BLOCK DOUBLING STRUCTURE ======
-  // Sets doubleBlock flag + directly doubles encounterBlock at end of turn.
-  testFortress: {
-    cardID: 312,
-    name: "Fortress Wall",
-    buildCost: 3,
-    effectText: "Doubles your fortification at end of turn",
-    avatar: "img/avatars/fortifyworkshop.png",
-    onTurnEffect: structureDefinitions.fortressWall.onTurnEffect,
-    text: (state, index, array) => {
-      return `Doubles your fortification at end of turn. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "fire",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
-
-  // ====== EXTRA HIT STRUCTURE ======
-  // Sets extraAttackHit flag. dealOpponentDamage adds +1 to attackNumber.
-  testDrums: {
-    cardID: 313,
-    name: "War Drums",
-    buildCost: 2,
-    effectText: "Your attacks hit an extra time",
-    avatar: "img/avatars/wardrum.png",
-    onTurnEffect: structureDefinitions.warDrums.onTurnEffect,
-    text: (state, index, array) => {
-      return `Your attacks hit an extra time. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "fire",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
-
-  // ====== DOUBLE DAMAGE STRUCTURE ======
-  // Sets doubleAttackDamage flag. dealOpponentDamage doubles damageNumber.
-  testWorkshop: {
-    cardID: 314,
-    name: "Siege Workshop",
-    buildCost: 4,
-    effectText: "Your attacks deal double damage",
-    avatar: "img/avatars/trebuchet.png",
-    onTurnEffect: structureDefinitions.siegeWorkshop.onTurnEffect,
-    text: (state, index, array) => {
-      return `Your attacks deal double damage. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "fire",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
+  // ====== STRUCTURE CARDS ======
+  // Structure cards live in structureCards.js.
+  ...testStructureCards,
 
   // ====== BUILD PROGRESS (from card effect) ======
   // buildSelectedStructure(state, amount) — adds build progress to selected structure
@@ -437,122 +282,6 @@ let testCardPool = {
     }
   },
 
-  // ====== HEALER'S HUT ======
-  // Structure: heal 1 HP every time you play a card. Stacks with multiple copies.
-  testHealersHut: {
-    cardID: 315,
-    name: "Healer's Hut",
-    buildCost: 1,
-    baseHeal: 1,
-    healOnCardPlay: 1,
-    effectText: "Heal 1 HP every time you play a card",
-    avatar: "img/avatars/healershut.png",
-    text: (state, index, array) => {
-      return `Heal ${array[index].baseHeal} HP every time you play a card. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "water",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
-
-  // ====== CATAPULT ======
-  // Structure: deal 4 damage/turn. Each replay permanently increases damage by 1.
-  testCatapult: {
-    cardID: 316,
-    name: "Catapult",
-    buildCost: 5,
-    baseDamage: 15,
-    projectileTarget: "opponent",
-    effectText: "Deals 15 damage to targeted enemy each turn",
-    avatar: "img/avatars/catapult.png",
-    onTurnEffect: structureDefinitions.catapult.onTurnEffect,
-    text: (state, index, array) => {
-      let existing = state.playerStructures.find(s => s.name === "Catapult" && s.buildProgress >= s.buildCost);
-      let dmg = existing ? existing.baseDamage : array[index].baseDamage;
-      return existing
-        ? `Upgrade Catapult to ${dmg + 1} damage per turn`
-        : `Deal ${array[index].baseDamage} damage to targeted enemy each turn. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "fire",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      let existingIndex = stateObj.playerStructures.findIndex(s => s.name === "Catapult" && s.buildProgress >= s.buildCost);
-      if (existingIndex >= 0) {
-        stateObj = immer.produce(stateObj, (newState) => {
-          newState.playerStructures[existingIndex].baseDamage += 1;
-          newState.playerStructures[existingIndex].effectText = `Deals ${newState.playerStructures[existingIndex].baseDamage} damage to targeted enemy each turn`;
-        });
-      } else {
-        stateObj = createStructure(stateObj, array[index], "player");
-      }
-      return stateObj;
-    }
-  },
-
-  // ====== SEISMIC SPIRE ======
-  // Structure: whenever enemy gains or loses development, deal 4 damage.
-  testSeismicSpire: {
-    cardID: 318,
-    name: "Seismic Spire",
-    buildCost: 2,
-    baseDamage: 5,
-    damageOnDevChange: 5,
-    effectText: "Whenever enemy gains or loses [E], deal 5 damage",
-    avatar: "img/avatars/batteringram.png",
-    text: (state, index, array) => {
-      return `Whenever enemy gains or loses [E], deal ${array[index].baseDamage} damage. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "earth",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
-
-  // ====== MORE HOUSING ======
-  // Structure: once built, permanently gain 5 max HP and heal 5.
-  testMoreHousing: {
-    cardID: 317,
-    name: "More Housing",
-    buildCost: 3,
-    baseHPGain: 5,
-    effectText: "Increases max HP by 5 and heals 5",
-    avatar: "img/structures/healingwell.png",
-    onTurnEffect: structureDefinitions.moreHousing.onTurnEffect,
-    text: (state, index, array) => {
-      return `Gain ${array[index].baseHPGain} max HP and heal ${array[index].baseHPGain}. (Build cost: ${array[index].buildCost})`
-    },
-    minReq: (state, index, array) => { return 0; },
-    upgrades: 0,
-    baseCost: 0,
-    cost: (state, index, array) => { return 0; },
-    cardType: "structure",
-    elementType: "earth",
-    action: async (stateObj, index, array) => {
-      await cardAnimationDiscard(index);
-      stateObj = createStructure(stateObj, array[index], "player");
-      return stateObj;
-    }
-  },
 }
 
 
@@ -581,6 +310,18 @@ let coastalSettlementCardPool = {
   testCatapult:     testCardPool.testCatapult,
   testSeismicSpire: testCardPool.testSeismicSpire,
   testMoreHousing:  testCardPool.testMoreHousing,
+
+  // -- Structure cards (from structureCards.js) --
+  buildwatchtower:      cards.buildwatchtower,
+  buildtraininggrounds: cards.buildtraininggrounds,
+  buildhealingwell:     cards.buildhealingwell,
+  buildEntrepreneur:    cards.buildEntrepreneur,
+  buildRaidingParty:    cards.buildRaidingParty,
+  buildDiplomatOffice:  cards.buildDiplomatOffice,
+  buildSpymaster:       cards.buildSpymaster,
+  buildPatentOffice:    cards.buildPatentOffice,
+  buildInventorWorkshop: cards.buildInventorWorkshop,
+  buildDynamiteHeap:    cards.buildDynamiteHeap,
 
   // -- Cards from basicCardPool.js (testingCardPoolMar20) --
   // Block

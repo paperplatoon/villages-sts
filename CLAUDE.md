@@ -70,6 +70,11 @@ The most important principle: **cards interact with each other through shared pr
 ## UI Preferences
 - **Minimal UI** — Avoid redundant labels, headers, and explanatory text. Let visuals and context communicate rather than adding extra words. If a card name already tells you what it builds, the card text doesn't need to repeat it. If structures are visually obvious, they don't need a "Your Structures" header.
 
+## Structure Naming Philosophy
+Structure names should be evocative, medieval, and immediately intuitive: the player should feel "of course that does that" without the name spelling out the mechanic. The best names imply the effect through a concrete in-world place or practice (Patent Office, Healer's Hut, Inventor's Workshop, Carnival Fireworks), not through literal rules text.
+
+Avoid flat or generic labels that don't match the effect (e.g., Guard Tower, Seismic Spire). Prefer strong thematic hooks that hint at cause-and-effect without being on-the-nose, so the name itself carries the flavor and explains the behavior at a glance.
+
 ## Testing & Prototyping
 - `CardPoolTesting.js` is a prototyping sandbox with test cards that mirror real cards. When changing patterns across card definitions (text format, property names, etc.), **both `basicCardPool.js` and `CardPoolTesting.js` must be updated** to stay in sync.
 

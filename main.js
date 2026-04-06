@@ -140,7 +140,7 @@ let gameStartState = {
   rarityPity: 0,
   goldOnCardPlay: 0,
   goldOnCardPlayCap: 0,
-  goldGainedThisTurn: 0,
+  goldGainedFromCardPlay: 0,
   goldOnUnblockedDamage: 0,
   patentOfficeActive: false,
 };
@@ -2673,7 +2673,6 @@ function resetAfterFight(stateObj) {
     newState.doubleAttackDamage = false;
     newState.goldOnCardPlay = 0;
     newState.goldOnCardPlayCap = 0;
-    newState.goldGainedThisTurn = 0;
     newState.goldOnUnblockedDamage = 0;
     newState.patentOfficeActive = false;
 
@@ -2805,7 +2804,6 @@ function setUpEncounter(stateObj, isBoss=false) {
     newState.doubleAttackDamage = false;
     newState.goldOnCardPlay = 0;
     newState.goldOnCardPlayCap = 0;
-    newState.goldGainedThisTurn = 0;
     newState.goldOnUnblockedDamage = 0;
     newState.patentOfficeActive = false;
 
@@ -3026,11 +3024,11 @@ async function playACard(stateObj, cardIndexInHand, arrayObj) {
   }
 
   // Gold on card play (from structures like Entrepreneur)
-  if (stateObj.goldOnCardPlay > 0 && stateObj.goldGainedThisTurn < stateObj.goldOnCardPlayCap) {
-    let goldToGain = Math.min(stateObj.goldOnCardPlay, stateObj.goldOnCardPlayCap - stateObj.goldGainedThisTurn);
+  if (stateObj.goldOnCardPlay > 0 && stateObj.goldGainedFromCardPlay < stateObj.goldOnCardPlayCap) {
+    let goldToGain = Math.min(stateObj.goldOnCardPlay, stateObj.goldOnCardPlayCap - stateObj.goldGainedFromCardPlay);
     stateObj = playerGainsGold(stateObj, goldToGain);
     stateObj = immer.produce(stateObj, (newState) => {
-      newState.goldGainedThisTurn += goldToGain;
+      newState.goldGainedFromCardPlay += goldToGain;
     });
   }
 
@@ -5037,7 +5035,6 @@ async function endTurnIncrement(stateObj) {
     newState.cardsPerTurn = 0;
     newState.comboPerTurn = 0;
     newState.combatTurnNumber += 1;
-    newState.goldGainedThisTurn = 0;
     newState.playerMonster.encounterBlock += newState.blockPerTurn;
     newState.playerMonster.encounterEnergy += newState.playerMonster.turnEnergy;
     newState.opponentMonster.forEach(function(monsterObj, monsterIndex) {
