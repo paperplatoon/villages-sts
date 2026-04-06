@@ -258,6 +258,140 @@ let structureDefinitions = {
     // Passive — damageOnDevChange flag is set when structure completes building
   },
 
+  // ====== GOLD & ECONOMY STRUCTURES ======
+
+  entrepreneur: {
+    name: "Entrepreneur",
+    owner: "player",
+    buildCost: 2,
+    goldOnCardPlay: 1,
+    goldOnCardPlayCap: 20,
+    effectText: "Gain 1 gold every time you play a card (up to 20 per turn)",
+    avatar: "img/structures/watchtower.png",
+    // Passive — goldOnCardPlay flag is set when structure completes building
+  },
+
+  carnivalFireworks: {
+    name: "Carnival Fireworks",
+    owner: "player",
+    buildCost: 2,
+    baseDamage: 12,
+    baseGoldCost: 3,
+    projectileTarget: "opponent-all",
+    effectText: "Spend 3 gold to deal 12 damage to ALL enemies",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      if (stateObj.gold < structures[index].baseGoldCost) return stateObj;
+      stateObj = immer.produce(stateObj, (newState) => {
+        newState.gold -= structures[index].baseGoldCost;
+      });
+      // Deal damage to all enemy villages
+      if (stateObj.opponentMonster.length > 0) {
+        stateObj = await dealOpponentDamage(stateObj, structures[index].baseDamage, 1, false, "all");
+      }
+      // Also deal damage to all enemy structures
+      stateObj = immer.produce(stateObj, (newState) => {
+        newState.opponentStructures.forEach(function(struct) {
+          if (struct.currentHP > 0) {
+            struct.currentHP -= structures[index].baseDamage;
+          }
+        });
+      });
+      return stateObj;
+    }
+  },
+
+  raidingParty: {
+    name: "Raiding Party",
+    owner: "player",
+    buildCost: 2,
+    goldOnUnblockedDamage: 2,
+    effectText: "Gain 2 gold every time you deal unblocked attack damage",
+    avatar: "img/structures/watchtower.png",
+    // Passive — goldOnUnblockedDamage flag is set when structure completes building
+  },
+
+  // ====== DIPLOMACY & ESPIONAGE STRUCTURES ======
+
+  diplomatOffice: {
+    name: "Diplomat's Office",
+    owner: "player",
+    buildCost: 3,
+    baseDiplomacy: 1,
+    effectText: "Gain 1 diplomacy at end of turn",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      stateObj = await gainDiplomacy(stateObj, structures[index].baseDiplomacy || 1);
+      return stateObj;
+    }
+  },
+
+  spymaster: {
+    name: "Spymaster",
+    owner: "player",
+    buildCost: 2,
+    baseTreason: 3,
+    projectileTarget: "opponent",
+    effectText: "Enemy gains 3 treason at end of turn",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      if (stateObj.opponentMonster.length > 0) {
+        stateObj = await applyTreason(stateObj, structures[index].baseTreason || 3);
+      }
+      return stateObj;
+    }
+  },
+
+  // ====== META STRUCTURES ======
+
+  patentOffice: {
+    name: "Patent Office",
+    owner: "player",
+    buildCost: 2,
+    onStructureComplete: "copyToHand",
+    effectText: "When you finish building a structure, add a copy to your hand (build cost +2)",
+    avatar: "img/structures/watchtower.png",
+    // Passive — patentOfficeActive flag is set when structure completes building
+  },
+
+  inventorWorkshop: {
+    name: "Inventor's Workshop",
+    owner: "player",
+    buildCost: 3,
+    baseDamage: 11,
+    baseBlock: 11,
+    baseAttackBuff: 2,
+    effectText: "At end of turn, randomly: deal 11 damage, gain 11 block, or gain +2 attack",
+    avatar: "img/structures/watchtower.png",
+    onTurnEffect: async function(stateObj, index, structures) {
+      let roll = Math.floor(Math.random() * 3);
+      if (roll === 0 && stateObj.opponentMonster.length > 0) {
+        stateObj = await dealOpponentDamage(stateObj, structures[index].baseDamage, 1, false, "specific");
+      } else if (roll === 1) {
+        stateObj = gainBlock(stateObj, structures[index].baseBlock);
+      } else {
+        stateObj = immer.produce(stateObj, (newState) => {
+          newState.playerMonster.fightAttack += structures[index].baseAttackBuff;
+          newState.playerMonster.attack += structures[index].baseAttackBuff;
+        });
+      }
+      return stateObj;
+    }
+  },
+
+  // ====== FIRE-ON-COMPLETE STRUCTURES ======
+
+  dynamiteHeap: {
+    name: "Dynamite Heap",
+    owner: "player",
+    buildCost: 6,
+    baseDamage: 50,
+    projectileTarget: "opponent",
+    fireOnComplete: true,
+    effectText: "When complete: deal 50 damage to targeted enemy. Then removed.",
+    avatar: "img/structures/watchtower.png",
+  },
+
   // ====== OPPONENT STRUCTURES ======
   // Enemy structures have HP and block. Can be targeted by demolish-type cards.
 

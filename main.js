@@ -137,7 +137,12 @@ let gameStartState = {
   playerXP: 0,
   playerLevel: 1,
   rarityWeights: { common: 80, uncommon: 15, rare: 5 },
-  rarityPity: 0
+  rarityPity: 0,
+  goldOnCardPlay: 0,
+  goldOnCardPlayCap: 0,
+  goldGainedThisTurn: 0,
+  goldOnUnblockedDamage: 0,
+  patentOfficeActive: false,
 };
 
 const eventsArray = [
@@ -702,97 +707,79 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
   if (stateObj.extraAttackHit) {
     attackNumber = attackNumber + 1;
   }
-  let calculatedDamage = (damageNumber + stateObj.playerMonster.attack) * attackNumber;
+  let singleHitDamage = damageNumber + stateObj.playerMonster.attack;
 
   let devChanges = [];
+  let goldChanges = 0;
+  let unblockedHitCount = 0;
 
+  // Per-hit resolution: each hit checks block individually, triggers per-hit effects
   stateObj = immer.produce(stateObj, (newState) => {
-    if (calculatedDamage > 0) {
-      if (all) {
-        newState.opponentMonster.forEach(function (monsterObj, monsterIndex) {
-          if (monsterObj.hunted > 0) {
-            calculatedDamage *=2;
-          }
+    if (singleHitDamage <= 0) return;
 
-          if (monsterObj.encounterBlock == 0) {
-            console.log("You dealt " + calculatedDamage + " to " + monsterObj.name);
-            newState.fightDamageCount += 1;
-            newState.fightDamageTotal += calculatedDamage;
-
-            if (monsterObj.deflate && calculatedDamage >= monsterObj.deflate && monsterObj.development > 0) {
-              devChanges.push({ index: monsterIndex, amount: -1 });
-            } else if (monsterObj.angry && monsterObj.development < 6) {
-              devChanges.push({ index: monsterIndex, amount: 1 });
-            } else if (monsterObj.shakedown) {
-              newState.gold += monsterObj.shakedown;
-            }
-
-            monsterObj.currentHP -= calculatedDamage;
-          } else if (monsterObj.encounterBlock >= calculatedDamage) {
-            console.log(monsterObj.name + " blocked for " + calculatedDamage);
-            monsterObj.encounterBlock -= calculatedDamage;
-          } else {
-            let takenDamage = calculatedDamage - monsterObj.encounterBlock;
-            console.log(monsterObj.name + " blocked for " + calculatedDamage + " and took " + (takenDamage) + " damage");
-            newState.fightDamageCount += 1;
-            newState.fightDamageTotal += takenDamage
-
-            if (monsterObj.deflate && takenDamage >= monsterObj.deflate && monsterObj.development > 0) {
-              devChanges.push({ index: monsterIndex, amount: -1 });
-            } else if (monsterObj.angry && monsterObj.development < 6) {
-              devChanges.push({ index: monsterIndex, amount: 1 });
-            } else if (monsterObj.shakedown) {
-              newState.gold += monsterObj.shakedown;
-            } else if (monsterObj.enrage) {
-              monsterObj.attack += monsterObj.enrage;
-            }
-            monsterObj.currentHP -= takenDamage;
-            monsterObj.encounterBlock = 0;
-          }
-        })
-      } else {
-        let monsterObj = newState.opponentMonster[targetIndex]
-        if (monsterObj.hunted > 0) {
-          calculatedDamage *=2;
-        }
-        if (monsterObj.encounterBlock == 0) {
-          console.log("You dealt " + calculatedDamage + " to " + monsterObj.name);
+    // Process hits against one monster
+    function processHitsOnMonster(monsterObj, monsterIndex) {
+      let hitDamage = singleHitDamage;
+      if (monsterObj.hunted > 0) {
+        hitDamage *= 2;
+      }
+      for (let hit = 0; hit < attackNumber; hit++) {
+        if (monsterObj.encounterBlock <= 0) {
+          // No block — full damage
+          console.log("Hit " + (hit+1) + ": dealt " + hitDamage + " to " + monsterObj.name);
           newState.fightDamageCount += 1;
-          newState.fightDamageTotal += calculatedDamage;
-          if (monsterObj.deflate && calculatedDamage >= monsterObj.deflate && monsterObj.development > 0) {
-            devChanges.push({ index: targetIndex, amount: -1 });
+          newState.fightDamageTotal += hitDamage;
+          unblockedHitCount += 1;
+
+          if (monsterObj.deflate && hitDamage >= monsterObj.deflate && monsterObj.development > 0) {
+            devChanges.push({ index: monsterIndex, amount: -1 });
           } else if (monsterObj.angry && monsterObj.development < 6) {
-            devChanges.push({ index: targetIndex, amount: 1 });
+            devChanges.push({ index: monsterIndex, amount: 1 });
           } else if (monsterObj.shakedown) {
-            newState.gold += monsterObj.shakedown;
+            goldChanges += monsterObj.shakedown;
           } else if (monsterObj.enrage) {
             monsterObj.attack += monsterObj.enrage;
           }
-          monsterObj.currentHP -= calculatedDamage;
-        } else if (monsterObj.encounterBlock >= calculatedDamage) {
-          console.log(monsterObj.name + " blocked for " + calculatedDamage);
-          monsterObj.encounterBlock -= calculatedDamage;
+
+          monsterObj.currentHP -= hitDamage;
+        } else if (monsterObj.encounterBlock >= hitDamage) {
+          // Block absorbs entire hit
+          console.log("Hit " + (hit+1) + ": " + monsterObj.name + " blocked " + hitDamage);
+          monsterObj.encounterBlock -= hitDamage;
         } else {
-          let takenDamage = calculatedDamage - monsterObj.encounterBlock
-          console.log(monsterObj.name + " blocked for " + calculatedDamage + " and took " + takenDamage + " damage");
+          // Partial block — some damage gets through
+          let takenDamage = hitDamage - monsterObj.encounterBlock;
+          console.log("Hit " + (hit+1) + ": " + monsterObj.name + " blocked " + monsterObj.encounterBlock + " and took " + takenDamage + " damage");
           newState.fightDamageCount += 1;
-          newState.fightDamageTotal += takenDamage
+          newState.fightDamageTotal += takenDamage;
+          unblockedHitCount += 1;
+
           if (monsterObj.deflate && takenDamage >= monsterObj.deflate && monsterObj.development > 0) {
-            devChanges.push({ index: targetIndex, amount: -1 });
+            devChanges.push({ index: monsterIndex, amount: -1 });
           } else if (monsterObj.angry && monsterObj.development < 6) {
-            devChanges.push({ index: targetIndex, amount: 1 });
+            devChanges.push({ index: monsterIndex, amount: 1 });
           } else if (monsterObj.shakedown) {
-            newState.gold += monsterObj.shakedown;
+            goldChanges += monsterObj.shakedown;
           } else if (monsterObj.enrage) {
             monsterObj.attack += monsterObj.enrage;
           }
+
           monsterObj.currentHP -= takenDamage;
           monsterObj.encounterBlock = 0;
         }
       }
     }
+
+    if (all) {
+      newState.opponentMonster.forEach(function (monsterObj, monsterIndex) {
+        processHitsOnMonster(monsterObj, monsterIndex);
+      });
+    } else {
+      processHitsOnMonster(newState.opponentMonster[targetIndex], targetIndex);
+    }
+
     if (energyCost) {
-      newState.playerMonster.encounterEnergy -= energyCost
+      newState.playerMonster.encounterEnergy -= energyCost;
     }
   });
 
@@ -803,6 +790,16 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
     } else {
       stateObj = await loseDevelopment(stateObj, Math.abs(change.amount), change.index);
     }
+  }
+
+  // Process deferred gold gains through central function
+  if (goldChanges > 0) {
+    stateObj = playerGainsGold(stateObj, goldChanges);
+  }
+
+  // Raiding Party: gain gold for each unblocked hit
+  if (unblockedHitCount > 0 && stateObj.goldOnUnblockedDamage > 0) {
+    stateObj = playerGainsGold(stateObj, stateObj.goldOnUnblockedDamage * unblockedHitCount);
   }
 
   if (all === true) {
@@ -1291,6 +1288,16 @@ function gainBlock(stateObj, blockToGain, energyCost=false, blockNumber=1) {
   return stateObj
 }
 
+// Central gold gain function — all combat gold gains route through here
+// so that future modifiers (double gold, gold bonus %, etc.) apply automatically
+function playerGainsGold(stateObj, amount) {
+  if (amount <= 0) return stateObj;
+  stateObj = immer.produce(stateObj, (newState) => {
+    newState.gold += amount;
+  });
+  return stateObj;
+}
+
 // Gain diplomacy — if threshold is met, kill all enemies (auto-win)
 async function gainDiplomacy(stateObj, amount) {
   stateObj = immer.produce(stateObj, (newState) => {
@@ -1735,6 +1742,14 @@ function getVillageAvatar(currentHP, maxHP) {
   return "img/villages/village_health_25.png";
 }
 
+function getPlayerVillageAvatar(currentHP, maxHP) {
+  let percent = (currentHP / maxHP) * 100;
+  if (percent >= 75) return "img/villages/player_village_100.png";
+  if (percent >= 50) return "img/villages/player_village_66.png";
+  if (percent >= 15) return "img/villages/player_village_25.png";
+  return "img/villages/player_village_0.png";
+}
+
 //Render the player's stats
 async function renderPlayerMonster(stateObj) {
   document.getElementById("playerStats").innerHTML = "";
@@ -1774,7 +1789,7 @@ async function renderPlayerMonster(stateObj) {
 
   // Village avatar on the cube
   let playerAvatar = document.createElement("img");
-  playerAvatar.src = getVillageAvatar(stateObj.playerMonster.currentHP, stateObj.playerMonster.maxHP);
+  playerAvatar.src = getPlayerVillageAvatar(stateObj.playerMonster.currentHP, stateObj.playerMonster.maxHP);
   playerAvatar.classList.add("village-avatar");
   cubeFront.appendChild(playerAvatar);
 
@@ -2110,6 +2125,9 @@ let structurePropertyKeys = [
   "buildCost", "baseDamage", "baseBlock", "baseHeal", "basePoison", "baseAttackBuff", "baseHPGain",
   "escalatingDamage", "damageOnDevChange", "healOnCardPlay",
   "singleUse", "maxHP", "currentHP", "encounterBlock",
+  "goldOnCardPlay", "goldOnCardPlayCap", "goldOnUnblockedDamage",
+  "onStructureComplete", "baseGoldCost", "baseDiplomacy", "baseTreason",
+  "fireOnComplete",
 ];
 
 function createStructure(stateObj, structureDef, side) {
@@ -2127,18 +2145,30 @@ function createStructure(stateObj, structureDef, side) {
       newStructure.buildProgress = 0;
       newStructure.owner = "player";
       // Generate effectText from current values so upgrades are reflected
-      if (newStructure.baseDamage && newStructure.projectileTarget) {
-        let target = newStructure.projectileTarget === "opponent-all" ? "all enemies" : "targeted enemy";
-        newStructure.effectText = `Deals ${newStructure.baseDamage} damage to ${target} each turn`;
-        if (newStructure.singleUse) newStructure.effectText = `Deal ${newStructure.baseDamage} damage. Then removed.`;
+      // Skip auto-generation for multi-property structures (they define their own effectText)
+      let autoGenerate = true;
+      if (newStructure.goldOnCardPlay || newStructure.goldOnUnblockedDamage || newStructure.onStructureComplete) autoGenerate = false;
+      if (newStructure.baseGoldCost) autoGenerate = false;
+      if (newStructure.fireOnComplete) autoGenerate = false;
+      // Inventor's Workshop has baseDamage + baseBlock + baseAttackBuff — keep its custom text
+      if (newStructure.baseDamage && newStructure.baseBlock && newStructure.baseAttackBuff) autoGenerate = false;
+
+      if (autoGenerate) {
+        if (newStructure.baseDamage && newStructure.projectileTarget) {
+          let target = newStructure.projectileTarget === "opponent-all" ? "all enemies" : "targeted enemy";
+          newStructure.effectText = `Deals ${newStructure.baseDamage} damage to ${target} each turn`;
+          if (newStructure.singleUse) newStructure.effectText = `Deal ${newStructure.baseDamage} damage. Then removed.`;
+        }
+        if (newStructure.baseBlock) newStructure.effectText = `Grants ${newStructure.baseBlock} fortification each turn`;
+        if (newStructure.baseHeal) newStructure.effectText = `Restores ${newStructure.baseHeal} HP each turn`;
+        if (newStructure.basePoison) newStructure.effectText = `Applies ${newStructure.basePoison} poison to targeted enemy each turn`;
+        if (newStructure.baseAttackBuff) newStructure.effectText = `Grants ${newStructure.baseAttackBuff} attack each turn`;
+        if (newStructure.baseHPGain) newStructure.effectText = `Increases max HP by ${newStructure.baseHPGain} and heals ${newStructure.baseHPGain}`;
+        if (newStructure.healOnCardPlay) newStructure.effectText = `Heal ${newStructure.healOnCardPlay} HP every time you play a card`;
+        if (newStructure.damageOnDevChange) newStructure.effectText = `Whenever enemy gains or loses development, deal ${newStructure.damageOnDevChange} damage`;
+        if (newStructure.baseDiplomacy) newStructure.effectText = `Gain ${newStructure.baseDiplomacy} diplomacy each turn`;
+        if (newStructure.baseTreason) newStructure.effectText = `Enemy gains ${newStructure.baseTreason} treason each turn`;
       }
-      if (newStructure.baseBlock) newStructure.effectText = `Grants ${newStructure.baseBlock} fortification each turn`;
-      if (newStructure.baseHeal) newStructure.effectText = `Restores ${newStructure.baseHeal} HP each turn`;
-      if (newStructure.basePoison) newStructure.effectText = `Applies ${newStructure.basePoison} poison to targeted enemy each turn`;
-      if (newStructure.baseAttackBuff) newStructure.effectText = `Grants ${newStructure.baseAttackBuff} attack each turn`;
-      if (newStructure.baseHPGain) newStructure.effectText = `Increases max HP by ${newStructure.baseHPGain} and heals ${newStructure.baseHPGain}`;
-      if (newStructure.healOnCardPlay) newStructure.effectText = `Heal ${newStructure.healOnCardPlay} HP every time you play a card`;
-      if (newStructure.damageOnDevChange) newStructure.effectText = `Whenever enemy gains or loses development, deal ${newStructure.damageOnDevChange} damage`;
       // Sync runtime damage values from baseDamage (so upgrades flow through)
       if (newStructure.escalatingDamage && newStructure.baseDamage) {
         newStructure.escalatingDamage = newStructure.baseDamage;
@@ -2166,41 +2196,188 @@ function createStructure(stateObj, structureDef, side) {
   return stateObj;
 }
 
+// Apply immediate passive effects when a structure finishes building
+function applyStructureCompletionEffects(newState, struct) {
+  if (struct.damageOnDevChange) {
+    newState.damageOnDevChange += struct.damageOnDevChange;
+  }
+  if (struct.goldOnCardPlay) {
+    newState.goldOnCardPlay += struct.goldOnCardPlay;
+    newState.goldOnCardPlayCap = Math.max(newState.goldOnCardPlayCap, struct.goldOnCardPlayCap || 0);
+  }
+  if (struct.goldOnUnblockedDamage) {
+    newState.goldOnUnblockedDamage += struct.goldOnUnblockedDamage;
+  }
+  if (struct.onStructureComplete === "copyToHand") {
+    newState.patentOfficeActive = true;
+  }
+}
+
+// Fire-on-complete: animate the structure, apply its damage, then remove it
+async function fireOnCompleteStructure(stateObj, structureIndex) {
+  let struct = stateObj.playerStructures[structureIndex];
+  if (!struct || !struct.fireOnComplete) return stateObj;
+
+  // Render the completed structure so the player sees it built
+  stateObj = await changeState(stateObj);
+
+  // Animate: glow → projectile → impact
+  let structEls = document.querySelectorAll(".village-cube.player-cube .structure");
+  let sourceEl = structEls[structureIndex];
+  if (sourceEl) sourceEl.classList.add("structure-activating");
+  await pause(300);
+
+  let fireballEl = document.getElementById("structure-fireball-" + structureIndex);
+  if (fireballEl && struct.projectileTarget) {
+    fireballEl.classList.add("structure-fireball-move");
+
+    let targetEls = Array.from(document.querySelectorAll("#opponents .avatar"));
+    let structDmg = struct.baseDamage || 0;
+    if (struct.projectileTarget === "opponent" && structDmg > 0) {
+      structDmg += stateObj.playerMonster.attack;
+      if (stateObj.doubleAttackDamage) structDmg *= 2;
+    }
+
+    setTimeout(() => {
+      for (let t = 0; t < targetEls.length; t++) {
+        targetEls[t].classList.add("opponent-impact");
+        spawnImpactSparks(targetEls[t]);
+      }
+      if (structDmg > 0) {
+        if (struct.projectileTarget === "opponent-all") {
+          for (let mi = 0; mi < stateObj.opponentMonster.length; mi++) {
+            let mon = stateObj.opponentMonster[mi];
+            let result = previewDamage(mon.currentHP, mon.encounterBlock, structDmg);
+            let hpEl = document.querySelectorAll("#opponents .monster-hp")[mi];
+            let blockEl = document.querySelectorAll("#opponents .monster-block")[mi];
+            updateHPDisplay(hpEl, result.hp, mon.maxHP, blockEl, result.block);
+          }
+        } else {
+          let targetIdx = stateObj.targetedMonster || 0;
+          let mon = stateObj.opponentMonster[targetIdx];
+          let result = previewDamage(mon.currentHP, mon.encounterBlock, structDmg);
+          let hpEl = document.querySelectorAll("#opponents .monster-hp")[targetIdx];
+          let blockEl = document.querySelectorAll("#opponents .monster-block")[targetIdx];
+          updateHPDisplay(hpEl, result.hp, mon.maxHP, blockEl, result.block);
+        }
+      }
+    }, 400);
+
+    await pause(600);
+    for (let t = 0; t < targetEls.length; t++) {
+      targetEls[t].classList.remove("opponent-impact");
+    }
+    fireballEl.classList.remove("structure-fireball-move");
+  } else {
+    // No projectile — just hold the glow a moment
+    await pause(400);
+  }
+
+  // Apply the effect through central functions
+  if (struct.baseDamage && stateObj.opponentMonster.length > 0) {
+    let targetType = struct.projectileTarget === "opponent-all" ? "all" : "specific";
+    stateObj = await dealOpponentDamage(stateObj, struct.baseDamage, 1, false, targetType);
+  }
+
+  // Remove the structure from the grid
+  stateObj = immer.produce(stateObj, (newState) => {
+    newState.playerStructures.splice(structureIndex, 1);
+    // Adjust selectedPlayerStructure if needed
+    if (newState.selectedPlayerStructure >= newState.playerStructures.length) {
+      newState.selectedPlayerStructure = Math.max(0, newState.playerStructures.length - 1);
+    }
+  });
+
+  stateObj = await changeState(stateObj);
+  return stateObj;
+}
+
 // Build a player structure by spending 1 villager (called from Build button click)
 async function buildStructureByIndex(stateObj, structureIndex) {
   if (stateObj.playerMonster.encounterEnergy < 1) return stateObj;
   let structure = stateObj.playerStructures[structureIndex];
   if (!structure || structure.buildProgress >= structure.buildCost) return stateObj;
 
+  let wasIncomplete = structure.buildProgress < structure.buildCost;
   stateObj = immer.produce(stateObj, (newState) => {
     newState.playerMonster.encounterEnergy -= 1;
     newState.playerStructures[structureIndex].buildProgress += 1;
-    // If this completes the structure, apply any immediate passive effects
     let struct = newState.playerStructures[structureIndex];
-    if (struct.buildProgress >= struct.buildCost && struct.damageOnDevChange) {
-      newState.damageOnDevChange += struct.damageOnDevChange;
+    if (wasIncomplete && struct.buildProgress >= struct.buildCost) {
+      applyStructureCompletionEffects(newState, struct);
     }
   });
+
+  // Patent Office: if a structure just completed and patent office is active, copy it to hand
+  let justCompleted = stateObj.playerStructures[structureIndex];
+  if (wasIncomplete && justCompleted.buildProgress >= justCompleted.buildCost && stateObj.patentOfficeActive) {
+    // Don't copy the Patent Office itself completing
+    if (justCompleted.onStructureComplete !== "copyToHand") {
+      stateObj = triggerPatentOffice(stateObj, justCompleted);
+    }
+  }
+
+  // Fire-on-complete: animate, apply effect, remove (handles its own changeState calls)
+  if (wasIncomplete && justCompleted.buildProgress >= justCompleted.buildCost && justCompleted.fireOnComplete) {
+    stateObj = await fireOnCompleteStructure(stateObj, structureIndex);
+    return stateObj;
+  }
+
   stateObj = await changeState(stateObj);
   return stateObj;
 }
 
 // Build 1 on the currently selected player structure (called from card effects)
-function buildSelectedStructure(stateObj, amount) {
+async function buildSelectedStructure(stateObj, amount) {
   if (stateObj.playerStructures.length === 0) return stateObj;
   let selectedIndex = stateObj.selectedPlayerStructure;
   if (selectedIndex < 0 || selectedIndex >= stateObj.playerStructures.length) return stateObj;
   let structure = stateObj.playerStructures[selectedIndex];
   if (structure.buildProgress >= structure.buildCost) return stateObj;
 
+  let wasIncomplete = structure.buildProgress < structure.buildCost;
   stateObj = immer.produce(stateObj, (newState) => {
     let struct = newState.playerStructures[selectedIndex];
-    let wasBuild = struct.buildProgress < struct.buildCost;
     struct.buildProgress = Math.min(struct.buildCost, struct.buildProgress + amount);
-    // If this completes the structure, apply any immediate passive effects
-    if (wasBuild && struct.buildProgress >= struct.buildCost && struct.damageOnDevChange) {
-      newState.damageOnDevChange += struct.damageOnDevChange;
+    if (wasIncomplete && struct.buildProgress >= struct.buildCost) {
+      applyStructureCompletionEffects(newState, struct);
     }
+  });
+
+  // Patent Office trigger
+  let justCompleted = stateObj.playerStructures[selectedIndex];
+  if (wasIncomplete && justCompleted.buildProgress >= justCompleted.buildCost && stateObj.patentOfficeActive) {
+    if (justCompleted.onStructureComplete !== "copyToHand") {
+      stateObj = triggerPatentOffice(stateObj, justCompleted);
+    }
+  }
+
+  // Fire-on-complete
+  if (wasIncomplete && justCompleted.buildProgress >= justCompleted.buildCost && justCompleted.fireOnComplete) {
+    stateObj = await fireOnCompleteStructure(stateObj, selectedIndex);
+  }
+
+  return stateObj;
+}
+
+// Patent Office: when a structure finishes building, add a copy of its card to hand with +2 build cost
+function triggerPatentOffice(stateObj, completedStructure) {
+  // Find the source card in the player's full deck by matching structure name
+  let sourceCard = null;
+  for (let card of stateObj.playerDeck) {
+    if (card.cardType === "structure" && card.name === completedStructure.name) {
+      sourceCard = card;
+      break;
+    }
+  }
+  if (!sourceCard) return stateObj;
+
+  stateObj = immer.produce(stateObj, (newState) => {
+    // Deep copy the card (spread for shallow, then copy functions)
+    let copy = { ...sourceCard };
+    // Functions survive spread — text, action, cost, minReq are all function refs
+    copy.buildCost = completedStructure.buildCost + 2;
+    newState.encounterHand.push(copy);
   });
   return stateObj;
 }
@@ -2331,7 +2508,7 @@ async function fireStructureEffects(stateObj, side) {
     if (side === "player") {
       let fireballEl = document.getElementById("structure-fireball-" + i);
       console.log("[STRUCT ANIM] structure " + i + " (" + struct.name + ") projectileTarget:", struct.projectileTarget, "fireballEl:", fireballEl);
-      if (fireballEl) {
+      if (fireballEl && struct.projectileTarget) {
         fireballEl.classList.add("structure-fireball-move");
         console.log("[STRUCT ANIM] Added structure-fireball-move class to fireball-" + i, "classes now:", fireballEl.className);
 
@@ -2494,6 +2671,11 @@ function resetAfterFight(stateObj) {
     newState.doubleBlock = false;
     newState.extraAttackHit = false;
     newState.doubleAttackDamage = false;
+    newState.goldOnCardPlay = 0;
+    newState.goldOnCardPlayCap = 0;
+    newState.goldGainedThisTurn = 0;
+    newState.goldOnUnblockedDamage = 0;
+    newState.patentOfficeActive = false;
 
     newState.townMapSquares[newState.playerHere] = "completed";
 
@@ -2621,6 +2803,11 @@ function setUpEncounter(stateObj, isBoss=false) {
     newState.doubleBlock = false;
     newState.extraAttackHit = false;
     newState.doubleAttackDamage = false;
+    newState.goldOnCardPlay = 0;
+    newState.goldOnCardPlayCap = 0;
+    newState.goldGainedThisTurn = 0;
+    newState.goldOnUnblockedDamage = 0;
+    newState.patentOfficeActive = false;
 
     newState.cardsPerTurn = 0;
     if (!stateObj.playerDeck) {
@@ -2836,6 +3023,15 @@ async function playACard(stateObj, cardIndexInHand, arrayObj) {
   });
   if (healOnPlay > 0) {
     stateObj = healPlayer(stateObj, healOnPlay);
+  }
+
+  // Gold on card play (from structures like Entrepreneur)
+  if (stateObj.goldOnCardPlay > 0 && stateObj.goldGainedThisTurn < stateObj.goldOnCardPlayCap) {
+    let goldToGain = Math.min(stateObj.goldOnCardPlay, stateObj.goldOnCardPlayCap - stateObj.goldGainedThisTurn);
+    stateObj = playerGainsGold(stateObj, goldToGain);
+    stateObj = immer.produce(stateObj, (newState) => {
+      newState.goldGainedThisTurn += goldToGain;
+    });
   }
 
   // stateObj = await pickOpponentMove(stateObj);
@@ -4841,6 +5037,7 @@ async function endTurnIncrement(stateObj) {
     newState.cardsPerTurn = 0;
     newState.comboPerTurn = 0;
     newState.combatTurnNumber += 1;
+    newState.goldGainedThisTurn = 0;
     newState.playerMonster.encounterBlock += newState.blockPerTurn;
     newState.playerMonster.encounterEnergy += newState.playerMonster.turnEnergy;
     newState.opponentMonster.forEach(function(monsterObj, monsterIndex) {

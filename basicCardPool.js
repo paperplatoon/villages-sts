@@ -4048,6 +4048,202 @@ let specialCardPool = {
       }
     },
 
+    buildEntrepreneur: {
+      cardID: 212,
+      name: "Build Entrepreneur",
+      buildCost: 2,
+      goldOnCardPlay: 1,
+      goldOnCardPlayCap: 20,
+      effectText: "Gain 1 gold every time you play a card (up to 20 per turn)",
+      avatar: "img/structures/watchtower.png",
+      text: (state, index, array) => {
+        return `Gain ${array[index].goldOnCardPlay} gold per card played, up to ${array[index].goldOnCardPlayCap}/turn. (Build cost: ${array[index].buildCost})`
+      },
+      minReq: (state, index, array) => { return 0; },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => { return 0; },
+      cardType: "structure",
+      elementType: "fire",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, array[index], "player");
+        return stateObj;
+      }
+    },
+
+    buildDiplomatOffice: {
+      cardID: 213,
+      name: "Build Diplomat's Office",
+      buildCost: 3,
+      baseDiplomacy: 1,
+      effectText: "Gain 1 diplomacy at end of turn",
+      avatar: "img/structures/watchtower.png",
+      onTurnEffect: structureDefinitions.diplomatOffice.onTurnEffect,
+      text: (state, index, array) => {
+        return `Gain ${array[index].baseDiplomacy} diplomacy each turn. (Build cost: ${array[index].buildCost})`
+      },
+      minReq: (state, index, array) => { return 0; },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => { return 0; },
+      cardType: "structure",
+      elementType: "water",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, array[index], "player");
+        return stateObj;
+      }
+    },
+
+    buildSpymaster: {
+      cardID: 214,
+      name: "Build Spymaster",
+      buildCost: 2,
+      baseTreason: 3,
+      projectileTarget: "opponent",
+      effectText: "Enemy gains 3 treason at end of turn",
+      avatar: "img/structures/watchtower.png",
+      onTurnEffect: structureDefinitions.spymaster.onTurnEffect,
+      text: (state, index, array) => {
+        return `Apply ${array[index].baseTreason} treason each turn. (Build cost: ${array[index].buildCost})`
+      },
+      minReq: (state, index, array) => { return 0; },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => { return 0; },
+      cardType: "structure",
+      elementType: "fire",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, array[index], "player");
+        return stateObj;
+      }
+    },
+
+    buildCarnivalFireworks: {
+      cardID: 215,
+      name: "Build Carnival Fireworks",
+      buildCost: 2,
+      baseDamage: 12,
+      baseGoldCost: 3,
+      projectileTarget: "opponent-all",
+      effectText: "Spend 3 gold to deal 12 damage to ALL enemies",
+      avatar: "img/structures/watchtower.png",
+      onTurnEffect: structureDefinitions.carnivalFireworks.onTurnEffect,
+      text: (state, index, array) => {
+        return `Spend ${array[index].baseGoldCost} gold to deal ${array[index].baseDamage} to ALL enemies and structures. (Build cost: ${array[index].buildCost})`
+      },
+      minReq: (state, index, array) => { return 0; },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => { return 0; },
+      cardType: "structure",
+      elementType: "fire",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, array[index], "player");
+        return stateObj;
+      }
+    },
+
+    buildRaidingParty: {
+      cardID: 216,
+      name: "Build Raiding Party",
+      buildCost: 2,
+      goldOnUnblockedDamage: 2,
+      effectText: "Gain 2 gold every time you deal unblocked attack damage",
+      avatar: "img/structures/watchtower.png",
+      text: (state, index, array) => {
+        return `Gain ${array[index].goldOnUnblockedDamage} gold per unblocked hit. (Build cost: ${array[index].buildCost})`
+      },
+      minReq: (state, index, array) => { return 0; },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => { return 0; },
+      cardType: "structure",
+      elementType: "fire",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, array[index], "player");
+        return stateObj;
+      }
+    },
+
+    buildPatentOffice: {
+      cardID: 217,
+      name: "Build Patent Office",
+      buildCost: 2,
+      onStructureComplete: "copyToHand",
+      effectText: "When you finish building a structure, add a copy to your hand (build cost +2)",
+      avatar: "img/structures/watchtower.png",
+      text: (state, index, array) => {
+        return `When you finish building a structure, add a copy to hand with +2 build cost. (Build cost: ${array[index].buildCost})`
+      },
+      minReq: (state, index, array) => { return 0; },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => { return 0; },
+      cardType: "structure",
+      elementType: "water",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, array[index], "player");
+        return stateObj;
+      }
+    },
+
+    buildInventorWorkshop: {
+      cardID: 218,
+      name: "Build Inventor's Workshop",
+      buildCost: 3,
+      baseDamage: 11,
+      baseBlock: 11,
+      baseAttackBuff: 2,
+      effectText: "At end of turn, randomly: deal 11 damage, gain 11 block, or gain +2 attack",
+      avatar: "img/structures/watchtower.png",
+      onTurnEffect: structureDefinitions.inventorWorkshop.onTurnEffect,
+      text: (state, index, array) => {
+        return `Each turn, randomly: deal ${array[index].baseDamage} damage, gain ${array[index].baseBlock} block, or +${array[index].baseAttackBuff} attack. (Build cost: ${array[index].buildCost})`
+      },
+      minReq: (state, index, array) => { return 0; },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => { return 0; },
+      cardType: "structure",
+      elementType: "fire",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, array[index], "player");
+        return stateObj;
+      }
+    },
+
+    buildDynamiteHeap: {
+      cardID: 219,
+      name: "Build Dynamite Heap",
+      buildCost: 6,
+      baseDamage: 50,
+      projectileTarget: "opponent",
+      fireOnComplete: true,
+      effectText: "When complete: deal 50 damage to targeted enemy. Then removed.",
+      avatar: "img/structures/watchtower.png",
+      text: (state, index, array) => {
+        return `When complete: deal ${array[index].baseDamage + state.playerMonster.attack} damage. Then removed. (Build cost: ${array[index].buildCost})`
+      },
+      minReq: (state, index, array) => { return 0; },
+      upgrades: 0,
+      baseCost: 0,
+      cost: (state, index, array) => { return 0; },
+      cardType: "structure",
+      elementType: "fire",
+      action: async (stateObj, index, array) => {
+        await cardAnimationDiscard(index);
+        stateObj = createStructure(stateObj, array[index], "player");
+        return stateObj;
+      }
+    },
+
     demolish: {
       cardID: 210,
       name: "Demolish",

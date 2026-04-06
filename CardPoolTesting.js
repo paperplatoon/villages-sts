@@ -193,7 +193,7 @@ let testCardPool = {
   testDrums: {
     cardID: 313,
     name: "War Drums",
-    buildCost: 3,
+    buildCost: 2,
     effectText: "Your attacks hit an extra time",
     avatar: "img/avatars/wardrum.png",
     onTurnEffect: structureDefinitions.warDrums.onTurnEffect,
@@ -468,10 +468,10 @@ let testCardPool = {
   testCatapult: {
     cardID: 316,
     name: "Catapult",
-    buildCost: 2,
-    baseDamage: 4,
+    buildCost: 5,
+    baseDamage: 15,
     projectileTarget: "opponent",
-    effectText: "Deals 4 damage to targeted enemy each turn",
+    effectText: "Deals 15 damage to targeted enemy each turn",
     avatar: "img/avatars/catapult.png",
     onTurnEffect: structureDefinitions.catapult.onTurnEffect,
     text: (state, index, array) => {

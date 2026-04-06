@@ -105,10 +105,13 @@
 
 
 .card h3 {
-  font-size: 3vmin;
+  font-size: 2.2vmin;
   padding: 0;
   padding-left: 0.1vmin;
   margin-bottom: 0;
+  text-align: center;
+  word-break: break-word;
+  overflow-wrap: break-word;
 }
 
 #stats, #town, #town-top-row, .monster-choice-window {
@@ -236,9 +239,9 @@
 
 /* ====== Structure Activation Glow ====== */
 @keyframes structureActivate {
-  0% { box-shadow: 0 0 0px transparent; }
-  50% { box-shadow: 0 0 12px rgb(255, 200, 50), 0 0 24px rgb(255, 180, 20); }
-  100% { box-shadow: 0 0 0px transparent; }
+  0% { filter: drop-shadow(0 0 0px transparent); }
+  50% { filter: drop-shadow(0 0 8px rgb(255, 200, 50)) drop-shadow(0 0 16px rgb(255, 180, 20)); }
+  100% { filter: drop-shadow(0 0 0px transparent); }
 }
 
 .structure-activating {
@@ -262,12 +265,12 @@
    Player village is left ~45% of #stats, cube is ~90% of that.
    Slot left% of cube → approximate left% of #stats.
    Slot top% of cube → approximate top% of #stats (cube is ~60% of band height). */
-.structure-fireball-slot-0 { left: 5%;  top: 18%; }
-.structure-fireball-slot-1 { left: 12%; top: 18%; }
-.structure-fireball-slot-2 { left: 19%; top: 18%; }
-.structure-fireball-slot-3 { left: 5%;  top: 32%; }
-.structure-fireball-slot-4 { left: 12%; top: 32%; }
-.structure-fireball-slot-5 { left: 19%; top: 32%; }
+.structure-fireball-slot-0 { left: 5%;  top: 34%; }
+.structure-fireball-slot-1 { left: 12%; top: 34%; }
+.structure-fireball-slot-2 { left: 19%; top: 34%; }
+.structure-fireball-slot-3 { left: 5%;  top: 48%; }
+.structure-fireball-slot-4 { left: 12%; top: 48%; }
+.structure-fireball-slot-5 { left: 19%; top: 48%; }
 
 .structure-fireball-move {
   animation: structureSlide 0.55s ease-in;
@@ -624,13 +627,15 @@
   display: flex;
   flex-direction: column;
   height: 89vh;
+  overflow: hidden;
 }
 
 .villages-band {
   display: flex;
   flex-direction: row;
   justify-content: space-between;
-  height: 50vh;
+  flex: 0 1 auto;
+  max-height: 55vh;
   padding: 0 2vw;
   gap: 5vw;
 }
@@ -640,7 +645,7 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 1vh 0;
+  padding: 0;
 }
 
 .player-village-side {
@@ -787,7 +792,8 @@
 /* ====== HAND BAND (Bottom) ====== */
 
 .hand-band {
-  height: 38vh;
+  flex: 1 1 0;
+  min-height: 0;
   display: flex;
   flex-direction: row;
   align-items: flex-start;
@@ -822,10 +828,10 @@
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  align-content: center;
+  align-content: flex-start;
   justify-content: center;
   gap: 0.4vw;
-  padding: 1vh 0.5vw;
+  padding: 0.5vh 0.5vw;
   height: 100%;
   overflow-y: auto;
   box-sizing: border-box;
@@ -1273,10 +1279,14 @@
 .card {
   background: linear-gradient(90deg, rgb(220, 245, 220), rgb(120, 190, 110), rgb(160, 215, 150), rgb(80, 170, 70));
   width: 9.5vw;
-  height: 26vh;
+  height: 100%;
+  max-height: 26vh;
   justify-content: center;
   position: relative;
   box-sizing: border-box;
+  overflow: visible;
+  border: 2px solid rgba(0,0,0,0.25);
+  border-radius: 4px;
 }
 
 
@@ -1290,6 +1300,18 @@
   flex-shrink: 0;
   box-sizing: border-box;
   overflow: hidden;
+  position: relative;
+}
+
+.card-pile-card .hand-card-cost {
+  width: 2.5vmin;
+  height: 2.5vmin;
+  min-width: 2.5vmin;
+  min-height: 2.5vmin;
+  font-size: 1.6vmin;
+  top: -0.3vmin;
+  left: -0.3vmin;
+  border-width: 1px;
 }
 
 
@@ -1323,10 +1345,19 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 }
 
 .card p{
-  font-size: 2vmin;
-  line-height: 2.4vmin;
-  padding: 0.3vmin;
-  justify-content: center;
+  font-size: 1.8vmin;
+  line-height: 2.2vmin;
+  padding: 0.3vmin 0.5vmin;
+  text-align: center;
+}
+
+.card .card-text {
+  border-top: 1px solid rgba(0,0,0,0.15);
+  margin: 0.3vmin 0.5vmin 0;
+  padding-top: 0.4vmin;
+  word-break: break-word;
+  overflow-wrap: break-word;
+  overflow: hidden;
 }
 
 .monster-energy {
@@ -1439,7 +1470,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
  }
 
 .hand-card-cost .inline-hammer {
-  height: 1.4em;
+  height: 1.1em;
 }
 
 
@@ -1473,6 +1504,15 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
   height: 14vh;
 }
 
+.card-reward h3 {
+  font-size: 2.8vmin;
+}
+
+.card-reward p {
+  font-size: 2.2vmin;
+  line-height: 2.6vmin;
+}
+
 #shop-div .card-reward {
   width: 20vw;
   height: 15vh;
@@ -1480,10 +1520,8 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 
  .card-top-row {
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5vmin;
-  margin-left: 1vmin;
   margin-top: 0.5vmin;
 }
 
@@ -1743,15 +1781,23 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 }
 
 .hand-card-cost {
-  width: auto;
-  height: auto;
-  font-size: 0.75em;
-  padding: 0.6vmin 1.2vmin;
-  margin-right: 3%;
+  position: absolute;
+  top: -1.8vmin;
+  left: -1.8vmin;
+  width: 3.8vmin;
+  height: 3.8vmin;
+  min-width: 3.8vmin;
+  min-height: 3.8vmin;
+  font-size: 2.2vmin;
+  padding: 0;
+  margin: 0;
   line-height: normal;
-  border-radius: 999px;
+  border-radius: 50%;
   background-color: rgb(60, 160, 50);
   color: white;
+  z-index: 2;
+  box-shadow: 1px 1px 3px rgba(0,0,0,0.4);
+  border: 2px solid rgba(255,255,255,0.6);
  }
 
  .fire-energy {
@@ -3284,7 +3330,7 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 /* ====== Player Structure Icon Overlays ====== */
 .structure-icon-slot {
   position: absolute;
-  width: 18%;
+  width: 22%;
   aspect-ratio: 1;
   z-index: 10;
   cursor: pointer;
@@ -3292,45 +3338,44 @@ https://blog.logrocket.com/css-style-button-accessibility/*/
 }
 .structure-icon-slot:hover { transform: scale(1.15); }
 
-/* 6 fixed positions: top row (0-2), bottom row (3-5) */
-.structure-slot-0 { left: 8%;  top: 10%; }
-.structure-slot-1 { left: 40%; top: 10%; }
-.structure-slot-2 { left: 72%; top: 10%; }
-.structure-slot-3 { left: 8%;  top: 38%; }
-.structure-slot-4 { left: 40%; top: 38%; }
-.structure-slot-5 { left: 72%; top: 38%; }
+/* 6 fixed positions: two rows of 3 in the bottom green field */
+.structure-slot-0 { left: 8%;  top: 48%; }
+.structure-slot-1 { left: 40%; top: 48%; }
+.structure-slot-2 { left: 72%; top: 48%; }
+.structure-slot-3 { left: 8%;  top: 74%; }
+.structure-slot-4 { left: 40%; top: 74%; }
+.structure-slot-5 { left: 72%; top: 74%; }
 
 .structure-icon-img {
   width: 100%;
   height: 100%;
-  border-radius: 50%;
-  background: rgba(100, 80, 50, 0.8);
-  border: 2px solid rgba(150, 130, 90, 0.8);
+  border-radius: 3px;
+  background: transparent;
+  border: none;
   box-sizing: border-box;
 }
 
 .structure-icon-building {
-  opacity: 0.5;
-  filter: grayscale(0.6);
+  opacity: 0.45;
+  filter: grayscale(0.6) drop-shadow(0 0 1px rgba(255,255,255,0.5)) drop-shadow(0 0 1px rgba(255,255,255,0.5));
 }
 
 .structure-icon-built {
   opacity: 1.0;
-  box-shadow: 0 0 6px rgba(255, 200, 50, 0.4);
+  filter: drop-shadow(0 0 1.5px white) drop-shadow(0 0 1.5px white) drop-shadow(0 0 1.5px white);
 }
 
 .structure-icon-selected {
   outline: 2px solid rgb(60, 160, 50);
-  outline-offset: 2px;
-  border-radius: 50%;
+  outline-offset: 1px;
+  border-radius: 3px;
 }
 .structure-icon-selected .structure-icon-img {
-  box-shadow: 0 0 8px rgba(60, 160, 50, 0.6);
+  filter: drop-shadow(0 0 1.5px white) drop-shadow(0 0 1.5px white) drop-shadow(0 0 1.5px white) drop-shadow(0 0 4px rgba(60, 160, 50, 0.6));
 }
 
 .structure-build-clickable:hover .structure-icon-img {
-  border-color: #7a9a3a;
-  box-shadow: 0 0 6px rgba(120, 180, 60, 0.5);
+  filter: drop-shadow(0 0 1.5px white) drop-shadow(0 0 1.5px white) drop-shadow(0 0 4px rgba(120, 180, 60, 0.5));
 }
 
 /* Mini progress bar */
