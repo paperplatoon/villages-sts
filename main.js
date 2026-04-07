@@ -799,6 +799,7 @@ async function dealOpponentDamage(stateObj, damageNumber, attackNumber = 1, ener
 
   // Raiding Party: gain gold for each unblocked hit
   if (unblockedHitCount > 0 && stateObj.goldOnUnblockedDamage > 0) {
+    await glowPassiveStructure(stateObj, "goldOnUnblockedDamage");
     stateObj = playerGainsGold(stateObj, stateObj.goldOnUnblockedDamage * unblockedHitCount);
   }
 
@@ -2313,6 +2314,7 @@ async function buildStructureByIndex(stateObj, structureIndex) {
   if (wasIncomplete && justCompleted.buildProgress >= justCompleted.buildCost && stateObj.patentOfficeActive) {
     // Don't copy the Patent Office itself completing
     if (justCompleted.onStructureComplete !== "copyToHand") {
+      await glowPassiveStructure(stateObj, "onStructureComplete");
       stateObj = triggerPatentOffice(stateObj, justCompleted);
     }
   }
@@ -2348,6 +2350,7 @@ async function buildSelectedStructure(stateObj, amount) {
   let justCompleted = stateObj.playerStructures[selectedIndex];
   if (wasIncomplete && justCompleted.buildProgress >= justCompleted.buildCost && stateObj.patentOfficeActive) {
     if (justCompleted.onStructureComplete !== "copyToHand") {
+      await glowPassiveStructure(stateObj, "onStructureComplete");
       stateObj = triggerPatentOffice(stateObj, justCompleted);
     }
   }
@@ -2409,6 +2412,23 @@ function dealStructureDamage(stateObj, damage, side, structureIndex) {
     }
   });
   return stateObj;
+}
+
+// Glow-only passive structure animation (no projectile, no damage preview)
+// Used for non-damage passives like Healer's Hut, Entrepreneur, Raiding Party, Patent Office
+async function glowPassiveStructure(stateObj, propertyName) {
+  let structIndex = stateObj.playerStructures.findIndex(s =>
+    s.buildProgress >= s.buildCost && s[propertyName]
+  );
+  if (structIndex === -1) return;
+
+  let structEls = document.querySelectorAll(".village-cube.player-cube .structure");
+  let sourceEl = structEls[structIndex];
+  if (sourceEl) {
+    sourceEl.classList.add("structure-activating");
+    await pause(400);
+    sourceEl.classList.remove("structure-activating");
+  }
 }
 
 // Animate a passive structure trigger (e.g. damageOnDevChange)
@@ -3020,12 +3040,14 @@ async function playACard(stateObj, cardIndexInHand, arrayObj) {
     }
   });
   if (healOnPlay > 0) {
+    await glowPassiveStructure(stateObj, "healOnCardPlay");
     stateObj = healPlayer(stateObj, healOnPlay);
   }
 
   // Gold on card play (from structures like Entrepreneur)
   if (stateObj.goldOnCardPlay > 0 && stateObj.goldGainedFromCardPlay < stateObj.goldOnCardPlayCap) {
     let goldToGain = Math.min(stateObj.goldOnCardPlay, stateObj.goldOnCardPlayCap - stateObj.goldGainedFromCardPlay);
+    await glowPassiveStructure(stateObj, "goldOnCardPlay");
     stateObj = playerGainsGold(stateObj, goldToGain);
     stateObj = immer.produce(stateObj, (newState) => {
       newState.goldGainedFromCardPlay += goldToGain;

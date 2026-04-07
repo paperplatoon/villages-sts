@@ -414,8 +414,7 @@
 
 /* Fight screen: #stats is the villages band, override shared 89vh height */
 #stats {
-  background-image: url(img/backgrounds/newpentacle.PNG);
-  background-size: cover;
+  background-image: none;
   height: auto !important;
   position: relative;
 }
@@ -628,6 +627,9 @@
   flex-direction: column;
   height: 89vh;
   overflow: hidden;
+  background-image: url(img/backgrounds/background.png);
+  background-size: cover;
+  background-position: center;
 }
 
 .villages-band {
@@ -797,8 +799,8 @@
   display: flex;
   flex-direction: row;
   align-items: flex-start;
-  background-color: #0500332a;
-  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  background-color: transparent;
+  border-top: none;
 }
 
 .hand-band-left {

@@ -249,11 +249,78 @@ let testCardPool = {
     }
   },
 
+  stalemate: {
+    cardID: 310,
+    name: "Stalemate",
+    diplomacyAmount: 1,
+    text: (state, index, array) => {
+      return `Gain ${array[index].diplomacyAmount} diplomacy. 
+      Gain ${array[index].baseBlock} block.`
+    },
+    minReq: (state, index, array) => { return array[index].baseCost; },
+    upgrades: 0,
+    baseCost: 2,
+    baseBlock: 7,
+    cost: (state, index, array) => { return array[index].baseCost; },
+    cardType: "ability",
+    elementType: "water",
+    action: async (stateObj, index, array) => {
+      await cardAnimationDiscard(index);
+      stateObj = immer.produce(stateObj, (newState) => {
+        newState.playerMonster.encounterEnergy -= array[index].baseCost;
+      });
+      stateObj = await gainDiplomacy(stateObj, array[index].diplomacyAmount);
+      stateObj = gainBlock(stateObj, array[index].baseBlock, array[index].baseCost);
+      return stateObj;
+    }
+  },
+
   // ====== TRIBUTE ======
   // Card property: tribute (gold cost). Checked automatically for playability.
   // payTribute(state, tributeAmount) — subtracts gold after tributeDiscount.
   // getEffectiveTribute(state, amount) — returns cost after discount (for display).
   // canAffordTribute(state, amount) — checked automatically by card rendering.
+  // ====== DIMINISHING RETURNS ======
+  // Gains gold that decreases each play. When gold would be 0, becomes "Remove" to thin deck.
+  // playedThisCombat resets each combat naturally (Immer forks encounter copy from playerDeck).
+  testDiminishingReturns: {
+    cardID: 319,
+    name: "Diminishing Returns",
+    baseGoldGain: 4,
+    playedThisCombat: 0,
+    text: (state, index, array) => {
+      let effectiveGold = array[index].baseGoldGain - array[index].playedThisCombat;
+      if (effectiveGold <= 0) return "Remove.";
+      return `Gain ${effectiveGold} gold. Decrease gold gained by 1 this combat.`;
+    },
+    minReq: (state, index, array) => { return array[index].baseCost; },
+    upgrades: 0,
+    baseCost: 1,
+    cost: (state, index, array) => { return array[index].baseCost; },
+    cardType: "ability",
+    elementType: "water",
+    action: async (stateObj, index, array) => {
+      let effectiveGold = array[index].baseGoldGain - array[index].playedThisCombat;
+      await cardAnimationDiscard(index);
+      stateObj = immer.produce(stateObj, (newState) => {
+        newState.playerMonster.encounterEnergy -= array[index].baseCost;
+      });
+      if (effectiveGold <= 0) {
+        // Remove from permanent deck
+        stateObj = immer.produce(stateObj, (newState) => {
+          let deckIndex = newState.playerDeck.findIndex(c => c.name === "Diminishing Returns");
+          if (deckIndex >= 0) newState.playerDeck.splice(deckIndex, 1);
+        });
+      } else {
+        stateObj = playerGainsGold(stateObj, effectiveGold);
+        stateObj = immer.produce(stateObj, (newState) => {
+          newState.encounterHand[index].playedThisCombat += 1;
+        });
+      }
+      return stateObj;
+    }
+  },
+
   testTribute: {
     cardID: 310,
     name: "Mercenary Assault",
@@ -306,6 +373,7 @@ let coastalSettlementCardPool = {
   testTreason:      testCardPool.testTreason,
   testDiplomacy:    testCardPool.testDiplomacy,
   testTribute:      testCardPool.testTribute,
+  testDiminishingReturns: testCardPool.testDiminishingReturns,
   testHealersHut:   testCardPool.testHealersHut,
   testCatapult:     testCardPool.testCatapult,
   testSeismicSpire: testCardPool.testSeismicSpire,
